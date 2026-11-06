@@ -1,5 +1,26 @@
 # Database Design
 
-No schema applied yet. Phase 2 will add profiles, workspaces, workspace_members, module_registry,
-workspace_modules, user_settings, audit_logs and storage buckets, all with RLS, via versioned migrations
-in `backend/supabase/migrations`.
+Supabase project `kkingg-ai` (`rlinlmnpzrlbprmcejdk`). Migrations live in `backend/supabase/migrations`
+and have been applied to the project.
+
+## Applied (Phase 2 foundation)
+
+Tables: `profiles`, `workspaces`, `workspace_members`, `module_registry`, `workspace_modules`,
+`user_settings`, `audit_logs`. Enums: `workspace_kind`, `workspace_role`, `module_status`.
+
+- Signup trigger (`handle_new_user`) creates the profile, a "Personal" workspace, settings and default modules.
+  The `workspaces_add_owner` trigger adds the owner membership.
+- Helper functions `is_workspace_member` and `has_workspace_role` are SECURITY DEFINER to avoid RLS recursion.
+  They are callable through the API by signed-in users and only reveal the caller's own membership
+  (accepted advisor warning).
+- RLS is enabled on every table. The `owner` role cannot be granted or changed through the API.
+  `module_registry` is read-only to clients. `audit_logs` is append-only for clients.
+
+## Not yet done
+
+Storage buckets (Phase 7), all productivity/AI/vault tables, notifications, sync metadata.
+
+## Tests
+
+`backend/supabase/tests/rls_foundation.sql` — run in the SQL editor; it rolls back and reports results.
+Last run: all checks passed (see `TESTING.md`).
