@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+/* Mirrors packages/design-tokens/src/index.ts — keep the two in sync. */
+@theme {
+  --color-bg: #0e1014;
+  --color-surface: #161920;
+  --color-raised: #1d212a;
+  --color-border: #2a2f3a;
+  --color-text: #e8eaf0;
+  --color-muted: #8b93a5;
+  --color-primary: #2f7bff;
+  --color-accent: #7c6cf0;
+  --color-success: #2fbf71;
+  --color-warning: #e0a030;
+  --color-danger: #e5484d;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

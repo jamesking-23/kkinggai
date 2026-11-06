@@ -1,6 +1,10 @@
 import { ModuleRegistry } from "@kkingg/module-registry";
 
-/** Single source of truth for modules; navigation is derived from this. */
+/**
+ * Code-side module definitions (navigation, status). Which modules a workspace has enabled is read
+ * from the `workspace_modules` table; this registry decides how enabled modules appear.
+ * Keep in sync with the seed rows in `module_registry`.
+ */
 export const registry = new ModuleRegistry();
 
 registry.register({
@@ -20,6 +24,3 @@ registry.register({
   status: "planned",
   nav: { label: "Tasks", href: "/tasks", icon: "check-square", order: 10 },
 });
-
-/** Until workspace_modules exists (Phase 2/6), only core modules are enabled. */
-export const enabledModules: ReadonlySet<string> = new Set(["dashboard"]);

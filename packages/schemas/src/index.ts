@@ -27,5 +27,20 @@ export const resetPasswordSchema = z
     path: ["confirm"],
   });
 
+function isValidTimeZone(tz: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export const profileSchema = z.object({
+  displayName: z.string().trim().min(1, "Enter your name").max(80, "Use at most 80 characters"),
+  timezone: z.string().refine(isValidTimeZone, "Choose a valid time zone"),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type ProfileInput = z.infer<typeof profileSchema>;

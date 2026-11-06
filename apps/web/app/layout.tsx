@@ -1,21 +1,12 @@
 import type { ReactNode } from "react";
-import { colors } from "@kkingg/design-tokens";
+import "./globals.css";
 
 export const metadata = { title: "KKINGG AI", description: "Personal operating system" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body
-        style={{
-          margin: 0,
-          background: colors.bg,
-          color: colors.text,
-          fontFamily: "system-ui, sans-serif",
-        }}
-      >
-        {children}
-      </body>
+      <body className="m-0 min-h-screen antialiased">{children}</body>
     </html>
   );
 }

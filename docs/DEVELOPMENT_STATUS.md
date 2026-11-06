@@ -2,7 +2,8 @@
 
 ## Current phase
 
-Phase 3 (authentication) — code complete, live sign-in flow NOT yet verified end to end.
+Phase 4 (app shell and design system) — code complete. Phase 3 auth and the signed-in shell have NOT been
+verified against live Supabase (the sandbox cannot reach it); please try them locally.
 
 ## Completed
 
@@ -10,9 +11,14 @@ Phase 3 (authentication) — code complete, live sign-in flow NOT yet verified e
 - Phase 3 code: register, login, logout, forgot/reset password, auth callback, protected routes via
   middleware, profile and workspace loaded on the home page. Shared zod schemas in `@kkingg/schemas`.
   Unsafe redirect targets are rejected; forgot-password gives the same response for any email.
-- Verified locally: lint, format, typecheck, 12 unit tests, `next build`. Against a running production
+- Verified locally: lint, format, typecheck, 16 unit tests, `next build`. Against a running production
   build: `/` and `/tasks` redirect to `/login` when signed out, auth pages return 200, a bad callback
   redirects to `/login` with an error and ignores an unsafe `next`.
+
+- Phase 4 code: Tailwind v4 theme mirroring the design tokens; responsive shell (collapsible sidebar,
+  mobile drawer, top bar) with navigation generated from the registry plus the workspace's enabled modules
+  (`workspace_modules`); working workspace switcher (cookie validated against RLS-visible workspaces);
+  account menu with sign out; settings page to edit name and time zone; module search (jumps to modules).
 
 ## Not verified
 
@@ -30,11 +36,15 @@ Phase 3 (authentication) — code complete, live sign-in flow NOT yet verified e
 
 ## Not yet done
 
-- Profile editing and account settings page, workspace switcher UI, account deletion workflow.
+- Account deletion, data export, password change from settings.
+- Notifications bell and AI assistant button are intentionally absent until their backends exist
+  (Phases 8 and 16). The top-bar search only finds modules until universal search (Phase 9).
+- Shell components (sidebar, menus) have no automated component tests yet; only logic is unit tested.
 - `apps/mobile`, `apps/desktop`; storage buckets; productivity tables; Tailwind/shadcn (Phase 4).
 - RLS tests are manual, not in CI. GitHub Actions not yet observed running.
 
 ## Exact next action
 
-Owner tries sign-up/sign-in locally (`pnpm --filter @kkingg/web dev`) and reports any problem. Then
-Phase 4: design system and application shell (Tailwind, shadcn/ui, sidebar, top bar, workspace switcher).
+Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
+Then Phase 5: dashboard and core productivity (tasks, projects, goals, calendar, reminders, habits) with
+migrations, RLS and tests.

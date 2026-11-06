@@ -13,3 +13,15 @@ Shared packages export TypeScript source directly (`main: src/index.ts`) and are
 ## ADR-003: Styling
 
 Phase 1 web shell uses inline styles from design tokens. Tailwind + shadcn/ui are planned for Phase 4.
+
+## ADR-004: Tailwind v4 with hand-built components (supersedes ADR-003)
+
+Tailwind v4 with the theme defined in `apps/web/app/globals.css`, mirroring `@kkingg/design-tokens`
+(keep both in sync). Components are hand-written with lucide icons and native `<details>` menus rather than
+a component library, to avoid dependencies until a component genuinely needs one. Revisit shadcn/ui when
+dialogs, comboboxes or tables are needed.
+
+## ADR-005: Active workspace stored in an httpOnly cookie
+
+The cookie is only a preference; `resolveWorkspace` honours it only when the user can see that workspace
+(RLS-limited list), so a forged value falls back to the first workspace.

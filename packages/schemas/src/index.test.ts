@@ -24,6 +24,17 @@ describe("auth schemas", () => {
     ).toBe(true);
   });
 
+  it("validates profile name and time zone", async () => {
+    const { profileSchema } = await import("./index");
+    expect(
+      profileSchema.safeParse({ displayName: "Ann", timezone: "Africa/Kampala" }).success,
+    ).toBe(true);
+    expect(profileSchema.safeParse({ displayName: " ", timezone: "UTC" }).success).toBe(false);
+    expect(profileSchema.safeParse({ displayName: "Ann", timezone: "Mars/Base" }).success).toBe(
+      false,
+    );
+  });
+
   it("rejects invalid email for forgot password", () => {
     expect(forgotPasswordSchema.safeParse({ email: "nope" }).success).toBe(false);
   });
