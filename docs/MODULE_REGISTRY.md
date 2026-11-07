@@ -3,8 +3,8 @@
 Implemented in `packages/module-registry`. Modules have id, name, description, version, status
 (planned | experimental | active | deprecated), dependencies, permissions and nav config.
 
-Registered in the web app (`apps/web/lib/registry.ts`): `dashboard` (active), `tasks` (planned).
-Database-backed activation (`module_registry`, `workspace_modules`) arrives in Phases 2 and 6.
+Code-side definitions (navigation, status, core flag) live in `apps/web/lib/registry.ts`; the database mirrors
+them in `module_registry` and records per-workspace activation in `workspace_modules`. Keep the two in sync.
 
 ## Activation (Phase 6)
 
