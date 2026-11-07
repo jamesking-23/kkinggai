@@ -81,3 +81,8 @@ Then Phase 7 (Personal Vault: storage bucket and tables; SQL is shown for review
 - Goals: add and complete milestones. Dashboard: "Reminders due" card with dismiss.
 - Verified: lint, format check, typecheck, 41 unit tests and production build pass. The new pages and actions have
   not been run signed in because the sandbox cannot reach Supabase.
+
+## Update: Phase 7 draft (not applied)
+
+- `backend/supabase/migrations/20261107000005_vault.sql` is a DRAFT awaiting the owner's review. It has NOT been applied to
+  the `kkingg-ai` database, so the Vault does not exist yet. No vault UI or tests are written.
