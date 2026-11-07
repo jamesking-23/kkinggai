@@ -1,3 +1,4 @@
+import { requireModule } from "../../../lib/modules";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
 import { isOverdue, PRIORITY_LABELS } from "../../../lib/productivity";
@@ -30,6 +31,7 @@ export default async function TasksPage({
   searchParams: Promise<FlashParams & { show?: string }>;
 }) {
   const ctx = await getAppContext();
+  requireModule(ctx, "tasks");
   const { error, message, show } = await searchParams;
   const showDone = show === "all";
 

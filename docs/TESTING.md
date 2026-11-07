@@ -2,7 +2,7 @@
 
 Run: `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build`.
 
-Automated tests: module registry (3), design tokens (1).
+Automated tests: module registry (4), design tokens (1), schemas (13), web logic (20).
 
 ## Database / RLS
 
@@ -13,6 +13,9 @@ read-only, audit logs append-only, anonymous reads return nothing.
 `rls_productivity.sql` (3 users: owner, viewer, outsider): 18 checks, all as expected — foreign-workspace writes
 and cross-workspace links blocked, `created_by` spoofing blocked, viewers read-only, reminders/habits private,
 revision increments on update, outsiders and anonymous users see nothing.
+`rls_modules_ideas.sql` (5 users: owner, member, admin, viewer, outsider): 19 checks, all as expected — only
+owners/admins toggle modules, clients cannot insert/delete module rows, core and dependency rules enforced,
+viewers read-only on ideas, outsiders and anonymous see nothing.
 The first foundation run found a signup bug (duplicate owner membership), fixed in migration 2.
 
 CI is defined in `.github/workflows/ci.yml` but has not been observed running on GitHub.

@@ -37,4 +37,16 @@ describe("ModuleRegistry", () => {
     const nav = r.navigation(new Set(["a", "b", "p"]));
     expect(nav.map((n) => n.id)).toEqual(["a", "b"]);
   });
+
+  it("blocks disabling core modules and modules others depend on", () => {
+    const r = new ModuleRegistry();
+    r.register({ ...base, id: "home", name: "Home", status: "active", core: true });
+    r.register({ ...base, id: "vault", name: "Vault", status: "active" });
+    r.register({ ...base, id: "ai", name: "AI", status: "active", dependencies: ["vault"] });
+    const on = new Set(["home", "vault", "ai"]);
+    expect(r.disableBlocker("home", on)).toMatch(/core module/);
+    expect(r.disableBlocker("vault", on)).toBe("Required by ai");
+    expect(r.disableBlocker("vault", new Set(["home", "vault"]))).toBeNull();
+    expect(r.disableBlocker("ai", on)).toBeNull();
+  });
 });

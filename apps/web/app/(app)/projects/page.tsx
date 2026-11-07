@@ -1,3 +1,4 @@
+import { requireModule } from "../../../lib/modules";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
 import {
@@ -27,6 +28,7 @@ export default async function ProjectsPage({
   searchParams: Promise<FlashParams>;
 }) {
   const ctx = await getAppContext();
+  requireModule(ctx, "projects");
   const { error, message } = await searchParams;
   const supabase = await createClient();
 

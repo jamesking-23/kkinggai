@@ -82,3 +82,25 @@ describe("productivity schemas", () => {
     });
   });
 });
+
+import { ideaSchema, ideaStatusSchema } from "./index";
+
+describe("idea schemas", () => {
+  it("accepts a minimal idea and applies defaults", () => {
+    expect(ideaSchema.parse({ title: " Dark mode ", description: "", relatedModule: "" })).toEqual({
+      title: "Dark mode",
+      priority: 3,
+    });
+  });
+
+  it("rejects empty titles and malformed module ids", () => {
+    expect(ideaSchema.safeParse({ title: " " }).success).toBe(false);
+    expect(ideaSchema.safeParse({ title: "x", relatedModule: "Bad Module" }).success).toBe(false);
+  });
+
+  it("only allows known statuses", () => {
+    const id = "6f1c1c1e-5a45-4f4e-9c7e-3a0b8d6f2a11";
+    expect(ideaStatusSchema.safeParse({ id, status: "planned" }).success).toBe(true);
+    expect(ideaStatusSchema.safeParse({ id, status: "bogus" }).success).toBe(false);
+  });
+});

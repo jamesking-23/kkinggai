@@ -2,11 +2,9 @@
 
 ## Current phase
 
-Phase 6 (module registry and Idea Inbox) — IN PROGRESS. Draft migration
-`backend/supabase/migrations/20261107000004_modules_and_ideas.sql` is written but NOT applied to `kkingg-ai`
-and has not been dry-run (the database tool's confirmation prompt for its `DROP POLICY` expired).
-Do not build the UI that depends on it until the owner approves and it is applied; then regenerate
-`apps/web/lib/supabase/database.types.ts` (adds `module_registry.core` and `idea_backlog`).
+Phase 6 (module registry and Idea Inbox) — built and deployed; migration 4 applied. Not yet exercised by a
+signed-in user (sandbox cannot reach Supabase). Phase 5 gaps (edit forms, reminders UI, milestones, subtasks,
+planning views) are still open.
 
 Phase 4 (app shell and design system) — code complete. Phase 3 auth and the signed-in shell have NOT been
 verified against live Supabase (the sandbox cannot reach it); please try them locally.
@@ -34,6 +32,14 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 - Verified: lint, format, typecheck, 34 unit tests (time zones, streaks, progress, schemas), production build;
   signed-out requests to every new route redirect to `/login`. Database access rules were tested in SQL.
 
+- Phase 6: migration `20261107000004_modules_and_ideas` applied. Database rules: only owners/admins can toggle
+  modules; clients cannot insert or delete `workspace_modules` rows; enabling needs dependencies on, disabling is
+  blocked while another enabled module needs it and for core modules (Dashboard). `idea_backlog` table with RLS.
+  UI: `/settings/modules` (enable/disable with the database's messages relayed) and `/ideas` (capture, filter by
+  status, change status, soft delete; priority, category, related module, notes). Disabled modules redirect home.
+  Voice capture for ideas waits for the voice phase.
+- Access-rule SQL test `rls_modules_ideas.sql`: 19 checks, all as expected. Unit tests now 38.
+
 ## Not verified
 
 - Real registration, login and password reset against Supabase Auth: the sandbox network blocks the
@@ -55,6 +61,8 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
   dashboard widget configuration. Tables for these exist; reminder delivery needs Phase 16.
 - Database types are hand-saved from the generator in `apps/web/lib/supabase/database.types.ts`; regenerate after each migration.
 - No automated tests yet for the server actions or pages themselves.
+- Supabase Auth: "leaked password protection" is off (advisor warning); enable it in Authentication settings
+  (may need a paid plan).
 - Account deletion, data export, password change from settings.
 - Notifications bell and AI assistant button are intentionally absent until their backends exist
   (Phases 8 and 16). The top-bar search only finds modules until universal search (Phase 9).

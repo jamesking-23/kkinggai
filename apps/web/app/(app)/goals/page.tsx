@@ -1,3 +1,4 @@
+import { requireModule } from "../../../lib/modules";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
 import { goalProgress } from "../../../lib/productivity";
@@ -27,6 +28,7 @@ type Goal = {
 
 export default async function GoalsPage({ searchParams }: { searchParams: Promise<FlashParams> }) {
   const ctx = await getAppContext();
+  requireModule(ctx, "goals");
   const { error, message } = await searchParams;
   const supabase = await createClient();
   const { data } = await supabase

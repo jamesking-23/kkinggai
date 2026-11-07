@@ -11,6 +11,7 @@ export const moduleDefinitionSchema = z.object({
   status: moduleStatusSchema,
   dependencies: z.array(z.string()).default([]),
   permissions: z.array(z.string()).default([]),
+  core: z.boolean().default(false),
   nav: z.object({ label: z.string(), href: z.string(), icon: z.string(), order: z.number() }),
 });
 export type ModuleDefinition = z.infer<typeof moduleDefinitionSchema>;
@@ -34,6 +35,22 @@ export class ModuleRegistry {
     const mod = this.modules.get(id);
     if (!mod) throw new Error(`Unknown module: ${id}`);
     return mod.dependencies.filter((d) => !enabled.has(d));
+  }
+
+  /** Enabled modules that depend on `id` (these block disabling it). */
+  enabledDependents(id: string, enabled: ReadonlySet<string>): string[] {
+    return [...this.modules.values()]
+      .filter((m) => enabled.has(m.id) && m.dependencies.includes(id))
+      .map((m) => m.id);
+  }
+
+  /** Why `id` cannot be disabled right now, or null when it can. */
+  disableBlocker(id: string, enabled: ReadonlySet<string>): string | null {
+    const mod = this.modules.get(id);
+    if (!mod) throw new Error(`Unknown module: ${id}`);
+    if (mod.core) return `${mod.name} is a core module and cannot be disabled`;
+    const dependents = this.enabledDependents(id, enabled);
+    return dependents.length > 0 ? `Required by ${dependents.join(", ")}` : null;
   }
 
   canEnable(id: string, enabled: ReadonlySet<string>): boolean {

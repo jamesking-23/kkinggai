@@ -13,6 +13,7 @@ registry.register({
   description: "Overview of your workspace",
   version: "0.1.0",
   status: "active",
+  core: true,
   nav: { label: "Dashboard", href: "/", icon: "layout-dashboard", order: 0 },
 });
 
@@ -40,3 +41,12 @@ for (const [id, name, description, href, icon, order] of [
     nav: { label: name, href, icon, order },
   });
 }
+
+registry.register({
+  id: "ideas",
+  name: "Idea Inbox",
+  description: "Capture and track future ideas",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Idea Inbox", href: "/ideas", icon: "lightbulb", order: 90 },
+});

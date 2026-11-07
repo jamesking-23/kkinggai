@@ -202,6 +202,57 @@ export type Database = {
         };
         Relationships: [];
       };
+      idea_backlog: {
+        Row: {
+          category: string | null;
+          created_at: string;
+          created_by: string;
+          deleted_at: string | null;
+          description: string;
+          id: string;
+          notes: string;
+          priority: number;
+          related_module: string | null;
+          revision: number;
+          status: string;
+          title: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          category?: string | null;
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          description?: string;
+          id?: string;
+          notes?: string;
+          priority?: number;
+          related_module?: string | null;
+          revision?: number;
+          status?: string;
+          title: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          category?: string | null;
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          description?: string;
+          id?: string;
+          notes?: string;
+          priority?: number;
+          related_module?: string | null;
+          revision?: number;
+          status?: string;
+          title?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
       milestones: {
         Row: {
           completed_at: string | null;
@@ -240,6 +291,7 @@ export type Database = {
       };
       module_registry: {
         Row: {
+          core: boolean;
           dependencies: string[];
           description: string;
           id: string;
@@ -253,6 +305,7 @@ export type Database = {
           version: string;
         };
         Insert: {
+          core?: boolean;
           dependencies?: string[];
           description?: string;
           id: string;
@@ -266,6 +319,7 @@ export type Database = {
           version: string;
         };
         Update: {
+          core?: boolean;
           dependencies?: string[];
           description?: string;
           id?: string;

@@ -26,6 +26,13 @@ Access: members read shared tables; owner/admin/member write; viewers are read-o
 habit logs are private to their creator. `can_write_workspace` is a SECURITY DEFINER helper (same accepted
 advisor warning as the other helpers).
 
+## Applied (Phase 6)
+
+Migration `20261107000004_modules_and_ideas`: `module_registry.core`, update-only policy on `workspace_modules`
+with the `enforce_module_rules` trigger (runs as the invoker, no security-definer exposure), and `idea_backlog`
+(workspace-scoped, revision and soft-delete, statuses captured/planned/in_development/active/experimental/
+deprecated, optional related module).
+
 ## Not yet done
 
 Storage buckets (Phase 7), all productivity/AI/vault tables, notifications, sync metadata.

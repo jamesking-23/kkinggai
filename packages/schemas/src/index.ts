@@ -105,3 +105,33 @@ export const habitSchema = z.object({
   cadence: z.enum(["daily", "weekly"]).default("daily"),
   targetPerPeriod: z.coerce.number().int().min(1).max(14).default(1),
 });
+
+export const IDEA_STATUSES = [
+  "captured",
+  "planned",
+  "in_development",
+  "active",
+  "experimental",
+  "deprecated",
+] as const;
+export type IdeaStatus = (typeof IDEA_STATUSES)[number];
+
+export const ideaSchema = z.object({
+  title: z.string().trim().min(1, "Enter a title for the idea").max(200),
+  description: optionalText(4000),
+  category: optionalText(60),
+  priority: z.coerce.number().int().min(1).max(4).default(3),
+  relatedModule: z.preprocess(
+    blank,
+    z
+      .string()
+      .regex(/^[a-z][a-z0-9-]*$/)
+      .optional(),
+  ),
+  notes: optionalText(4000),
+});
+
+export const ideaStatusSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(IDEA_STATUSES),
+});

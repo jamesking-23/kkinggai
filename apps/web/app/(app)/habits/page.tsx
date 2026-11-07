@@ -1,3 +1,4 @@
+import { requireModule } from "../../../lib/modules";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
 import { dailyStreak } from "../../../lib/productivity";
@@ -18,6 +19,7 @@ type Habit = { id: string; name: string; cadence: string; target_per_period: num
 
 export default async function HabitsPage({ searchParams }: { searchParams: Promise<FlashParams> }) {
   const ctx = await getAppContext();
+  requireModule(ctx, "habits");
   const { error, message } = await searchParams;
   const supabase = await createClient();
   const today = localDate(new Date(), ctx.timezone);

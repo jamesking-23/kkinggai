@@ -1,3 +1,4 @@
+import { requireModule } from "../../../lib/modules";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
 import { addDays, isValidMonth, localDate, monthGrid, shiftMonth } from "../../../lib/time";
@@ -29,6 +30,7 @@ export default async function CalendarPage({
   searchParams: Promise<FlashParams & { m?: string }>;
 }) {
   const ctx = await getAppContext();
+  requireModule(ctx, "calendar");
   const sp = await searchParams;
   const today = localDate(new Date(), ctx.timezone);
   const month = isValidMonth(sp.m) ? sp.m : today.slice(0, 7);
