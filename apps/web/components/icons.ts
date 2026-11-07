@@ -1,8 +1,21 @@
-import { Box, CheckSquare, LayoutDashboard, type LucideIcon } from "lucide-react";
+import {
+  Box,
+  Calendar,
+  CheckSquare,
+  FolderKanban,
+  LayoutDashboard,
+  Repeat,
+  Target,
+  type LucideIcon,
+} from "lucide-react";
 
 const icons: Record<string, LucideIcon> = {
   "layout-dashboard": LayoutDashboard,
   "check-square": CheckSquare,
+  "folder-kanban": FolderKanban,
+  target: Target,
+  calendar: Calendar,
+  repeat: Repeat,
 };
 
 /** Registry icon names resolve here; unknown names fall back to a generic icon. */

@@ -39,3 +39,46 @@ describe("auth schemas", () => {
     expect(forgotPasswordSchema.safeParse({ email: "nope" }).success).toBe(false);
   });
 });
+
+import { eventSchema, goalSchema, habitSchema, taskSchema } from "./index";
+
+describe("productivity schemas", () => {
+  it("treats blank optional fields as missing", () => {
+    const t = taskSchema.parse({
+      title: " Write report ",
+      priority: "1",
+      dueDate: "",
+      projectId: "",
+      category: "",
+    });
+    expect(t).toEqual({ title: "Write report", priority: 1 });
+  });
+
+  it("rejects bad priority, dates and project ids", () => {
+    expect(taskSchema.safeParse({ title: "x", priority: "9" }).success).toBe(false);
+    expect(taskSchema.safeParse({ title: "x", dueDate: "tomorrow" }).success).toBe(false);
+    expect(taskSchema.safeParse({ title: "x", projectId: "nope" }).success).toBe(false);
+  });
+
+  it("requires a positive goal target when given", () => {
+    expect(goalSchema.safeParse({ title: "Run", targetValue: "0" }).success).toBe(false);
+    expect(goalSchema.parse({ title: "Run", targetValue: "100", unit: "km" }).targetValue).toBe(
+      100,
+    );
+    expect(goalSchema.parse({ title: "Read" }).targetValue).toBeUndefined();
+  });
+
+  it("rejects events that end before they start", () => {
+    const base = { title: "Meet", startsAt: "2026-11-07T10:00" };
+    expect(eventSchema.safeParse({ ...base, endsAt: "2026-11-07T09:00" }).success).toBe(false);
+    expect(eventSchema.safeParse({ ...base, endsAt: "2026-11-07T11:00" }).success).toBe(true);
+  });
+
+  it("defaults habit cadence", () => {
+    expect(habitSchema.parse({ name: "Run" })).toEqual({
+      name: "Run",
+      cadence: "daily",
+      targetPerPeriod: 1,
+    });
+  });
+});

@@ -21,6 +21,22 @@ registry.register({
   name: "Tasks",
   description: "Tasks, projects and goals",
   version: "0.1.0",
-  status: "planned",
+  status: "active",
   nav: { label: "Tasks", href: "/tasks", icon: "check-square", order: 10 },
 });
+
+for (const [id, name, description, href, icon, order] of [
+  ["projects", "Projects", "Projects and milestones", "/projects", "folder-kanban", 20],
+  ["goals", "Goals", "Measurable goals and progress", "/goals", "target", 30],
+  ["calendar", "Calendar", "Events and schedule", "/calendar", "calendar", 40],
+  ["habits", "Habits", "Daily and weekly habits", "/habits", "repeat", 50],
+] as const) {
+  registry.register({
+    id,
+    name,
+    description,
+    version: "0.1.0",
+    status: "active",
+    nav: { label: name, href, icon, order },
+  });
+}

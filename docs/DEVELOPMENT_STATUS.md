@@ -20,6 +20,14 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
   (`workspace_modules`); working workspace switcher (cookie validated against RLS-visible workspaces);
   account menu with sign out; settings page to edit name and time zone; module search (jumps to modules).
 
+- Phase 5 code: tasks (create, complete/reopen with completion history, soft delete, project/category/priority,
+  due dates in the user's time zone), projects (status changes, open-task counts), goals (target, progress
+  updates, achieve/abandon), habits (private, daily log, streaks), calendar (month grid, events, open tasks on
+  due dates), and a dashboard showing real data only. Edits use the stored `revision` as an optimistic lock:
+  a stale edit is rejected with a message instead of overwriting a newer change.
+- Verified: lint, format, typecheck, 34 unit tests (time zones, streaks, progress, schemas), production build;
+  signed-out requests to every new route redirect to `/login`. Database access rules were tested in SQL.
+
 ## Not verified
 
 - Real registration, login and password reset against Supabase Auth: the sandbox network blocks the
@@ -36,6 +44,11 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 
 ## Not yet done
 
+- Phase 5 gaps: no UI yet for subtasks, task recurrence, task attachments, milestones, reminders, editing
+  existing items (only create, status changes and delete), daily/weekly planning views, activity history, or
+  dashboard widget configuration. Tables for these exist; reminder delivery needs Phase 16.
+- Supabase queries are untyped (no generated database types yet); add generated types next.
+- No automated tests yet for the server actions or pages themselves.
 - Account deletion, data export, password change from settings.
 - Notifications bell and AI assistant button are intentionally absent until their backends exist
   (Phases 8 and 16). The top-bar search only finds modules until universal search (Phase 9).
@@ -46,5 +59,5 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Then Phase 5: dashboard and core productivity (tasks, projects, goals, calendar, reminders, habits) with
-migrations, RLS and tests.
+Then finish Phase 5 gaps (edit forms, reminders UI, milestones, subtasks, planning views, generated DB types), then
+Phase 6: module registry UI (activate/deactivate modules) and Idea Inbox.
