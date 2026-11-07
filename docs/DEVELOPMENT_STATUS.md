@@ -2,6 +2,12 @@
 
 ## Current phase
 
+Phase 6 (module registry and Idea Inbox) — IN PROGRESS. Draft migration
+`backend/supabase/migrations/20261107000004_modules_and_ideas.sql` is written but NOT applied to `kkingg-ai`
+and has not been dry-run (the database tool's confirmation prompt for its `DROP POLICY` expired).
+Do not build the UI that depends on it until the owner approves and it is applied; then regenerate
+`apps/web/lib/supabase/database.types.ts` (adds `module_registry.core` and `idea_backlog`).
+
 Phase 4 (app shell and design system) — code complete. Phase 3 auth and the signed-in shell have NOT been
 verified against live Supabase (the sandbox cannot reach it); please try them locally.
 
