@@ -16,11 +16,21 @@ Tables: `profiles`, `workspaces`, `workspace_members`, `module_registry`, `works
 - RLS is enabled on every table. The `owner` role cannot be granted or changed through the API.
   `module_registry` is read-only to clients. `audit_logs` is append-only for clients.
 
+## Applied (Phase 5 productivity)
+
+Migration `20261107000003_productivity`: `projects`, `goals`, `milestones`, `tasks`, `task_completions`,
+`events`, `reminders`, `habits`, `habit_logs`. Cross-references use composite `(id, workspace_id)` foreign
+keys so a record can never point into another workspace. Tasks, goals, projects and events carry a
+`revision` (bumped by trigger) and tasks/events a `deleted_at` marker for the later sync layer.
+Access: members read shared tables; owner/admin/member write; viewers are read-only; reminders, habits and
+habit logs are private to their creator. `can_write_workspace` is a SECURITY DEFINER helper (same accepted
+advisor warning as the other helpers).
+
 ## Not yet done
 
 Storage buckets (Phase 7), all productivity/AI/vault tables, notifications, sync metadata.
 
 ## Tests
 
-`backend/supabase/tests/rls_foundation.sql` — run in the SQL editor; it rolls back and reports results.
-Last run: all checks passed (see `TESTING.md`).
+`backend/supabase/tests/rls_foundation.sql` and `rls_productivity.sql` — run in the SQL editor; they roll back and
+report results. Last runs: all checks passed (see `TESTING.md`).
