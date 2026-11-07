@@ -146,9 +146,12 @@ export default async function TasksPage({
                   />
                 </form>
                 <div className="min-w-0 flex-1">
-                  <p className={`truncate text-sm ${done ? "text-muted line-through" : ""}`}>
+                  <a
+                    href={`/tasks/${t.id}`}
+                    className={`block truncate text-sm hover:underline ${done ? "text-muted line-through" : ""}`}
+                  >
                     {t.title}
-                  </p>
+                  </a>
                   <p className="mt-0.5 text-xs text-muted">
                     {PRIORITY_LABELS[t.priority]}
                     {t.category ? ` · ${t.category}` : ""}

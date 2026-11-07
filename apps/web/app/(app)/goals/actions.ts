@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { goalProgressSchema, goalSchema } from "@kkingg/schemas";
+import { goalProgressSchema, goalSchema, milestoneSchema } from "@kkingg/schemas";
 import { firstIssue, flash } from "../../../lib/form";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
@@ -60,4 +60,33 @@ export async function setGoalStatus(formData: FormData) {
     flash(PATH, "error", "This goal was changed elsewhere. Try again.");
   revalidatePath(PATH);
   flash(PATH, "message", "Goal updated");
+}
+
+export async function addMilestone(formData: FormData) {
+  const parsed = milestoneSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) flash(PATH, "error", firstIssue(parsed.error));
+  const ctx = await getAppContext();
+  const supabase = await createClient();
+  const { error } = await supabase.from("milestones").insert({
+    workspace_id: ctx.current.id,
+    goal_id: parsed.data.goalId,
+    title: parsed.data.title,
+    due_date: parsed.data.dueDate ?? null,
+  });
+  if (error) flash(PATH, "error", "Could not add the milestone");
+  revalidatePath(PATH);
+  flash(PATH, "message", "Milestone added");
+}
+
+export async function toggleMilestone(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const done = formData.get("done") === "1";
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("milestones")
+    .update({ completed_at: done ? new Date().toISOString() : null })
+    .eq("id", id);
+  if (error) flash(PATH, "error", "Could not update the milestone");
+  revalidatePath(PATH);
+  flash(PATH, "message", done ? "Milestone completed" : "Milestone reopened");
 }

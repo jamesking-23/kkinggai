@@ -56,9 +56,9 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 
 ## Not yet done
 
-- Phase 5 gaps: no UI yet for subtasks, task recurrence, task attachments, milestones, reminders, editing
-  existing items (only create, status changes and delete), daily/weekly planning views, activity history, or
-  dashboard widget configuration. Tables for these exist; reminder delivery needs Phase 16.
+- Phase 5 gaps still open: task recurrence and attachments, edit forms for projects/goals/events, project
+  milestones, daily/weekly planning views, activity history, dashboard widget configuration. Reminder delivery
+  (push/email) needs Phase 16; reminders only show on the dashboard when due.
 - Database types are hand-saved from the generator in `apps/web/lib/supabase/database.types.ts`; regenerate after each migration.
 - No automated tests yet for the server actions or pages themselves.
 - Supabase Auth: "leaked password protection" is off (advisor warning); enable it in Authentication settings
@@ -73,5 +73,11 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Then finish Phase 5 gaps (edit forms, reminders UI, milestones, subtasks, planning views, generated DB types), then
-Phase 6: module registry UI (activate/deactivate modules) and Idea Inbox.
+Then Phase 7 (Personal Vault: storage bucket and tables; SQL is shown for review before applying).
+
+## Update: task detail, milestones, reminders (code written, not exercised against a live database)
+
+- `/tasks/[id]`: edit details (revision-guarded), one-level subtasks with completion history, per-task reminders.
+- Goals: add and complete milestones. Dashboard: "Reminders due" card with dismiss.
+- Verified: lint, format check, typecheck, 41 unit tests and production build pass. The new pages and actions have
+  not been run signed in because the sandbox cannot reach Supabase.

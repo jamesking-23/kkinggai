@@ -2,7 +2,8 @@ import { getAppContext } from "../../lib/session";
 import { createClient } from "../../lib/supabase/server";
 import { goalProgress, isOverdue } from "../../lib/productivity";
 import { addDays, localDate, zonedTimeToUtc } from "../../lib/time";
-import { Card, Empty, ProgressBar } from "../../components/ui";
+import { Card, Empty, ProgressBar, subtleButton } from "../../components/ui";
+import { dismissReminder } from "./reminder-actions";
 
 type Task = { id: string; title: string; status: string; due_at: string | null };
 type Event = { id: string; title: string; starts_at: string; ends_at: string };
@@ -23,7 +24,7 @@ export default async function DashboardPage() {
   const dayEnd = zonedTimeToUtc(`${addDays(today, 1)}T00:00`, ctx.timezone).toISOString();
   const ws = ctx.current.id;
 
-  const [tasks, events, goals, projects] = await Promise.all([
+  const [tasks, events, goals, projects, reminders] = await Promise.all([
     supabase
       .from("tasks")
       .select("id, title, status, due_at")
@@ -51,6 +52,14 @@ export default async function DashboardPage() {
       .select("id", { count: "exact", head: true })
       .eq("workspace_id", ws)
       .eq("status", "active"),
+    supabase
+      .from("reminders")
+      .select("id, message, remind_at")
+      .eq("workspace_id", ws)
+      .is("dismissed_at", null)
+      .lte("remind_at", now.toISOString())
+      .order("remind_at")
+      .limit(10),
   ]);
 
   const open = (tasks.data ?? []) as Task[];
@@ -91,6 +100,28 @@ export default async function DashboardPage() {
             </a>{" "}
             and it will appear on this page.
           </p>
+        </Card>
+      )}
+
+      {(reminders.data ?? []).length > 0 && (
+        <Card className="mt-6" title="Reminders due">
+          <ul className="space-y-2 text-sm">
+            {(reminders.data ?? []).map((r) => (
+              <li key={r.id} className="flex items-center justify-between gap-3">
+                <span>
+                  {r.message}{" "}
+                  <span className="text-xs text-muted">· {time.format(new Date(r.remind_at))}</span>
+                </span>
+                <form action={dismissReminder}>
+                  <input type="hidden" name="id" value={r.id} />
+                  <input type="hidden" name="back" value="/" />
+                  <button type="submit" className={subtleButton}>
+                    Dismiss
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
         </Card>
       )}
 

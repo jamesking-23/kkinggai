@@ -104,3 +104,41 @@ describe("idea schemas", () => {
     expect(ideaStatusSchema.safeParse({ id, status: "bogus" }).success).toBe(false);
   });
 });
+
+import { milestoneSchema, reminderSchema, subtaskSchema, taskEditSchema } from "./index";
+
+describe("task detail schemas", () => {
+  const id = "6f1c1c1e-5a45-4f4e-9c7e-3a0b8d6f2a11";
+
+  it("parses a task edit and treats blanks as cleared", () => {
+    const t = taskEditSchema.parse({
+      id,
+      title: " Plan ",
+      priority: "2",
+      description: "",
+      dueDate: "",
+      projectId: "",
+      category: "",
+    });
+    expect(t).toEqual({ id, title: "Plan", priority: 2 });
+  });
+
+  it("rejects invalid ids, empty titles and bad reminder times", () => {
+    expect(taskEditSchema.safeParse({ id: "nope", title: "x", priority: "2" }).success).toBe(false);
+    expect(subtaskSchema.safeParse({ parentId: id, title: " " }).success).toBe(false);
+    expect(
+      reminderSchema.safeParse({ taskId: id, message: "Call", remindAt: "tomorrow" }).success,
+    ).toBe(false);
+    expect(
+      reminderSchema.safeParse({ taskId: id, message: "Call", remindAt: "2026-11-08T09:00" })
+        .success,
+    ).toBe(true);
+  });
+
+  it("allows milestones without a due date", () => {
+    expect(milestoneSchema.parse({ goalId: id, title: "First 50 km", dueDate: "" })).toEqual({
+      goalId: id,
+      title: "First 50 km",
+    });
+  });
+});

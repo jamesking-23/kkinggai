@@ -135,3 +135,31 @@ export const ideaStatusSchema = z.object({
   id: z.string().uuid(),
   status: z.enum(IDEA_STATUSES),
 });
+
+// ---------- task detail, reminders, milestones ----------
+export const taskEditSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string().trim().min(1, "Enter a task title").max(300),
+  description: optionalText(4000),
+  priority: z.coerce.number().int().min(1).max(4),
+  dueDate: optionalDate,
+  projectId: z.preprocess(blank, z.string().uuid().optional()),
+  category: optionalText(60),
+});
+
+export const subtaskSchema = z.object({
+  parentId: z.string().uuid(),
+  title: z.string().trim().min(1, "Enter a subtask title").max(300),
+});
+
+export const reminderSchema = z.object({
+  taskId: z.string().uuid(),
+  message: z.string().trim().min(1, "Enter a reminder message").max(500),
+  remindAt: localDateTime,
+});
+
+export const milestoneSchema = z.object({
+  goalId: z.string().uuid(),
+  title: z.string().trim().min(1, "Enter a milestone title").max(200),
+  dueDate: optionalDate,
+});

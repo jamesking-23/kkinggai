@@ -2,7 +2,7 @@
 
 Run: `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build`.
 
-Automated tests: module registry (4), design tokens (1), schemas (13), web logic (20).
+Automated tests: module registry (4), design tokens (1), schemas (16), web logic (20).
 
 ## Database / RLS
 

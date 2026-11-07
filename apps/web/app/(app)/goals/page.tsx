@@ -13,7 +13,13 @@ import {
   subtleButton,
 } from "../../../components/ui";
 import type { FlashParams } from "../../../lib/form";
-import { createGoal, setGoalStatus, updateGoalProgress } from "./actions";
+import {
+  addMilestone,
+  createGoal,
+  setGoalStatus,
+  toggleMilestone,
+  updateGoalProgress,
+} from "./actions";
 
 type Goal = {
   id: string;
@@ -37,6 +43,17 @@ export default async function GoalsPage({ searchParams }: { searchParams: Promis
     .eq("workspace_id", ctx.current.id)
     .order("created_at", { ascending: false });
   const goals = (data ?? []) as Goal[];
+  const { data: ms } = goals.length
+    ? await supabase
+        .from("milestones")
+        .select("id, goal_id, title, due_date, completed_at")
+        .in(
+          "goal_id",
+          goals.map((g) => g.id),
+        )
+        .order("created_at")
+    : { data: [] };
+  const milestones = ms ?? [];
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -119,6 +136,55 @@ export default async function GoalsPage({ searchParams }: { searchParams: Promis
                     <ProgressBar percent={pct} />
                   </div>
                 )}
+                <div className="mt-3">
+                  {milestones
+                    .filter((m) => m.goal_id === g.id)
+                    .map((m) => (
+                      <form
+                        key={m.id}
+                        action={toggleMilestone}
+                        className="flex items-center gap-2 py-1"
+                      >
+                        <input type="hidden" name="id" value={m.id} />
+                        <input type="hidden" name="done" value={m.completed_at ? "0" : "1"} />
+                        <button
+                          type="submit"
+                          aria-label={m.completed_at ? "Reopen milestone" : "Complete milestone"}
+                          className={`h-4 w-4 rounded-full border ${m.completed_at ? "border-success bg-success" : "border-muted"}`}
+                        />
+                        <span
+                          className={`text-sm ${m.completed_at ? "text-muted line-through" : ""}`}
+                        >
+                          {m.title}
+                          {m.due_date ? (
+                            <span className="text-xs text-muted"> · by {m.due_date}</span>
+                          ) : null}
+                        </span>
+                      </form>
+                    ))}
+                  {g.status === "active" && (
+                    <form action={addMilestone} className="mt-2 flex gap-2">
+                      <input type="hidden" name="goalId" value={g.id} />
+                      <input
+                        name="title"
+                        required
+                        maxLength={200}
+                        placeholder="Add a milestone"
+                        aria-label="Milestone title"
+                        className={inputClass}
+                      />
+                      <input
+                        name="dueDate"
+                        type="date"
+                        aria-label="Milestone due date"
+                        className={`${inputClass} max-w-40`}
+                      />
+                      <button type="submit" className={subtleButton}>
+                        Add
+                      </button>
+                    </form>
+                  )}
+                </div>
                 {g.status === "active" && (
                   <form action={updateGoalProgress} className="mt-3 flex gap-2">
                     <input type="hidden" name="id" value={g.id} />
