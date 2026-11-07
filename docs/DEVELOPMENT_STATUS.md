@@ -40,7 +40,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 - Notifications bell and AI assistant button are intentionally absent until their backends exist
   (Phases 8 and 16). The top-bar search only finds modules until universal search (Phase 9).
 - Shell components (sidebar, menus) have no automated component tests yet; only logic is unit tested.
-- `apps/mobile`, `apps/desktop`; storage buckets; productivity tables; Tailwind/shadcn (Phase 4).
+- `apps/mobile`, `apps/desktop`; storage buckets; Vault storage buckets.
 - RLS tests are manual, not in CI. GitHub Actions not yet observed running.
 
 ## Exact next action
