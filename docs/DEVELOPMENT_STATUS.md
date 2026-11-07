@@ -47,7 +47,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 - Phase 5 gaps: no UI yet for subtasks, task recurrence, task attachments, milestones, reminders, editing
   existing items (only create, status changes and delete), daily/weekly planning views, activity history, or
   dashboard widget configuration. Tables for these exist; reminder delivery needs Phase 16.
-- Supabase queries are untyped (no generated database types yet); add generated types next.
+- Database types are hand-saved from the generator in `apps/web/lib/supabase/database.types.ts`; regenerate after each migration.
 - No automated tests yet for the server actions or pages themselves.
 - Account deletion, data export, password change from settings.
 - Notifications bell and AI assistant button are intentionally absent until their backends exist
