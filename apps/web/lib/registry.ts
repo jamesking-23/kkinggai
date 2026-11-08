@@ -50,3 +50,12 @@ registry.register({
   status: "active",
   nav: { label: "Idea Inbox", href: "/ideas", icon: "lightbulb", order: 90 },
 });
+
+registry.register({
+  id: "vault",
+  name: "Vault",
+  description: "Private notes, links and documents",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Vault", href: "/vault", icon: "lock", order: 20 },
+});

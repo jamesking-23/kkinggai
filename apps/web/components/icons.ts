@@ -5,6 +5,7 @@ import {
   FolderKanban,
   LayoutDashboard,
   Lightbulb,
+  Lock,
   Repeat,
   Target,
   type LucideIcon,
@@ -18,6 +19,7 @@ const icons: Record<string, LucideIcon> = {
   calendar: Calendar,
   repeat: Repeat,
   lightbulb: Lightbulb,
+  lock: Lock,
 };
 
 /** Registry icon names resolve here; unknown names fall back to a generic icon. */

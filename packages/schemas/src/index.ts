@@ -163,3 +163,47 @@ export const milestoneSchema = z.object({
   title: z.string().trim().min(1, "Enter a milestone title").max(200),
   dueDate: optionalDate,
 });
+
+// ---------- vault ----------
+export const VAULT_MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // hosting request limit; the bucket itself allows 25 MB
+export const VAULT_MIME_TYPES = [
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "text/plain",
+  "text/markdown",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+] as const;
+
+const vaultTags = z.preprocess(
+  (v) =>
+    typeof v === "string"
+      ? v
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : v,
+  z.array(z.string().max(30)).max(20).default([]),
+);
+
+export const vaultNoteSchema = z.object({
+  title: z.string().trim().min(1, "Enter a title").max(200),
+  body: z.string().max(20000).default(""),
+  category: optionalText(60),
+  tags: vaultTags,
+});
+
+export const vaultLinkSchema = z.object({
+  title: z.string().trim().min(1, "Enter a title").max(200),
+  url: z
+    .string()
+    .trim()
+    .url("Enter a valid link")
+    .refine((u) => /^https?:\/\//i.test(u), "Links must start with http:// or https://"),
+  body: z.string().max(20000).default(""),
+  category: optionalText(60),
+  tags: vaultTags,
+});

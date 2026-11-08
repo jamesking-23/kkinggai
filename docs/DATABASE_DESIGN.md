@@ -33,9 +33,15 @@ with the `enforce_module_rules` trigger (runs as the invoker, no security-define
 (workspace-scoped, revision and soft-delete, statuses captured/planned/in_development/active/experimental/
 deprecated, optional related module).
 
+## Applied (Phase 7)
+
+Migration `20261107000005_vault`: private `vault` storage bucket (25 MB, allowed types listed in the migration) and
+`vault_items` (notes, links, files). Owner-only: no workspace sharing. Files live under `<user id>/`; policies on
+`storage.objects` and a check constraint keep paths inside the owner folder. No delete policy: soft delete only.
+
 ## Not yet done
 
-Storage buckets (Phase 7), all productivity/AI/vault tables, notifications, sync metadata.
+All productivity/AI/vault tables, notifications, sync metadata.
 
 ## Tests
 

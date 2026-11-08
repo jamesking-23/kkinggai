@@ -105,7 +105,14 @@ describe("idea schemas", () => {
   });
 });
 
-import { milestoneSchema, reminderSchema, subtaskSchema, taskEditSchema } from "./index";
+import {
+  vaultLinkSchema,
+  vaultNoteSchema,
+  milestoneSchema,
+  reminderSchema,
+  subtaskSchema,
+  taskEditSchema,
+} from "./index";
 
 describe("task detail schemas", () => {
   const id = "6f1c1c1e-5a45-4f4e-9c7e-3a0b8d6f2a11";
@@ -140,5 +147,30 @@ describe("task detail schemas", () => {
       goalId: id,
       title: "First 50 km",
     });
+  });
+});
+
+describe("vault schemas", () => {
+  it("parses a note and splits tags", () => {
+    const n = vaultNoteSchema.parse({
+      title: " Passport scan ",
+      body: "",
+      category: "",
+      tags: "id, travel,, ",
+    });
+    expect(n.title).toBe("Passport scan");
+    expect(n.tags).toEqual(["id", "travel"]);
+    expect(n.category).toBeUndefined();
+  });
+
+  it("only accepts http(s) links", () => {
+    expect(vaultLinkSchema.safeParse({ title: "x", url: "https://example.com/a" }).success).toBe(
+      true,
+    );
+    expect(vaultLinkSchema.safeParse({ title: "x", url: "javascript:alert(1)" }).success).toBe(
+      false,
+    );
+    expect(vaultLinkSchema.safeParse({ title: "x", url: "not a url" }).success).toBe(false);
+    expect(vaultNoteSchema.safeParse({ title: " " }).success).toBe(false);
   });
 });

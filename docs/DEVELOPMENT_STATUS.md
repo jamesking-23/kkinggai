@@ -73,7 +73,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Then Phase 7 (Personal Vault: storage bucket and tables; SQL is shown for review before applying).
+Then Phase 8 (AI core: server-side provider calls only). Show any migration SQL for review before applying.
 
 ## Update: task detail, milestones, reminders (code written, not exercised against a live database)
 
@@ -82,7 +82,16 @@ Then Phase 7 (Personal Vault: storage bucket and tables; SQL is shown for review
 - Verified: lint, format check, typecheck, 41 unit tests and production build pass. The new pages and actions have
   not been run signed in because the sandbox cannot reach Supabase.
 
-## Update: Phase 7 draft (not applied)
+## Update: Phase 7 Personal Vault
 
-- `backend/supabase/migrations/20261107000005_vault.sql` is a DRAFT awaiting the owner's review. It has NOT been applied to
-  the `kkingg-ai` database, so the Vault does not exist yet. No vault UI or tests are written.
+- Migration `20261107000005_vault.sql` is APPLIED to `kkingg-ai`: private `vault` bucket, `vault_items` table,
+  owner-only RLS on both, `vault` module registered and enabled for existing workspaces.
+- RLS tested live (`backend/supabase/tests/rls_vault.sql`, rolled back): 17 results, all as expected (owner CRUD,
+  cross-folder and non-http inputs blocked, other users/outsiders/anonymous see nothing, no hard delete).
+  Not testable in SQL: deleting storage objects (Supabase blocks direct deletes; use the Storage API).
+- `/vault` page: notes, links, file upload (PDF, images, text, Word, Excel; 4 MB because uploads go through a
+  server action under Vercel's 4.5 MB request cap), signed download links (5 minutes), soft delete.
+- Verified: lint, format, typecheck, 43 unit tests, production build. NOT verified: the page signed in, and file
+  upload/download through the real Storage API (sandbox cannot reach Supabase).
+- Not built: end-to-end encryption (the page says so), editing items, search within the vault, restore/permanent
+  delete, direct-to-storage uploads for files over 4 MB.

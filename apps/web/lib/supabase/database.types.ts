@@ -541,6 +541,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      vault_items: {
+        Row: {
+          body: string;
+          category: string | null;
+          created_at: string;
+          deleted_at: string | null;
+          id: string;
+          kind: string;
+          mime_type: string | null;
+          owner_id: string;
+          revision: number;
+          size_bytes: number | null;
+          storage_path: string | null;
+          tags: string[];
+          title: string;
+          updated_at: string;
+          url: string | null;
+        };
+        Insert: {
+          body?: string;
+          category?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          kind: string;
+          mime_type?: string | null;
+          owner_id?: string;
+          revision?: number;
+          size_bytes?: number | null;
+          storage_path?: string | null;
+          tags?: string[];
+          title: string;
+          updated_at?: string;
+          url?: string | null;
+        };
+        Update: {
+          body?: string;
+          category?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          kind?: string;
+          mime_type?: string | null;
+          owner_id?: string;
+          revision?: number;
+          size_bytes?: number | null;
+          storage_path?: string | null;
+          tags?: string[];
+          title?: string;
+          updated_at?: string;
+          url?: string | null;
+        };
+        Relationships: [];
+      };
       workspace_members: {
         Row: {
           created_at: string;
