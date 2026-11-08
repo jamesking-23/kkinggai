@@ -95,3 +95,11 @@ Then Phase 8 (AI core: server-side provider calls only). Show any migration SQL 
   upload/download through the real Storage API (sandbox cannot reach Supabase).
 - Not built: end-to-end encryption (the page says so), editing items, search within the vault, restore/permanent
   delete, direct-to-storage uploads for files over 4 MB.
+
+## Update: Phase 8 in progress (AI core)
+
+- `packages/ai`: provider-agnostic chat completion (Gemini, OpenRouter), env-based selection, error mapping that never
+  leaks keys, history trimming. 12 unit tests against a mocked network. NOT yet called against a real provider: no API
+  key has been supplied.
+- `backend/supabase/migrations/20261108000006_ai_conversations.sql` is a DRAFT awaiting the owner's review. NOT applied,
+  so there is no conversation storage and no assistant page yet.
