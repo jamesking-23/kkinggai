@@ -39,6 +39,12 @@ Migration `20261107000005_vault`: private `vault` storage bucket (25 MB, allowed
 `vault_items` (notes, links, files). Owner-only: no workspace sharing. Files live under `<user id>/`; policies on
 `storage.objects` and a check constraint keep paths inside the owner folder. No delete policy: soft delete only.
 
+## Applied (Phase 8)
+
+Migration `20261108000006_ai_conversations`: `ai_conversations` and `ai_messages`, private to their owner (not shared with
+workspace admins). A composite foreign key keeps a message in a conversation with the same owner. Messages are
+immutable; conversations soft-delete. Token counts are client-written bookkeeping, not billing data.
+
 ## Not yet done
 
 All productivity/AI/vault tables, notifications, sync metadata.

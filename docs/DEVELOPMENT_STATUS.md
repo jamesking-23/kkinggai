@@ -73,7 +73,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Then Phase 8 (AI core: server-side provider calls only). Show any migration SQL for review before applying.
+Then Phase 9 (universal search). The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
 
 ## Update: task detail, milestones, reminders (code written, not exercised against a live database)
 
@@ -96,18 +96,17 @@ Then Phase 8 (AI core: server-side provider calls only). Show any migration SQL 
 - Not built: end-to-end encryption (the page says so), editing items, search within the vault, restore/permanent
   delete, direct-to-storage uploads for files over 4 MB.
 
-## Update: Phase 8 in progress (AI core)
+## Update: Phase 8 AI core
 
-- `packages/ai`: provider-agnostic chat completion (Gemini, OpenRouter), env-based selection, error mapping that never
-  leaks keys, history trimming. 12 unit tests against a mocked network. NOT yet called against a real provider: no API
-  key has been supplied.
-- `/assistant` page and server action written (conversation list, thread, send, soft delete; per-account cap of 50
-  messages per 24 h because signups are open; user message is stored before the provider call so it is not lost on
-  failure). The assistant sees only the current conversation, not tasks, vault or other data.
-- `backend/supabase/migrations/20261108000006_ai_conversations.sql` is a DRAFT awaiting the owner's review. NOT applied.
-  Until it is applied the Assistant module is not registered, so the page is unreachable and nothing is stored.
-  `backend/supabase/tests/rls_ai.sql` is written but has not been run.
-- Verified: lint, format, typecheck, 52 unit tests, production build. The `Database` types for the two new tables were
-  hand-added, not generated; regenerate after applying.
-- Open decision for the owner: public sign-up is enabled, so anyone who registers could use the server's AI key within
-  the daily cap. Consider disabling sign-ups in Supabase Auth settings for this private app.
+- Migration `20261108000006_ai_conversations.sql` is APPLIED to `kkingg-ai`: `ai_conversations`, `ai_messages` (owner-only,
+  messages immutable, conversations soft-deleted), Assistant module registered and enabled for existing workspaces.
+- RLS tested live (`backend/supabase/tests/rls_ai.sql`, rolled back): 16 results, all as expected, including that a
+  workspace admin cannot see another member's chats. Column list checked against the hand-added `Database` types.
+- `packages/ai`: Gemini and OpenRouter providers, env-based selection, key-safe error mapping, history trimming; 12 unit
+  tests against a mocked network. NOT yet called against a real provider: no API key has been supplied.
+- `/assistant` page: conversation list, thread, send, soft delete; 50 messages per account per 24 h; the user message is
+  saved before the provider call. The assistant sees only the current conversation, not tasks or the vault.
+- Verified: lint, format, typecheck, 52 unit tests, build. NOT verified: the page signed in, or a real model reply.
+- Owner to do: set GEMINI_API_KEY or OPENROUTER_API_KEY on Vercel (optionally GEMINI_MODEL / OPENROUTER_MODEL; default
+  model names are unverified guesses). Public sign-up is on, so consider disabling it in Supabase Auth.
+- Not built: streaming replies, giving the assistant access to app data or tools, conversation rename/search.
