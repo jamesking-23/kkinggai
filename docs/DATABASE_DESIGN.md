@@ -50,6 +50,12 @@ immutable; conversations soft-delete. Token counts are client-written bookkeepin
 Migration `20261109000007_search`: `search_workspace` (SECURITY INVOKER, no new tables). Results respect RLS; vault items and
 AI chats only ever match for their owner.
 
+## Applied (Phase 10, part 1)
+
+Migration `20261109000008_academics_flashcards`: `courses`, `assignments`, `study_notes`, `flashcard_decks`, `flashcards`
+(shared in the workspace, soft delete) and `card_reviews` (private to the reviewer). Composite foreign keys keep links inside a
+workspace. Card scheduling state (ease, interval, due) lives on the card, so it is shared by workspace members.
+
 ## Not yet done
 
 All productivity/AI/vault tables, notifications, sync metadata.

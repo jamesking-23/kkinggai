@@ -2,7 +2,7 @@
 
 Run: `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build`.
 
-Automated tests: module registry (4), design tokens (1), AI providers (12), schemas (19), web logic (22).
+Automated tests: module registry (4), design tokens (1), AI providers (12), schemas (23), web logic (27).
 
 ## Database / RLS
 
@@ -20,6 +20,7 @@ viewers read-only on ideas, outsiders and anonymous see nothing.
 tested in SQL.
 `rls_ai.sql` (3 users): 16 results, all as expected.
 `rls_search.sql` (3 users): 10 results, all as expected.
+`rls_academics.sql` is written but has NOT been run (confirmation prompt timed out).
 The first foundation run found a signup bug (duplicate owner membership), fixed in migration 2.
 
 CI is defined in `.github/workflows/ci.yml` but has not been observed running on GitHub.

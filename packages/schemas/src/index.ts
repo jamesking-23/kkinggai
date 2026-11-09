@@ -223,3 +223,66 @@ export const assistantMessageSchema = z.object({
       `Messages are limited to ${ASSISTANT_MAX_MESSAGE_CHARS} characters`,
     ),
 });
+
+// ---------- academics and flashcards ----------
+export const ASSIGNMENT_STATUSES = ["todo", "in_progress", "submitted", "graded"] as const;
+export const COURSE_STATUSES = ["active", "completed", "dropped"] as const;
+
+export const courseSchema = z.object({
+  name: z.string().trim().min(1, "Enter a course name").max(200),
+  code: optionalText(30),
+  term: optionalText(60),
+  instructor: optionalText(120),
+  credits: z.preprocess(
+    blank,
+    z.coerce.number().min(0, "Credits cannot be negative").max(99).optional(),
+  ),
+});
+
+export const assignmentSchema = z.object({
+  courseId: z.string().uuid("Choose a course"),
+  title: z.string().trim().min(1, "Enter an assignment title").max(300),
+  description: optionalText(4000),
+  dueDate: optionalDate,
+  maxScore: z.preprocess(
+    blank,
+    z.coerce.number().positive("Maximum score must be above zero").default(100),
+  ),
+  weightPercent: z.preprocess(blank, z.coerce.number().min(0).max(100).optional()),
+});
+
+export const assignmentUpdateSchema = z
+  .object({
+    id: z.string().uuid(),
+    status: z.enum(ASSIGNMENT_STATUSES),
+    score: z.preprocess(blank, z.coerce.number().min(0, "Score cannot be negative").optional()),
+    maxScore: z.coerce.number().positive(),
+  })
+  .refine((a) => a.score === undefined || a.score <= a.maxScore, {
+    message: "Score cannot exceed the maximum score",
+    path: ["score"],
+  });
+
+export const studyNoteSchema = z.object({
+  title: z.string().trim().min(1, "Enter a title").max(200),
+  body: z.string().max(50000).default(""),
+  courseId: z.preprocess(blank, z.string().uuid().optional()),
+  tags: vaultTags,
+});
+
+export const deckSchema = z.object({
+  name: z.string().trim().min(1, "Enter a deck name").max(200),
+  description: optionalText(1000),
+  courseId: z.preprocess(blank, z.string().uuid().optional()),
+});
+
+export const cardSchema = z.object({
+  deckId: z.string().uuid("Choose a deck"),
+  front: z.string().trim().min(1, "Enter the question").max(2000),
+  back: z.string().trim().min(1, "Enter the answer").max(4000),
+});
+
+export const cardReviewSchema = z.object({
+  id: z.string().uuid(),
+  rating: z.coerce.number().int().min(0).max(3),
+});

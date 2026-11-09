@@ -123,3 +123,19 @@ Then Phase 10 (academics and career). The owner has authorised applying migratio
 - Verified: lint, format, typecheck, 54 unit tests, build. NOT verified signed in.
 - Limits: plain substring matching, no ranking or typo tolerance, no search inside Vault files or milestones, subtasks
   and reminders. Add trigram/full-text indexes if the data grows.
+
+## Update: Phase 10 part 1 (academics and flashcards)
+
+- Migration `20261109000008_academics_flashcards.sql` APPLIED: courses, assignments, study_notes, flashcard_decks, flashcards,
+  card_reviews (private to the reviewer); shared tables use the workspace role rules, soft delete, revisions; Academics and
+  Flashcards modules registered and enabled.
+- **RLS test NOT YET RUN**: `backend/supabase/tests/rls_academics.sql` is written, but the Supabase confirmation prompt
+  timed out, so the access rules for these tables are untested. Run it next session before relying on them.
+- `/academics`: courses (status, remove), assignments per course (due date, status, score, weight, overdue flag, graded
+  percentage), study notes with tags. `/flashcards`: decks, cards, review queue with SM-2 style scheduling
+  (`lib/spaced-repetition.ts`, 5 unit tests), review history written to `card_reviews`.
+- Verified: lint, format, typecheck, unit tests, build. NOT verified signed in.
+- Phase 10 still to do: quizzes, document organisation, research, CV management, career profile, job applications, interview
+  preparation, portfolio. AI-generated flashcards/quizzes are not built.
+- New tables are not yet in universal search (needs a migration to extend `search_workspace`).
+- Phase 9 gaps against the spec: search uses ILIKE rather than PostgreSQL full-text, with no filters and no search history.

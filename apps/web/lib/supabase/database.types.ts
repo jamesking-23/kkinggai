@@ -7,6 +7,273 @@ export type Database = {
   };
   public: {
     Tables: {
+      assignments: {
+        Row: {
+          course_id: string;
+          created_at: string;
+          created_by: string;
+          deleted_at: string | null;
+          description: string;
+          due_at: string | null;
+          id: string;
+          max_score: number;
+          revision: number;
+          score: number | null;
+          status: string;
+          title: string;
+          updated_at: string;
+          weight_percent: number | null;
+          workspace_id: string;
+        };
+        Insert: {
+          course_id: string;
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          description?: string;
+          due_at?: string | null;
+          id?: string;
+          max_score?: number;
+          revision?: number;
+          score?: number | null;
+          status?: string;
+          title: string;
+          updated_at?: string;
+          weight_percent?: number | null;
+          workspace_id: string;
+        };
+        Update: {
+          course_id?: string;
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          description?: string;
+          due_at?: string | null;
+          id?: string;
+          max_score?: number;
+          revision?: number;
+          score?: number | null;
+          status?: string;
+          title?: string;
+          updated_at?: string;
+          weight_percent?: number | null;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
+      card_reviews: {
+        Row: {
+          card_id: string;
+          id: string;
+          rating: number;
+          reviewed_at: string;
+          user_id: string;
+          workspace_id: string;
+        };
+        Insert: {
+          card_id: string;
+          id?: string;
+          rating: number;
+          reviewed_at?: string;
+          user_id?: string;
+          workspace_id: string;
+        };
+        Update: {
+          card_id?: string;
+          id?: string;
+          rating?: number;
+          reviewed_at?: string;
+          user_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
+      courses: {
+        Row: {
+          code: string | null;
+          created_at: string;
+          created_by: string;
+          credits: number | null;
+          deleted_at: string | null;
+          id: string;
+          instructor: string | null;
+          name: string;
+          revision: number;
+          status: string;
+          term: string | null;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          code?: string | null;
+          created_at?: string;
+          created_by?: string;
+          credits?: number | null;
+          deleted_at?: string | null;
+          id?: string;
+          instructor?: string | null;
+          name: string;
+          revision?: number;
+          status?: string;
+          term?: string | null;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          code?: string | null;
+          created_at?: string;
+          created_by?: string;
+          credits?: number | null;
+          deleted_at?: string | null;
+          id?: string;
+          instructor?: string | null;
+          name?: string;
+          revision?: number;
+          status?: string;
+          term?: string | null;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
+      flashcard_decks: {
+        Row: {
+          course_id: string | null;
+          created_at: string;
+          created_by: string;
+          deleted_at: string | null;
+          description: string;
+          id: string;
+          name: string;
+          revision: number;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          course_id?: string | null;
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          description?: string;
+          id?: string;
+          name: string;
+          revision?: number;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          course_id?: string | null;
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          description?: string;
+          id?: string;
+          name?: string;
+          revision?: number;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
+      flashcards: {
+        Row: {
+          back: string;
+          created_at: string;
+          created_by: string;
+          deck_id: string;
+          deleted_at: string | null;
+          due_at: string;
+          ease: number;
+          front: string;
+          id: string;
+          interval_days: number;
+          lapses: number;
+          last_reviewed_at: string | null;
+          repetitions: number;
+          revision: number;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          back: string;
+          created_at?: string;
+          created_by?: string;
+          deck_id: string;
+          deleted_at?: string | null;
+          due_at?: string;
+          ease?: number;
+          front: string;
+          id?: string;
+          interval_days?: number;
+          lapses?: number;
+          last_reviewed_at?: string | null;
+          repetitions?: number;
+          revision?: number;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          back?: string;
+          created_at?: string;
+          created_by?: string;
+          deck_id?: string;
+          deleted_at?: string | null;
+          due_at?: string;
+          ease?: number;
+          front?: string;
+          id?: string;
+          interval_days?: number;
+          lapses?: number;
+          last_reviewed_at?: string | null;
+          repetitions?: number;
+          revision?: number;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
+      study_notes: {
+        Row: {
+          body: string;
+          course_id: string | null;
+          created_at: string;
+          created_by: string;
+          deleted_at: string | null;
+          id: string;
+          revision: number;
+          tags: string[];
+          title: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          body?: string;
+          course_id?: string | null;
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          id?: string;
+          revision?: number;
+          tags?: string[];
+          title: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          body?: string;
+          course_id?: string | null;
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          id?: string;
+          revision?: number;
+          tags?: string[];
+          title?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
       ai_conversations: {
         Row: {
           created_at: string;

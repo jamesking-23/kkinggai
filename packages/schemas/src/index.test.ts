@@ -106,6 +106,13 @@ describe("idea schemas", () => {
 });
 
 import {
+  assignmentSchema,
+  assignmentUpdateSchema,
+  cardReviewSchema,
+  cardSchema,
+  courseSchema,
+  deckSchema,
+  studyNoteSchema,
   assistantMessageSchema,
   vaultLinkSchema,
   vaultNoteSchema,
@@ -186,5 +193,58 @@ describe("assistant message schema", () => {
     expect(
       assistantMessageSchema.safeParse({ conversationId: "nope", message: "hi" }).success,
     ).toBe(false);
+  });
+});
+
+describe("academics and flashcard schemas", () => {
+  const id = "6f1c1c1e-5a45-4f4e-9c7e-3a0b8d6f2a11";
+
+  it("parses a course with blank optionals", () => {
+    expect(
+      courseSchema.parse({
+        name: " Structures ",
+        code: "",
+        term: "",
+        instructor: "",
+        credits: "3",
+      }),
+    ).toEqual({
+      name: "Structures",
+      credits: 3,
+    });
+    expect(courseSchema.safeParse({ name: "x", credits: "-1" }).success).toBe(false);
+  });
+
+  it("defaults assignment max score and rejects bad input", () => {
+    const a = assignmentSchema.parse({
+      courseId: id,
+      title: "Lab 1",
+      maxScore: "",
+      dueDate: "",
+      weightPercent: "",
+    });
+    expect(a.maxScore).toBe(100);
+    expect(assignmentSchema.safeParse({ courseId: "nope", title: "x" }).success).toBe(false);
+    expect(
+      assignmentSchema.safeParse({ courseId: id, title: "x", weightPercent: "150" }).success,
+    ).toBe(false);
+  });
+
+  it("does not let a score exceed the maximum", () => {
+    const base = { id, status: "graded", maxScore: "50" };
+    expect(assignmentUpdateSchema.safeParse({ ...base, score: "45" }).success).toBe(true);
+    expect(assignmentUpdateSchema.safeParse({ ...base, score: "51" }).success).toBe(false);
+    expect(assignmentUpdateSchema.safeParse({ ...base, status: "todo", score: "" }).success).toBe(
+      true,
+    );
+    expect(assignmentUpdateSchema.safeParse({ ...base, status: "bogus" }).success).toBe(false);
+  });
+
+  it("validates notes, decks, cards and ratings", () => {
+    expect(studyNoteSchema.parse({ title: "T", tags: "a, b" }).tags).toEqual(["a", "b"]);
+    expect(deckSchema.parse({ name: "D", description: "", courseId: "" })).toEqual({ name: "D" });
+    expect(cardSchema.safeParse({ deckId: id, front: " ", back: "a" }).success).toBe(false);
+    expect(cardReviewSchema.safeParse({ id, rating: "3" }).success).toBe(true);
+    expect(cardReviewSchema.safeParse({ id, rating: "4" }).success).toBe(false);
   });
 });

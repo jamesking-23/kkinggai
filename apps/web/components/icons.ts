@@ -3,6 +3,8 @@ import {
   Calendar,
   CheckSquare,
   FolderKanban,
+  GraduationCap,
+  Layers,
   LayoutDashboard,
   Lightbulb,
   Lock,
@@ -21,6 +23,8 @@ const icons: Record<string, LucideIcon> = {
   repeat: Repeat,
   lightbulb: Lightbulb,
   lock: Lock,
+  "graduation-cap": GraduationCap,
+  layers: Layers,
   sparkles: Sparkles,
 };
 

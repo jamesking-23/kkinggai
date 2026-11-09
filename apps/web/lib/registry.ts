@@ -68,3 +68,21 @@ registry.register({
   status: "active",
   nav: { label: "Assistant", href: "/assistant", icon: "sparkles", order: 5 },
 });
+
+registry.register({
+  id: "academics",
+  name: "Academics",
+  description: "Courses, assignments and study notes",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Academics", href: "/academics", icon: "graduation-cap", order: 60 },
+});
+
+registry.register({
+  id: "flashcards",
+  name: "Flashcards",
+  description: "Spaced-repetition flashcards",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Flashcards", href: "/flashcards", icon: "layers", order: 62 },
+});
