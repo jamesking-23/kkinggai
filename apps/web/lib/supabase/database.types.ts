@@ -88,6 +88,234 @@ export type Database = {
         };
         Relationships: [];
       };
+      career_profiles: {
+        Row: {
+          created_at: string;
+          github_url: string | null;
+          headline: string;
+          linkedin_url: string | null;
+          location: string | null;
+          revision: number;
+          summary: string;
+          updated_at: string;
+          user_id: string;
+          website: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          github_url?: string | null;
+          headline?: string;
+          linkedin_url?: string | null;
+          location?: string | null;
+          revision?: number;
+          summary?: string;
+          updated_at?: string;
+          user_id?: string;
+          website?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          github_url?: string | null;
+          headline?: string;
+          linkedin_url?: string | null;
+          location?: string | null;
+          revision?: number;
+          summary?: string;
+          updated_at?: string;
+          user_id?: string;
+          website?: string | null;
+        };
+        Relationships: [];
+      };
+      cv_entries: {
+        Row: {
+          created_at: string;
+          deleted_at: string | null;
+          description: string;
+          end_date: string | null;
+          id: string;
+          kind: string;
+          location: string | null;
+          organisation: string | null;
+          revision: number;
+          sort_order: number;
+          start_date: string | null;
+          title: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          deleted_at?: string | null;
+          description?: string;
+          end_date?: string | null;
+          id?: string;
+          kind: string;
+          location?: string | null;
+          organisation?: string | null;
+          revision?: number;
+          sort_order?: number;
+          start_date?: string | null;
+          title: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          deleted_at?: string | null;
+          description?: string;
+          end_date?: string | null;
+          id?: string;
+          kind?: string;
+          location?: string | null;
+          organisation?: string | null;
+          revision?: number;
+          sort_order?: number;
+          start_date?: string | null;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      interview_prep: {
+        Row: {
+          answer: string;
+          application_id: string | null;
+          category: string;
+          confidence: number;
+          created_at: string;
+          deleted_at: string | null;
+          id: string;
+          question: string;
+          revision: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          answer?: string;
+          application_id?: string | null;
+          category?: string;
+          confidence?: number;
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          question: string;
+          revision?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          answer?: string;
+          application_id?: string | null;
+          category?: string;
+          confidence?: number;
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          question?: string;
+          revision?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      job_applications: {
+        Row: {
+          applied_on: string | null;
+          company: string;
+          contact_name: string | null;
+          created_at: string;
+          deadline: string | null;
+          deleted_at: string | null;
+          id: string;
+          location: string | null;
+          notes: string;
+          revision: number;
+          role: string;
+          status: string;
+          updated_at: string;
+          url: string | null;
+          user_id: string;
+        };
+        Insert: {
+          applied_on?: string | null;
+          company: string;
+          contact_name?: string | null;
+          created_at?: string;
+          deadline?: string | null;
+          deleted_at?: string | null;
+          id?: string;
+          location?: string | null;
+          notes?: string;
+          revision?: number;
+          role: string;
+          status?: string;
+          updated_at?: string;
+          url?: string | null;
+          user_id?: string;
+        };
+        Update: {
+          applied_on?: string | null;
+          company?: string;
+          contact_name?: string | null;
+          created_at?: string;
+          deadline?: string | null;
+          deleted_at?: string | null;
+          id?: string;
+          location?: string | null;
+          notes?: string;
+          revision?: number;
+          role?: string;
+          status?: string;
+          updated_at?: string;
+          url?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      portfolio_items: {
+        Row: {
+          created_at: string;
+          deleted_at: string | null;
+          description: string;
+          id: string;
+          kind: string;
+          revision: number;
+          tags: string[];
+          title: string;
+          updated_at: string;
+          url: string | null;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          deleted_at?: string | null;
+          description?: string;
+          id?: string;
+          kind?: string;
+          revision?: number;
+          tags?: string[];
+          title: string;
+          updated_at?: string;
+          url?: string | null;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          deleted_at?: string | null;
+          description?: string;
+          id?: string;
+          kind?: string;
+          revision?: number;
+          tags?: string[];
+          title?: string;
+          updated_at?: string;
+          url?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       courses: {
         Row: {
           code: string | null;

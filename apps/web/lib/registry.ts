@@ -86,3 +86,12 @@ registry.register({
   status: "active",
   nav: { label: "Flashcards", href: "/flashcards", icon: "layers", order: 62 },
 });
+
+registry.register({
+  id: "career",
+  name: "Career",
+  description: "Applications, CV, interview prep and portfolio",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Career", href: "/career", icon: "briefcase", order: 64 },
+});

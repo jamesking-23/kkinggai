@@ -10,6 +10,13 @@ export const SEARCH_KINDS: Record<string, { label: string; module: string }> = {
   idea: { label: "Ideas", module: "ideas" },
   vault: { label: "Vault", module: "vault" },
   conversation: { label: "Assistant chats", module: "assistant" },
+  course: { label: "Courses", module: "academics" },
+  study_note: { label: "Study notes", module: "academics" },
+  deck: { label: "Flashcard decks", module: "flashcards" },
+  card: { label: "Flashcards", module: "flashcards" },
+  application: { label: "Job applications", module: "career" },
+  interview: { label: "Interview questions", module: "career" },
+  portfolio: { label: "Portfolio", module: "career" },
 };
 
 export type SearchGroup = { kind: string; label: string; hits: SearchHit[] };

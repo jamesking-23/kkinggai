@@ -88,7 +88,9 @@ export function Shell(props: ShellProps) {
 
   return (
     <div className="flex min-h-screen">
-      <aside className={`hidden shrink-0 lg:block ${collapsed ? "w-16" : "w-60"}`}>{sidebar}</aside>
+      <aside className={`hidden shrink-0 lg:block print:hidden ${collapsed ? "w-16" : "w-60"}`}>
+        {sidebar}
+      </aside>
 
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
@@ -103,7 +105,7 @@ export function Shell(props: ShellProps) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-border bg-surface px-4 py-2.5">
+        <header className="flex items-center gap-3 border-b border-border bg-surface px-4 py-2.5 print:hidden">
           <button
             type="button"
             onClick={() => setMobileOpen((o) => !o)}

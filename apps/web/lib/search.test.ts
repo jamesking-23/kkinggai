@@ -28,4 +28,19 @@ describe("groupHits", () => {
     expect(groupHits(hits, new Set(["tasks"])).map((x) => x.kind)).toEqual(["task"]);
     expect(groupHits(hits, new Set())).toEqual([]);
   });
+
+  it("includes academics, flashcards and career kinds only when their modules are enabled", () => {
+    const more = [
+      hit("course", "c"),
+      hit("card", "k"),
+      hit("application", "a"),
+      hit("portfolio", "p"),
+    ];
+    expect(groupHits(more, new Set(["academics", "career"])).map((g) => g.kind)).toEqual([
+      "course",
+      "application",
+      "portfolio",
+    ]);
+    expect(groupHits(more, new Set(["flashcards"])).map((g) => g.kind)).toEqual(["card"]);
+  });
 });

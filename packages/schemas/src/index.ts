@@ -286,3 +286,104 @@ export const cardReviewSchema = z.object({
   id: z.string().uuid(),
   rating: z.coerce.number().int().min(0).max(3),
 });
+
+// ---------- career ----------
+export const CV_KINDS = [
+  "experience",
+  "education",
+  "skill",
+  "project",
+  "certification",
+  "award",
+  "other",
+] as const;
+export const APPLICATION_STATUSES = [
+  "wishlist",
+  "applied",
+  "interviewing",
+  "offer",
+  "rejected",
+  "withdrawn",
+] as const;
+export const INTERVIEW_CATEGORIES = [
+  "behavioural",
+  "technical",
+  "situational",
+  "company",
+  "other",
+] as const;
+export const PORTFOLIO_KINDS = [
+  "project",
+  "publication",
+  "certificate",
+  "design",
+  "other",
+] as const;
+
+const optionalUrl = z.preprocess(
+  blank,
+  z
+    .string()
+    .trim()
+    .max(500)
+    .url("Enter a valid link")
+    .refine((u) => /^https?:\/\//i.test(u), "Links must start with http:// or https://")
+    .optional(),
+);
+
+export const careerProfileSchema = z.object({
+  headline: optionalText(200),
+  summary: optionalText(4000),
+  location: optionalText(120),
+  website: optionalUrl,
+  linkedinUrl: optionalUrl,
+  githubUrl: optionalUrl,
+});
+
+export const cvEntrySchema = z
+  .object({
+    kind: z.enum(CV_KINDS),
+    title: z.string().trim().min(1, "Enter a title").max(200),
+    organisation: optionalText(200),
+    location: optionalText(120),
+    startDate: optionalDate,
+    endDate: optionalDate,
+    description: optionalText(4000),
+  })
+  .refine((e) => !e.startDate || !e.endDate || e.endDate >= e.startDate, {
+    message: "The end date cannot be before the start date",
+    path: ["endDate"],
+  });
+
+export const applicationSchema = z.object({
+  company: z.string().trim().min(1, "Enter the company").max(200),
+  role: z.string().trim().min(1, "Enter the role").max(200),
+  url: optionalUrl,
+  status: z.enum(APPLICATION_STATUSES).default("wishlist"),
+  location: optionalText(120),
+  appliedOn: optionalDate,
+  deadline: optionalDate,
+  contactName: optionalText(120),
+  notes: optionalText(4000),
+});
+
+export const applicationStatusSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(APPLICATION_STATUSES),
+});
+
+export const interviewPrepSchema = z.object({
+  question: z.string().trim().min(1, "Enter the question").max(1000),
+  answer: optionalText(4000),
+  category: z.enum(INTERVIEW_CATEGORIES).default("behavioural"),
+  confidence: z.coerce.number().int().min(1).max(5).default(3),
+  applicationId: z.preprocess(blank, z.string().uuid().optional()),
+});
+
+export const portfolioSchema = z.object({
+  title: z.string().trim().min(1, "Enter a title").max(200),
+  kind: z.enum(PORTFOLIO_KINDS).default("project"),
+  url: optionalUrl,
+  description: optionalText(2000),
+  tags: vaultTags,
+});

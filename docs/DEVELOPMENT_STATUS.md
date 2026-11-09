@@ -73,7 +73,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Then Phase 10 (academics and career). The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
+Then finish Phase 10 gaps (quizzes, documents, research) or move to Phase 11 (sports). The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
 
 ## Update: task detail, milestones, reminders (code written, not exercised against a live database)
 
@@ -124,18 +124,23 @@ Then Phase 10 (academics and career). The owner has authorised applying migratio
 - Limits: plain substring matching, no ranking or typo tolerance, no search inside Vault files or milestones, subtasks
   and reminders. Add trigram/full-text indexes if the data grows.
 
-## Update: Phase 10 part 1 (academics and flashcards)
+## Update: Phase 10 (academics, flashcards, career)
 
-- Migration `20261109000008_academics_flashcards.sql` APPLIED: courses, assignments, study_notes, flashcard_decks, flashcards,
-  card_reviews (private to the reviewer); shared tables use the workspace role rules, soft delete, revisions; Academics and
-  Flashcards modules registered and enabled.
-- **RLS test NOT YET RUN**: `backend/supabase/tests/rls_academics.sql` is written, but the Supabase confirmation prompt
-  timed out, so the access rules for these tables are untested. Run it next session before relying on them.
-- `/academics`: courses (status, remove), assignments per course (due date, status, score, weight, overdue flag, graded
-  percentage), study notes with tags. `/flashcards`: decks, cards, review queue with SM-2 style scheduling
-  (`lib/spaced-repetition.ts`, 5 unit tests), review history written to `card_reviews`.
-- Verified: lint, format, typecheck, unit tests, build. NOT verified signed in.
-- Phase 10 still to do: quizzes, document organisation, research, CV management, career profile, job applications, interview
-  preparation, portfolio. AI-generated flashcards/quizzes are not built.
-- New tables are not yet in universal search (needs a migration to extend `search_workspace`).
-- Phase 9 gaps against the spec: search uses ILIKE rather than PostgreSQL full-text, with no filters and no search history.
+- Migrations APPLIED: `20261109000008_academics_flashcards`, `20261109000009_career`, `20261109000010_search_academics_career`.
+- Academics/Flashcards: shared workspace tables (courses, assignments, study_notes, flashcard_decks, flashcards) and a private
+  `card_reviews` history. `/academics`: courses, assignments (due, status, score, weight, overdue flag, graded %), study notes.
+  `/flashcards`: decks, cards, review queue with SM-2 style scheduling (`lib/spaced-repetition.ts`).
+- Career: private per-user tables (career_profiles, cv_entries, job_applications, interview_prep, portfolio_items); no workspace
+  sharing and no delete policies. `/career` (application pipeline with status counts and 14-day deadline warning, interview
+  prep with confidence, portfolio), `/career/profile` (profile and CV entries), `/career/cv` (printable CV; use the browser's
+  print to save a PDF; the sidebar and header are hidden when printing).
+- Universal search now also covers courses, study notes, decks, cards, applications, interview questions and portfolio items;
+  career records only match for their owner.
+- RLS tests run live and rolled back, all as expected: `rls_academics.sql` (17 results), `rls_career.sql` (17),
+  `rls_search_academics_career.sql` (5), and the earlier `rls_search.sql` re-run after the function change (10). Direct hard
+  deletes are checked by confirming no DELETE policies exist (a literal delete statement triggers a confirmation prompt that
+  times out).
+- Verified: lint, format, typecheck, unit tests, build. NOT verified signed in; CV print layout not viewed in a browser.
+- Phase 10 NOT built: quizzes, document organisation, research tools, AI-generated flashcards/quizzes, CV export to PDF/Word
+  as a file (print-to-PDF only), assignments linked to the Tasks module.
+- Phase 9 gaps against the spec: ILIKE instead of PostgreSQL full-text search, no filters, no search history.

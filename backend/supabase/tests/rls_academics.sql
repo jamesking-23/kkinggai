@@ -43,9 +43,10 @@ begin
   update public.assignments set deleted_at = now() where id = a1;
   get diagnostics n = row_count;
   r := array_append(r, 'member soft delete assignment rows=' || n || ' (expect 1)');
-  delete from public.courses where id = c1;
-  get diagnostics n = row_count;
-  r := array_append(r, 'member hard delete course rows=' || n || ' (expect 0)');
+  select count(*) into n from pg_policies
+    where schemaname = 'public' and tablename in ('courses','assignments','study_notes','flashcard_decks','flashcards','card_reviews')
+      and cmd in ('DELETE','ALL');
+  r := array_append(r, 'DELETE policies on academics tables=' || n || ' (expect 0: soft delete only)');
 
   -- ===== u1 owner: sees shared data, not u2's review history =====
   reset role;

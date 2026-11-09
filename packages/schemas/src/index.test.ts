@@ -106,6 +106,12 @@ describe("idea schemas", () => {
 });
 
 import {
+  applicationSchema,
+  applicationStatusSchema,
+  careerProfileSchema,
+  cvEntrySchema,
+  interviewPrepSchema,
+  portfolioSchema,
   assignmentSchema,
   assignmentUpdateSchema,
   cardReviewSchema,
@@ -246,5 +252,53 @@ describe("academics and flashcard schemas", () => {
     expect(cardSchema.safeParse({ deckId: id, front: " ", back: "a" }).success).toBe(false);
     expect(cardReviewSchema.safeParse({ id, rating: "3" }).success).toBe(true);
     expect(cardReviewSchema.safeParse({ id, rating: "4" }).success).toBe(false);
+  });
+});
+
+describe("career schemas", () => {
+  const id = "6f1c1c1e-5a45-4f4e-9c7e-3a0b8d6f2a11";
+
+  it("parses a profile with blank fields and rejects non-http links", () => {
+    expect(
+      careerProfileSchema.parse({ headline: " Civil engineer ", summary: "", website: "" }),
+    ).toEqual({
+      headline: "Civil engineer",
+    });
+    expect(careerProfileSchema.safeParse({ website: "javascript:alert(1)" }).success).toBe(false);
+    expect(
+      careerProfileSchema.safeParse({ linkedinUrl: "https://linkedin.com/in/x" }).success,
+    ).toBe(true);
+  });
+
+  it("requires CV entries to end after they start", () => {
+    const ok = {
+      kind: "experience",
+      title: "Site engineer",
+      startDate: "2024-01-01",
+      endDate: "2024-06-30",
+    };
+    expect(cvEntrySchema.safeParse(ok).success).toBe(true);
+    expect(cvEntrySchema.safeParse({ ...ok, endDate: "2023-12-31" }).success).toBe(false);
+    expect(cvEntrySchema.safeParse({ ...ok, endDate: "" }).success).toBe(true);
+    expect(cvEntrySchema.safeParse({ ...ok, kind: "hobby" }).success).toBe(false);
+  });
+
+  it("defaults application status and validates it", () => {
+    expect(applicationSchema.parse({ company: " Acme ", role: "Graduate engineer" }).status).toBe(
+      "wishlist",
+    );
+    expect(applicationSchema.safeParse({ company: "", role: "x" }).success).toBe(false);
+    expect(applicationStatusSchema.safeParse({ id, status: "offer" }).success).toBe(true);
+    expect(applicationStatusSchema.safeParse({ id, status: "hired" }).success).toBe(false);
+  });
+
+  it("validates interview prep and portfolio items", () => {
+    const q = interviewPrepSchema.parse({ question: "Tell me about yourself", confidence: "4" });
+    expect(q).toMatchObject({ category: "behavioural", confidence: 4 });
+    expect(interviewPrepSchema.safeParse({ question: "q", confidence: "6" }).success).toBe(false);
+    expect(portfolioSchema.parse({ title: "Bridge design", tags: "civil, design" }).tags).toEqual([
+      "civil",
+      "design",
+    ]);
   });
 });

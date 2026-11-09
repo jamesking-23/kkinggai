@@ -1,5 +1,6 @@
 import {
   Box,
+  Briefcase,
   Calendar,
   CheckSquare,
   FolderKanban,
@@ -23,6 +24,7 @@ const icons: Record<string, LucideIcon> = {
   repeat: Repeat,
   lightbulb: Lightbulb,
   lock: Lock,
+  briefcase: Briefcase,
   "graduation-cap": GraduationCap,
   layers: Layers,
   sparkles: Sparkles,
