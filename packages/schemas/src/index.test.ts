@@ -106,6 +106,7 @@ describe("idea schemas", () => {
 });
 
 import {
+  assistantMessageSchema,
   vaultLinkSchema,
   vaultNoteSchema,
   milestoneSchema,
@@ -172,5 +173,18 @@ describe("vault schemas", () => {
     );
     expect(vaultLinkSchema.safeParse({ title: "x", url: "not a url" }).success).toBe(false);
     expect(vaultNoteSchema.safeParse({ title: " " }).success).toBe(false);
+  });
+});
+
+describe("assistant message schema", () => {
+  it("trims, treats a blank conversation id as new and enforces limits", () => {
+    expect(assistantMessageSchema.parse({ conversationId: "", message: "  hi " })).toEqual({
+      message: "hi",
+    });
+    expect(assistantMessageSchema.safeParse({ message: "   " }).success).toBe(false);
+    expect(assistantMessageSchema.safeParse({ message: "x".repeat(4001) }).success).toBe(false);
+    expect(
+      assistantMessageSchema.safeParse({ conversationId: "nope", message: "hi" }).success,
+    ).toBe(false);
   });
 });

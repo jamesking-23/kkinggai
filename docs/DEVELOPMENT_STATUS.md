@@ -101,5 +101,13 @@ Then Phase 8 (AI core: server-side provider calls only). Show any migration SQL 
 - `packages/ai`: provider-agnostic chat completion (Gemini, OpenRouter), env-based selection, error mapping that never
   leaks keys, history trimming. 12 unit tests against a mocked network. NOT yet called against a real provider: no API
   key has been supplied.
-- `backend/supabase/migrations/20261108000006_ai_conversations.sql` is a DRAFT awaiting the owner's review. NOT applied,
-  so there is no conversation storage and no assistant page yet.
+- `/assistant` page and server action written (conversation list, thread, send, soft delete; per-account cap of 50
+  messages per 24 h because signups are open; user message is stored before the provider call so it is not lost on
+  failure). The assistant sees only the current conversation, not tasks, vault or other data.
+- `backend/supabase/migrations/20261108000006_ai_conversations.sql` is a DRAFT awaiting the owner's review. NOT applied.
+  Until it is applied the Assistant module is not registered, so the page is unreachable and nothing is stored.
+  `backend/supabase/tests/rls_ai.sql` is written but has not been run.
+- Verified: lint, format, typecheck, 52 unit tests, production build. The `Database` types for the two new tables were
+  hand-added, not generated; regenerate after applying.
+- Open decision for the owner: public sign-up is enabled, so anyone who registers could use the server's AI key within
+  the daily cap. Consider disabling sign-ups in Supabase Auth settings for this private app.

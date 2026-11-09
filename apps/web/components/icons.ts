@@ -7,6 +7,7 @@ import {
   Lightbulb,
   Lock,
   Repeat,
+  Sparkles,
   Target,
   type LucideIcon,
 } from "lucide-react";
@@ -20,6 +21,7 @@ const icons: Record<string, LucideIcon> = {
   repeat: Repeat,
   lightbulb: Lightbulb,
   lock: Lock,
+  sparkles: Sparkles,
 };
 
 /** Registry icon names resolve here; unknown names fall back to a generic icon. */

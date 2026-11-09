@@ -7,6 +7,78 @@ export type Database = {
   };
   public: {
     Tables: {
+      ai_conversations: {
+        Row: {
+          created_at: string;
+          deleted_at: string | null;
+          id: string;
+          owner_id: string;
+          revision: number;
+          title: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          owner_id?: string;
+          revision?: number;
+          title?: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          owner_id?: string;
+          revision?: number;
+          title?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
+      ai_messages: {
+        Row: {
+          content: string;
+          conversation_id: string;
+          created_at: string;
+          id: string;
+          input_tokens: number | null;
+          model: string | null;
+          output_tokens: number | null;
+          owner_id: string;
+          provider: string | null;
+          role: string;
+        };
+        Insert: {
+          content: string;
+          conversation_id: string;
+          created_at?: string;
+          id?: string;
+          input_tokens?: number | null;
+          model?: string | null;
+          output_tokens?: number | null;
+          owner_id?: string;
+          provider?: string | null;
+          role: string;
+        };
+        Update: {
+          content?: string;
+          conversation_id?: string;
+          created_at?: string;
+          id?: string;
+          input_tokens?: number | null;
+          model?: string | null;
+          output_tokens?: number | null;
+          owner_id?: string;
+          provider?: string | null;
+          role?: string;
+        };
+        Relationships: [];
+      };
       audit_logs: {
         Row: {
           action: string;

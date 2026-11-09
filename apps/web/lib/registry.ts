@@ -59,3 +59,12 @@ registry.register({
   status: "active",
   nav: { label: "Vault", href: "/vault", icon: "lock", order: 20 },
 });
+
+registry.register({
+  id: "assistant",
+  name: "Assistant",
+  description: "Chat with the KKINGG AI assistant",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Assistant", href: "/assistant", icon: "sparkles", order: 5 },
+});

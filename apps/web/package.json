@@ -10,6 +10,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@kkingg/ai": "workspace:*",
     "@kkingg/design-tokens": "workspace:*",
     "@kkingg/module-registry": "workspace:*",
     "next": "^15.0.0",

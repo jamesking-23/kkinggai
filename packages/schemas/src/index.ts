@@ -207,3 +207,19 @@ export const vaultLinkSchema = z.object({
   category: optionalText(60),
   tags: vaultTags,
 });
+
+// ---------- assistant ----------
+export const ASSISTANT_MAX_MESSAGE_CHARS = 4000;
+export const ASSISTANT_DAILY_MESSAGE_LIMIT = 50;
+
+export const assistantMessageSchema = z.object({
+  conversationId: z.preprocess(blank, z.string().uuid().optional()),
+  message: z
+    .string()
+    .trim()
+    .min(1, "Type a message")
+    .max(
+      ASSISTANT_MAX_MESSAGE_CHARS,
+      `Messages are limited to ${ASSISTANT_MAX_MESSAGE_CHARS} characters`,
+    ),
+});
