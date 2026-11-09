@@ -45,6 +45,11 @@ Migration `20261108000006_ai_conversations`: `ai_conversations` and `ai_messages
 workspace admins). A composite foreign key keeps a message in a conversation with the same owner. Messages are
 immutable; conversations soft-delete. Token counts are client-written bookkeeping, not billing data.
 
+## Applied (Phase 9)
+
+Migration `20261109000007_search`: `search_workspace` (SECURITY INVOKER, no new tables). Results respect RLS; vault items and
+AI chats only ever match for their owner.
+
 ## Not yet done
 
 All productivity/AI/vault tables, notifications, sync metadata.

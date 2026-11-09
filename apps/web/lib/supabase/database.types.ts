@@ -742,6 +742,16 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      search_workspace: {
+        Args: { per_kind?: number; q: string; ws: string };
+        Returns: {
+          href: string;
+          id: string;
+          kind: string;
+          snippet: string;
+          title: string;
+        }[];
+      };
       can_write_workspace: { Args: { ws: string }; Returns: boolean };
       has_workspace_role: {
         Args: { roles: Database["public"]["Enums"]["workspace_role"][]; ws: string };

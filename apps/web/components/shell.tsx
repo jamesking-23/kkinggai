@@ -176,7 +176,7 @@ export function Shell(props: ShellProps) {
   );
 }
 
-/** Searches modules only. Universal search across records arrives in Phase 9. */
+/** Jumps to a module, or runs a universal search across records on Enter. */
 function ModuleSearch({ nav }: { nav: NavItem[] }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -192,20 +192,28 @@ function ModuleSearch({ nav }: { nav: NavItem[] }) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && results[0]) {
-            router.push(results[0].href);
+          if (e.key === "Enter" && query.trim().length >= 2) {
+            router.push(`/search?q=${encodeURIComponent(query.trim())}`);
             setQuery("");
           }
           if (e.key === "Escape") setQuery("");
         }}
-        placeholder="Jump to a module…"
-        aria-label="Jump to a module"
+        placeholder="Search everything…"
+        aria-label="Search everything"
         className="w-full rounded-md border border-border bg-bg py-2 pl-9 pr-3 text-sm placeholder:text-muted"
       />
       {query.trim() && (
         <ul className="absolute z-30 mt-1 w-full rounded-lg border border-border bg-raised p-1 shadow-xl">
-          {results.length === 0 && (
-            <li className="px-3 py-2 text-sm text-muted">No modules found</li>
+          {query.trim().length >= 2 && (
+            <li>
+              <a
+                href={`/search?q=${encodeURIComponent(query.trim())}`}
+                onClick={() => setQuery("")}
+                className="block rounded-md px-3 py-2 text-sm hover:bg-surface"
+              >
+                Search everything for “{query.trim()}”
+              </a>
+            </li>
           )}
           {results.map((r) => (
             <li key={r.id}>

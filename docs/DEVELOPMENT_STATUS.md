@@ -65,7 +65,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
   (may need a paid plan).
 - Account deletion, data export, password change from settings.
 - Notifications bell and AI assistant button are intentionally absent until their backends exist
-  (Phases 8 and 16). The top-bar search only finds modules until universal search (Phase 9).
+  (Phases 8 and 16).
 - Shell components (sidebar, menus) have no automated component tests yet; only logic is unit tested.
 - `apps/mobile`, `apps/desktop`; storage buckets; Vault storage buckets.
 - RLS tests are manual, not in CI. GitHub Actions not yet observed running.
@@ -73,7 +73,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Then Phase 9 (universal search). The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
+Then Phase 10 (academics and career). The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
 
 ## Update: task detail, milestones, reminders (code written, not exercised against a live database)
 
@@ -110,3 +110,16 @@ Then Phase 9 (universal search). The owner has authorised applying migrations wi
 - Owner to do: set GEMINI_API_KEY or OPENROUTER_API_KEY on Vercel (optionally GEMINI_MODEL / OPENROUTER_MODEL; default
   model names are unverified guesses). Public sign-up is on, so consider disabling it in Supabase Auth.
 - Not built: streaming replies, giving the assistant access to app data or tools, conversation rename/search.
+
+## Update: Phase 9 universal search
+
+- Migration `20261109000007_search.sql` APPLIED: `search_workspace(ws, q, per_kind)`, SECURITY INVOKER so every table's RLS
+  applies; searches tasks, projects, goals, events, habits, ideas, plus the caller's own vault items and AI chat titles.
+  Substring match with LIKE wildcards escaped; 2-100 character queries. Not executable by anonymous users.
+- Tested live (`backend/supabase/tests/rls_search.sql`, rolled back): 10 results, all as expected (soft-deleted rows hidden,
+  wildcards literal, admin cannot find another member's vault or chats, outsider gets nothing, anon blocked).
+- `/search` page and top-bar search (Enter searches records; the dropdown still offers module jumps). Results are limited
+  to modules enabled in the workspace. 22 web unit tests (2 new files of logic).
+- Verified: lint, format, typecheck, 54 unit tests, build. NOT verified signed in.
+- Limits: plain substring matching, no ranking or typo tolerance, no search inside Vault files or milestones, subtasks
+  and reminders. Add trigram/full-text indexes if the data grows.
