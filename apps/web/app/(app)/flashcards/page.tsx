@@ -94,6 +94,12 @@ export default async function FlashcardsPage({
         )}
       </Card>
 
+      <p className="mb-6 text-sm">
+        <a href="/flashcards/quiz" className="text-primary">
+          Take a quiz on all cards
+        </a>
+      </p>
+
       <div className="mb-6 grid gap-4 md:grid-cols-2">
         <Card title="New deck">
           <form action={createDeck} className="space-y-2">
@@ -169,13 +175,18 @@ export default async function FlashcardsPage({
                       {d.description ? ` · ${d.description}` : ""}
                     </p>
                   </div>
-                  <form action={deleteDeck}>
-                    <input type="hidden" name="id" value={d.id} />
-                    <input type="hidden" name="revision" value={d.revision} />
-                    <button type="submit" className={subtleButton}>
-                      Remove deck
-                    </button>
-                  </form>
+                  <div className="flex gap-2">
+                    <a href={`/flashcards/quiz?deck=${d.id}`} className={subtleButton}>
+                      Quiz
+                    </a>
+                    <form action={deleteDeck}>
+                      <input type="hidden" name="id" value={d.id} />
+                      <input type="hidden" name="revision" value={d.revision} />
+                      <button type="submit" className={subtleButton}>
+                        Remove deck
+                      </button>
+                    </form>
+                  </div>
                 </div>
                 {inDeck.length > 0 && (
                   <ul className="mt-3 space-y-1">

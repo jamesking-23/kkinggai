@@ -106,6 +106,8 @@ describe("idea schemas", () => {
 });
 
 import {
+  researchSourceSchema,
+  researchStatusSchema,
   applicationSchema,
   applicationStatusSchema,
   careerProfileSchema,
@@ -300,5 +302,31 @@ describe("career schemas", () => {
       "civil",
       "design",
     ]);
+  });
+});
+
+describe("research schemas", () => {
+  const id = "6f1c1c1e-5a45-4f4e-9c7e-3a0b8d6f2a11";
+  it("parses a source, defaults the kind and rejects bad years and links", () => {
+    const s = researchSourceSchema.parse({
+      title: " Load paths ",
+      authors: "",
+      publishedYear: "2021",
+      tags: "a, b",
+      url: "",
+    });
+    expect(s).toMatchObject({
+      title: "Load paths",
+      publishedYear: 2021,
+      kind: "article",
+      tags: ["a", "b"],
+    });
+    expect(researchSourceSchema.safeParse({ title: "x", publishedYear: "5" }).success).toBe(false);
+    expect(researchSourceSchema.safeParse({ title: "x", url: "ftp://x.org" }).success).toBe(false);
+    expect(researchSourceSchema.safeParse({ title: "x", publishedYear: "" }).success).toBe(true);
+  });
+  it("validates reading status", () => {
+    expect(researchStatusSchema.safeParse({ id, status: "reading" }).success).toBe(true);
+    expect(researchStatusSchema.safeParse({ id, status: "done" }).success).toBe(false);
   });
 });

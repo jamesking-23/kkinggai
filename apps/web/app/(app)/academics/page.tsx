@@ -65,6 +65,11 @@ export default async function AcademicsPage({
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader title="Academics" subtitle="Courses, assignments and study notes." />
+      <p className="mb-4 text-sm">
+        <a href="/academics/research" className="text-primary">
+          Research library
+        </a>
+      </p>
       <Flash error={error} message={message} />
 
       <Card title="Add a course" className="mb-6">

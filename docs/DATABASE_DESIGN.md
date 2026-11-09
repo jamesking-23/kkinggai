@@ -62,6 +62,9 @@ application through a composite `(id, user_id)` key so they can only point at th
 
 Migration `20261109000010_search_academics_career`: extends `search_workspace`.
 
+Migration `20261109000011_research`: `research_sources` (shared in the workspace, soft delete, optional course link) and the
+search function again, now including research sources.
+
 ## Not yet done
 
 All productivity/AI/vault tables, notifications, sync metadata.

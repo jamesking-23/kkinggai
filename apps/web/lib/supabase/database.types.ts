@@ -460,6 +460,63 @@ export type Database = {
         };
         Relationships: [];
       };
+      research_sources: {
+        Row: {
+          authors: string | null;
+          course_id: string | null;
+          created_at: string;
+          created_by: string;
+          deleted_at: string | null;
+          id: string;
+          kind: string;
+          published_year: number | null;
+          revision: number;
+          status: string;
+          summary: string;
+          tags: string[];
+          title: string;
+          updated_at: string;
+          url: string | null;
+          workspace_id: string;
+        };
+        Insert: {
+          authors?: string | null;
+          course_id?: string | null;
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          id?: string;
+          kind?: string;
+          published_year?: number | null;
+          revision?: number;
+          status?: string;
+          summary?: string;
+          tags?: string[];
+          title: string;
+          updated_at?: string;
+          url?: string | null;
+          workspace_id: string;
+        };
+        Update: {
+          authors?: string | null;
+          course_id?: string | null;
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          id?: string;
+          kind?: string;
+          published_year?: number | null;
+          revision?: number;
+          status?: string;
+          summary?: string;
+          tags?: string[];
+          title?: string;
+          updated_at?: string;
+          url?: string | null;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
       study_notes: {
         Row: {
           body: string;

@@ -387,3 +387,31 @@ export const portfolioSchema = z.object({
   description: optionalText(2000),
   tags: vaultTags,
 });
+
+// ---------- research ----------
+export const RESEARCH_KINDS = ["paper", "book", "article", "website", "report", "other"] as const;
+export const RESEARCH_STATUSES = ["to_read", "reading", "read"] as const;
+
+export const researchSourceSchema = z.object({
+  title: z.string().trim().min(1, "Enter a title").max(300),
+  authors: optionalText(300),
+  publishedYear: z.preprocess(
+    blank,
+    z.coerce
+      .number()
+      .int()
+      .min(1000, "Enter a valid year")
+      .max(2200, "Enter a valid year")
+      .optional(),
+  ),
+  kind: z.enum(RESEARCH_KINDS).default("article"),
+  url: optionalUrl,
+  summary: optionalText(20000),
+  courseId: z.preprocess(blank, z.string().uuid().optional()),
+  tags: vaultTags,
+});
+
+export const researchStatusSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(RESEARCH_STATUSES),
+});

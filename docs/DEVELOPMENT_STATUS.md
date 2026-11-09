@@ -144,3 +144,16 @@ Then finish Phase 10 gaps (quizzes, documents, research) or move to Phase 11 (sp
 - Phase 10 NOT built: quizzes, document organisation, research tools, AI-generated flashcards/quizzes, CV export to PDF/Word
   as a file (print-to-PDF only), assignments linked to the Tasks module.
 - Phase 9 gaps against the spec: ILIKE instead of PostgreSQL full-text search, no filters, no search history.
+
+## Update: Phase 10 gaps closed (quizzes, research)
+
+- `/flashcards/quiz`: multiple-choice quizzes built from your own cards (other cards' answers are the distractors; needs at least
+  4 cards with different answers). Per deck or across all cards, 1-20 questions. Grading is by card id, results show the right
+  answer. Pure logic in `lib/quiz.ts` (4 unit tests). Quiz results are not stored and do not change card scheduling.
+- Research library at `/academics/research`: migration `20261109000011_research` APPLIED (`research_sources`, shared in the
+  workspace, soft delete, optional course link; search function extended). Sources have kind, authors, year, link, reading status
+  (to read / reading / read), your notes and tags.
+- RLS tested live and rolled back (`rls_research.sql`): 15 results, all as expected, including the search over research sources.
+- Verified: lint, format, typecheck, 65 unit tests, build. NOT verified signed in.
+- Phase 10 still NOT built: document organisation (beyond the Vault's categories and tags), AI-generated flashcards or quizzes,
+  CV export to a Word/PDF file (print-to-PDF only).

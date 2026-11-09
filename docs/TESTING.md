@@ -2,7 +2,7 @@
 
 Run: `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build`.
 
-Automated tests: module registry (4), design tokens (1), AI providers (12), schemas (27), web logic (32).
+Automated tests: module registry (4), design tokens (1), AI providers (12), schemas (29), web logic (36).
 
 ## Database / RLS
 
@@ -21,6 +21,7 @@ tested in SQL.
 `rls_ai.sql` (3 users): 16 results, all as expected.
 `rls_search.sql` (3 users): 10 results, all as expected.
 `rls_academics.sql` (4 users): 17 results, all as expected. `rls_career.sql` (3 users): 17 results, all as expected.
+`rls_research.sql` (4 users): 15 results, all as expected.
 `rls_search_academics_career.sql`: 5 results, all as expected; `rls_search.sql` re-run after the change: 10, all as expected.
 The first foundation run found a signup bug (duplicate owner membership), fixed in migration 2.
 
