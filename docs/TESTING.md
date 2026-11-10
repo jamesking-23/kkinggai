@@ -26,3 +26,4 @@ tested in SQL.
 The first foundation run found a signup bug (duplicate owner membership), fixed in migration 2.
 
 CI is defined in `.github/workflows/ci.yml` but has not been observed running on GitHub.
+`rls_chess.sql` (3 users): 15 results, all as expected.

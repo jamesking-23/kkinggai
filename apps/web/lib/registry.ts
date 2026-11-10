@@ -95,3 +95,12 @@ registry.register({
   status: "active",
   nav: { label: "Career", href: "/career", icon: "briefcase", order: 64 },
 });
+
+registry.register({
+  id: "chess",
+  name: "Chess",
+  description: "Game history, PGN import and export, analysis",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Chess", href: "/chess", icon: "crown", order: 70 },
+});

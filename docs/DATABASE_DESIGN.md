@@ -73,3 +73,7 @@ All productivity/AI/vault tables, notifications, sync metadata.
 
 `backend/supabase/tests/rls_foundation.sql` and `rls_productivity.sql` — run in the SQL editor; they roll back and
 report results. Last runs: all checks passed (see `TESTING.md`).
+
+Migration `20261110000012_chess`: `chess_games` (private per user, soft delete, partial unique index on
+`(user_id, source, external_id)` so re-importing a game is a no-op) and `chess_profiles` (names and optional Lichess/Chess.com
+usernames). Owner-only RLS, no DELETE policies.

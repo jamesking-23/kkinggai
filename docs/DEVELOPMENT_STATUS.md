@@ -73,7 +73,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Then finish Phase 10 gaps (quizzes, documents, research) or move to Phase 11 (sports). The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
+Next: Phase 11 chess slice 2 (Stockfish analysis, puzzles, Lichess/Chess.com import), then running. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
 
 ## Update: task detail, milestones, reminders (code written, not exercised against a live database)
 
@@ -157,3 +157,20 @@ Then finish Phase 10 gaps (quizzes, documents, research) or move to Phase 11 (sp
 - Verified: lint, format, typecheck, 65 unit tests, build. NOT verified signed in.
 - Phase 10 still NOT built: document organisation (beyond the Vault's categories and tags), AI-generated flashcards or quizzes,
   CV export to a Word/PDF file (print-to-PDF only).
+
+## Update: Phase 11, chess slice 1 (game history, PGN import/export)
+
+- Migration `20261110000012_chess` APPLIED: `chess_games` and `chess_profiles`, private per user (no workspace sharing, no
+  delete policies, soft delete, optimistic-lock revision). Module `chess` registered and enabled for existing workspaces.
+- `/chess`: win/draw/loss overall and by colour, top openings, rating span from imported PGNs, game history, PGN import
+  (paste or `.pgn` file, up to 200 games / 1 MB, duplicates skipped, illegal games reported and not saved), PGN export
+  (`/chess/export`), saved player names used to work out which side you played.
+- `/chess/[id]`: board viewer that steps through the game (buttons, move list, left/right arrow keys), notes and tags, raw PGN,
+  remove. The board is a plain unicode rendering of server-computed positions, not an interactive board.
+- Parsing and move validation use `chess.js`. Openings come from a small bundled prefix table (`lib/openings.ts`, about 40
+  entries), not a full ECO database; a PGN's own Opening/ECO headers take priority.
+- Tests: `rls_chess.sql` run live and rolled back, 15 results all as expected; advisors show only the already-accepted
+  warnings. 15 new unit tests in `lib/chess.test.ts`. Verified: lint, format, typecheck, unit tests, build. NOT verified signed in.
+- Phase 11 chess NOT built yet: Stockfish engine analysis, puzzles, training, endgames, Lichess/Chess.com import (the
+  username fields are stored only and connect to nothing), search integration, manual game entry, a playable board.
+- Phase 11 running and future-sports architecture NOT started.

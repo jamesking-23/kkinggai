@@ -415,3 +415,44 @@ export const researchStatusSchema = z.object({
   id: z.string().uuid(),
   status: z.enum(RESEARCH_STATUSES),
 });
+
+// ---------- chess ----------
+export const CHESS_MAX_PGN_CHARS = 1_000_000; // pasted or uploaded text per import
+export const CHESS_MAX_GAMES_PER_IMPORT = 200;
+
+export const chessImportSchema = z.object({
+  pgn: z
+    .string()
+    .min(1, "Paste a PGN or choose a .pgn file")
+    .max(CHESS_MAX_PGN_CHARS, "PGN is too large"),
+});
+
+const chessUsername = z.preprocess(
+  blank,
+  z
+    .string()
+    .trim()
+    .regex(/^[A-Za-z0-9_-]{2,30}$/, "Usernames use letters, numbers, _ and -")
+    .optional(),
+);
+
+export const chessProfileSchema = z.object({
+  playerNames: z.preprocess(
+    (v) =>
+      typeof v === "string"
+        ? v
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : v,
+    z.array(z.string().max(100)).max(10, "Use at most 10 names").default([]),
+  ),
+  lichessUsername: chessUsername,
+  chesscomUsername: chessUsername,
+});
+
+export const chessNotesSchema = z.object({
+  id: z.string().uuid(),
+  notes: z.string().max(4000).default(""),
+  tags: vaultTags,
+});
