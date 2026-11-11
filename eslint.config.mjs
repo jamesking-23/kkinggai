@@ -9,8 +9,13 @@ export default tseslint.config(
       "**/dist/**",
       "**/.turbo/**",
       "**/next-env.d.ts",
+      "apps/web/public/engine/**",
     ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    files: ["**/*.mjs"],
+    languageOptions: { globals: { URL: "readonly", console: "readonly" } },
+  },
 );

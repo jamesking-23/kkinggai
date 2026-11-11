@@ -73,7 +73,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Next: Phase 11 chess slice 2 (Stockfish analysis, puzzles, Lichess/Chess.com import), then running. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
+Next: chess slice 3 (puzzles/training from your own mistakes, Lichess/Chess.com import), then running. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
 
 ## Update: task detail, milestones, reminders (code written, not exercised against a live database)
 
@@ -174,3 +174,20 @@ Next: Phase 11 chess slice 2 (Stockfish analysis, puzzles, Lichess/Chess.com imp
 - Phase 11 chess NOT built yet: Stockfish engine analysis, puzzles, training, endgames, Lichess/Chess.com import (the
   username fields are stored only and connect to nothing), search integration, manual game entry, a playable board.
 - Phase 11 running and future-sports architecture NOT started.
+
+## Update: Phase 11, chess slice 2 (Stockfish analysis)
+
+- `/chess/[id]` can now analyse a game with Stockfish 19 (the "lite", single-threaded WASM build from the `stockfish` npm package),
+  running in a Web Worker in your browser. Choose depth 10, 14 or 18. Shows an evaluation bar, the engine's suggested move for the
+  position before each move, per-move labels (best / good / inaccuracy `?!` / mistake `?` / blunder `??`) and average centipawn
+  loss per side. Positions where the game is over are scored without the engine.
+- Classification is by evaluation change at the chosen depth (thresholds 30 / 80 / 200 centipawns; evaluations clamped to +-1000).
+  It is an estimate from a lite engine, not a chess.com or Lichess "accuracy" figure. Results are NOT saved; re-run to see them again.
+- Engine files are copied from `node_modules` into `apps/web/public/engine` by `scripts/copy-engine.mjs` before dev and build
+  (git-ignored, about 1.9 MB). Stockfish is GPL-3.0; its licence text is copied alongside. This is a private app, but keep the licence
+  in mind if it is ever distributed.
+- Verified: pure logic in 10 unit tests (`lib/analysis.test.ts`); the Engine class run for real in headless Chromium on a 7-ply game
+  (worker loads, scores plausible, the blunder allowing mate was flagged, final checkmate scored without the engine). Lint, format,
+  typecheck, unit tests and build pass. NOT verified: the full page signed in, mobile browsers, large games at depth 18.
+- Phase 11 chess still NOT built: saved analyses, puzzles, training, endgames, Lichess/Chess.com import, search integration, playable
+  board. Running and future sports not started.

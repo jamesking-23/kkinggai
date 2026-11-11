@@ -67,7 +67,7 @@ export default async function ChessGamePage({
 
       {played ? (
         <Card className="mb-6">
-          <ChessBoard fens={played.fens} sans={played.sans} flip={g.user_color === "black"} />
+          <ChessBoard fens={played.fens} sans={played.sans} ucis={played.ucis} flip={g.user_color === "black"} />
         </Card>
       ) : (
         <p className="mb-6 rounded-md border border-border bg-surface p-3 text-sm text-danger">

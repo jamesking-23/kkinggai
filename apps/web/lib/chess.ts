@@ -140,7 +140,7 @@ export function detectColor(white: string, black: string, names: string[]): Colo
 }
 
 /** SAN list and a FEN for every position (index 0 is the starting position). Null if the PGN is invalid. */
-export function replay(pgn: string): { sans: string[]; fens: string[] } | null {
+export function replay(pgn: string): { sans: string[]; ucis: string[]; fens: string[] } | null {
   const chess = new Chess();
   try {
     chess.loadPgn(pgn);
@@ -149,7 +149,11 @@ export function replay(pgn: string): { sans: string[]; fens: string[] } | null {
   }
   const verbose = chess.history({ verbose: true });
   const start = verbose[0]?.before ?? new Chess().fen();
-  return { sans: verbose.map((m) => m.san), fens: [start, ...verbose.map((m) => m.after)] };
+  return {
+    sans: verbose.map((m) => m.san),
+    ucis: verbose.map((m) => m.from + m.to + (m.promotion ?? "")),
+    fens: [start, ...verbose.map((m) => m.after)],
+  };
 }
 
 export type StatGame = {

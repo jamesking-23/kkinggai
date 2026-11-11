@@ -27,3 +27,5 @@ The first foundation run found a signup bug (duplicate owner membership), fixed 
 
 CI is defined in `.github/workflows/ci.yml` but has not been observed running on GitHub.
 `rls_chess.sql` (3 users): 15 results, all as expected.
+
+Engine check (manual, not in CI): `lib/engine.ts` bundled with esbuild and run in headless Chromium against the served worker files; see the Phase 11 slice 2 notes in DEVELOPMENT_STATUS.md.
