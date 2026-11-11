@@ -73,7 +73,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Next: finish chess (endgames, openings trainer, puzzle list/delete) or start the running module. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
+Next: running slice 2 (training plans, AI coach) or Strava; chess extras (endgames, openings trainer, puzzle list) remain. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
 
 ## Update: task detail, milestones, reminders (code written, not exercised against a live database)
 
@@ -225,3 +225,25 @@ Next: finish chess (endgames, openings trainer, puzzle list/delete) or start the
   the UI is not). Puzzles are not shown on other devices differently, and there is no list view to delete or browse saved puzzles yet.
 - Phase 11 chess still NOT built: endgame trainer, opening repertoire trainer, puzzles from outside sources, saved analyses, search
   integration, playable board. Running and future sports not started.
+
+## Update: Phase 11, running slice 1 (activities, GPX import, dashboard)
+
+- Migration `20261112000014_running` APPLIED: `run_activities` (private per user, soft delete, no delete policy, unique per source and
+  external id, route stored as at most 600 `[lat, lon]` pairs, moving time cannot exceed elapsed time). Module `running` registered and
+  enabled for existing workspaces.
+- `/running`: this week / this month / all-time totals (weeks start Monday in your time zone), weekly distance for the last 8 weeks,
+  fastest average pace on runs of at least 5 km / 10 km / half marathon / marathon (average over a whole run, NOT a split-based
+  personal best), manual run entry (distance, time, climb, heart rate, effort), GPX import (up to 4 MB) and the activity list.
+- `/running/[id]`: stats, route outline drawn as an SVG from the GPX points (no map tiles, no external map service), edit name/type/
+  effort/notes, remove.
+- GPX parsing is pattern-based, not an XML parser, so it never resolves entities or external references. Distance (haversine), moving
+  time (stops and gaps over 60 s excluded, GPS jumps above 12 m/s ignored) and climb (3 m hysteresis) are calculated here, so they
+  can differ from your watch. A GPX file with no timestamps is rejected. Re-importing the same track is detected and refused.
+- Tests: `rls_running.sql` run live and rolled back, 15 results all as expected; advisors show only the accepted warnings. 14 unit
+  tests (GPX parsing, track maths, route drawing, formatting, weekly and best-pace statistics). Lint, format, typecheck, 88 web unit
+  tests and build pass.
+- NOT verified: the pages signed in, GPX files from real devices (only generated test files), the route drawing in a browser.
+- Running NOT built yet: live GPS tracking in the browser/phone, saved routes and route library, Strava (needs your own Strava API
+  app and OAuth), Samsung Health (no public web API; GPX/file import is the realistic route), training plans, the AI running coach,
+  shoes, heart-rate zones, search integration.
+- Future-sports architecture NOT started.

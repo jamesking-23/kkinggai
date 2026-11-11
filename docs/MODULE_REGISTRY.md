@@ -15,3 +15,5 @@ rows. The sidebar is generated from the code registry filtered by the workspace'
 dashboard (core), tasks, projects, goals, calendar, habits, ideas, vault, assistant, academics, flashcards, career.
 
 Also registered: chess (nav `/chess`, order 70).
+
+Also registered: running (nav `/running`, order 72).

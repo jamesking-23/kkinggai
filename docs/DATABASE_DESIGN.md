@@ -79,3 +79,5 @@ Migration `20261110000012_chess`: `chess_games` (private per user, soft delete, 
 usernames). Owner-only RLS, no DELETE policies.
 
 Migration `20261112000013_chess_puzzles`: `chess_puzzles` (private per user; composite FK `(game_id, user_id)` to `chess_games`; unique per game and ply while not deleted; Leitner box and due date; soft delete, no DELETE policy).
+
+Migration `20261112000014_running`: `run_activities` (private per user; source in manual/gpx/strava/samsung; route jsonb array of at most 600 points; soft delete; no DELETE policy).

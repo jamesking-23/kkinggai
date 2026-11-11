@@ -30,3 +30,4 @@ CI is defined in `.github/workflows/ci.yml` but has not been observed running on
 
 Engine check (manual, not in CI): `lib/engine.ts` bundled with esbuild and run in headless Chromium against the served worker files; see the Phase 11 slice 2 notes in DEVELOPMENT_STATUS.md.
 `rls_chess_puzzles.sql` (3 users): 13 results, all as expected.
+`rls_running.sql` (3 users): 15 results, all as expected.

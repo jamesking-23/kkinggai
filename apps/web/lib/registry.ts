@@ -104,3 +104,12 @@ registry.register({
   status: "active",
   nav: { label: "Chess", href: "/chess", icon: "crown", order: 70 },
 });
+
+registry.register({
+  id: "running",
+  name: "Running",
+  description: "Activities, routes and training analytics",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Running", href: "/running", icon: "footprints", order: 72 },
+});

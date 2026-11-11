@@ -478,3 +478,53 @@ export const chessPuzzleAttemptSchema = z.object({
   revision: z.coerce.number().int().min(1),
   move: z.string().regex(/^([a-h][1-8][a-h][1-8][qrbn]?|reveal)$/),
 });
+
+// ---------- running ----------
+export const RUN_KINDS = [
+  "easy",
+  "long",
+  "tempo",
+  "intervals",
+  "race",
+  "trail",
+  "treadmill",
+  "other",
+] as const;
+export const RUN_MAX_GPX_BYTES = 4_000_000; // stays under the 4.5 MB request limit of the host
+
+const optionalInt = (min: number, max: number) =>
+  z.preprocess(blank, z.coerce.number().int().min(min).max(max).optional());
+const durationPart = (max: number) =>
+  z.preprocess(blank, z.coerce.number().int().min(0).max(max).default(0));
+
+export const runManualSchema = z
+  .object({
+    name: z.string().trim().min(1, "Enter a name").max(200),
+    kind: z.enum(RUN_KINDS).default("easy"),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a date"),
+    distanceKm: z.coerce.number().min(0.01, "Enter a distance").max(1000, "Distance is too large"),
+    hours: durationPart(99),
+    minutes: durationPart(59),
+    seconds: durationPart(59),
+    elevationGain: optionalInt(0, 20000),
+    avgHr: optionalInt(30, 250),
+    effort: optionalInt(1, 10),
+    notes: optionalText(4000),
+  })
+  .refine((v) => v.hours * 3600 + v.minutes * 60 + v.seconds > 0, {
+    message: "Enter the time it took",
+    path: ["minutes"],
+  });
+
+export const runGpxSchema = z.object({
+  name: optionalText(200),
+  kind: z.enum(RUN_KINDS).default("easy"),
+});
+
+export const runEditSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().trim().min(1, "Enter a name").max(200),
+  kind: z.enum(RUN_KINDS),
+  effort: optionalInt(1, 10),
+  notes: z.string().max(4000).default(""),
+});

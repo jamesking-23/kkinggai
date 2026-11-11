@@ -697,6 +697,72 @@ export type Database = {
         };
         Relationships: [];
       };
+      run_activities: {
+        Row: {
+          avg_hr: number | null;
+          created_at: string;
+          deleted_at: string | null;
+          distance_m: number;
+          effort: number | null;
+          elapsed_seconds: number | null;
+          elevation_gain_m: number | null;
+          external_id: string | null;
+          id: string;
+          kind: string;
+          moving_seconds: number;
+          name: string;
+          notes: string;
+          revision: number;
+          route: Json | null;
+          source: string;
+          started_at: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          avg_hr?: number | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          distance_m: number;
+          effort?: number | null;
+          elapsed_seconds?: number | null;
+          elevation_gain_m?: number | null;
+          external_id?: string | null;
+          id?: string;
+          kind?: string;
+          moving_seconds: number;
+          name: string;
+          notes?: string;
+          revision?: number;
+          route?: Json | null;
+          source?: string;
+          started_at: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          avg_hr?: number | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          distance_m?: number;
+          effort?: number | null;
+          elapsed_seconds?: number | null;
+          elevation_gain_m?: number | null;
+          external_id?: string | null;
+          id?: string;
+          kind?: string;
+          moving_seconds?: number;
+          name?: string;
+          notes?: string;
+          revision?: number;
+          route?: Json | null;
+          source?: string;
+          started_at?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       study_notes: {
         Row: {
           body: string;
