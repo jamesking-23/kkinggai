@@ -73,7 +73,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Next: chess slice 3 (puzzles/training from your own mistakes, Lichess/Chess.com import), then running. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
+Next: chess slice 3b (save analyses, puzzles/training from your own mistakes; needs a migration), then running. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
 
 ## Update: task detail, milestones, reminders (code written, not exercised against a live database)
 
@@ -191,3 +191,18 @@ Next: chess slice 3 (puzzles/training from your own mistakes, Lichess/Chess.com 
   typecheck, unit tests and build pass. NOT verified: the full page signed in, mobile browsers, large games at depth 18.
 - Phase 11 chess still NOT built: saved analyses, puzzles, training, endgames, Lichess/Chess.com import, search integration, playable
   board. Running and future sports not started.
+
+## Update: Phase 11, chess slice 3a (Lichess and Chess.com sync)
+
+- `/chess` shows "Sync Lichess" / "Sync Chess.com" buttons once a username is saved. Each pulls up to 100 recent public games (Lichess
+  `/api/games/user/...`; Chess.com latest 2 monthly archives), parses them with the same validated PGN pipeline, skips games already
+  saved for that source and works out your colour from the saved names. The username used is always the one saved on your profile,
+  validated to letters, digits, `_` and `-`; Chess.com archive links are only followed if they stay on the user's own API path.
+  No login, token or password is used, so only public games are reachable (private Lichess games are not).
+- **Code written and tested against MOCKED responses only (7 unit tests in `lib/chess-sources.test.ts`). The sandbox cannot reach
+  lichess.org or api.chess.com, so neither integration has been run against the real service.** Treat them as unproven until you click
+  Sync once and confirm games appear. Field formats (Lichess PGN stream, Chess.com `games[].pgn`) follow the public API docs as I know
+  them and could differ in detail.
+- Verified: lint, format, typecheck, 68 unit tests, build.
+- Still NOT built for chess: saved analyses, puzzles and training from your own mistakes, endgames, opening repertoire trainer,
+  search integration, playable board. Running and future sports not started.

@@ -12,7 +12,7 @@ import {
   primaryButton,
   subtleButton,
 } from "../../../components/ui";
-import { importPgn, saveChessProfile } from "./actions";
+import { importPgn, saveChessProfile, syncChesscom, syncLichess } from "./actions";
 
 const fmtRecord = (r: Record3) =>
   r.games ? `${r.wins}W ${r.draws}D ${r.losses}L · ${winRate(r)}%` : "No games yet";
@@ -62,6 +62,26 @@ export default async function ChessPage({ searchParams }: { searchParams: Promis
           <p className="text-sm">{fmtRecord(stats.black)}</p>
         </Card>
       </div>
+
+      {(profile?.lichess_username || profile?.chesscom_username) && (
+        <div className="mb-6 flex flex-wrap items-center gap-2 text-sm">
+          {profile?.lichess_username && (
+            <form action={syncLichess}>
+              <button type="submit" className={subtleButton}>
+                Sync Lichess ({profile.lichess_username})
+              </button>
+            </form>
+          )}
+          {profile?.chesscom_username && (
+            <form action={syncChesscom}>
+              <button type="submit" className={subtleButton}>
+                Sync Chess.com ({profile.chesscom_username})
+              </button>
+            </form>
+          )}
+          <span className="text-xs text-muted">Fetches up to 100 recent public games.</span>
+        </div>
+      )}
 
       {unknownColor > 0 && (
         <p className="mb-6 rounded-md border border-border bg-surface p-3 text-sm text-muted">
@@ -120,8 +140,8 @@ export default async function ChessPage({ searchParams }: { searchParams: Promis
               className={inputClass}
             />
             <p className="text-xs text-muted">
-              Used to work out which side you played. Usernames are stored only; no account is
-              connected.
+              Used to work out which side you played. Saving a username lets you sync that account's
+              public games. No password or login is used.
             </p>
             <button type="submit" className={subtleButton}>
               Save

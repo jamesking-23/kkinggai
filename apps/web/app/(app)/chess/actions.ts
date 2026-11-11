@@ -9,6 +9,7 @@ import {
   chessProfileSchema,
 } from "@kkingg/schemas";
 import { detectColor, parsePgnGames } from "../../../lib/chess";
+import { fetchChesscomPgn, fetchLichessPgn, SourceError } from "../../../lib/chess-sources";
 import { firstIssue, flash } from "../../../lib/form";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
@@ -33,19 +34,17 @@ export async function saveChessProfile(formData: FormData) {
   flash(PATH, "message", "Chess profile saved");
 }
 
-export async function importPgn(formData: FormData) {
-  const file = formData.get("file");
-  let text = String(formData.get("pgn") ?? "");
-  if (file instanceof File && file.size > 0) {
-    if (file.size > CHESS_MAX_PGN_CHARS) flash(PATH, "error", "That file is larger than 1 MB");
-    text = await file.text();
-  }
-  const parsed = chessImportSchema.safeParse({ pgn: text });
-  if (!parsed.success) flash(PATH, "error", firstIssue(parsed.error));
+type Source = "pgn" | "lichess" | "chesscom";
 
-  const out = parsePgnGames(parsed.data.pgn, CHESS_MAX_GAMES_PER_IMPORT);
+/** Parses PGN text, skips games already saved for this source, inserts the rest and redirects with a summary. */
+async function saveGames(source: Source, text: string, label: string): Promise<never> {
+  const out = parsePgnGames(text, CHESS_MAX_GAMES_PER_IMPORT);
   if (out.games.length === 0) {
-    flash(PATH, "error", out.errors[0] ?? "No valid games found");
+    flash(
+      PATH,
+      "error",
+      out.errors[0] ?? `No games found${source === "pgn" ? "" : " for that account"}`,
+    );
   }
 
   const ctx = await getAppContext();
@@ -65,7 +64,7 @@ export async function importPgn(formData: FormData) {
   const { data: existing } = await supabase
     .from("chess_games")
     .select("external_id")
-    .eq("source", "pgn")
+    .eq("source", source)
     .is("deleted_at", null)
     .in("external_id", keys);
   const have = new Set((existing ?? []).map((r) => r.external_id));
@@ -74,7 +73,7 @@ export async function importPgn(formData: FormData) {
   if (fresh.length > 0) {
     const { error } = await supabase.from("chess_games").insert(
       fresh.map((g) => ({
-        source: "pgn",
+        source,
         external_id: g.externalId,
         white: g.white,
         black: g.black,
@@ -97,12 +96,55 @@ export async function importPgn(formData: FormData) {
   }
 
   revalidatePath(PATH);
-  const parts = [`Imported ${fresh.length} game${fresh.length === 1 ? "" : "s"}`];
+  const parts = [`${label} ${fresh.length} game${fresh.length === 1 ? "" : "s"}`];
   const dupes = out.games.length - fresh.length;
   if (dupes) parts.push(`${dupes} already in your history`);
   if (out.errors.length) parts.push(`${out.errors.length} skipped (${out.errors[0]})`);
   if (out.truncated) parts.push(`only the first ${CHESS_MAX_GAMES_PER_IMPORT} were read`);
   flash(PATH, "message", parts.join(" · ").slice(0, 300));
+}
+
+export async function importPgn(formData: FormData) {
+  const file = formData.get("file");
+  let text = String(formData.get("pgn") ?? "");
+  if (file instanceof File && file.size > 0) {
+    if (file.size > CHESS_MAX_PGN_CHARS) flash(PATH, "error", "That file is larger than 1 MB");
+    text = await file.text();
+  }
+  const parsed = chessImportSchema.safeParse({ pgn: text });
+  if (!parsed.success) flash(PATH, "error", firstIssue(parsed.error));
+  await saveGames("pgn", parsed.data.pgn, "Imported");
+}
+
+/** Pulls recent games for the username saved on the profile (never one typed into the form). */
+async function sync(source: "lichess" | "chesscom") {
+  const ctx = await getAppContext();
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("chess_profiles")
+    .select("lichess_username, chesscom_username")
+    .eq("user_id", ctx.userId)
+    .maybeSingle();
+  const username = source === "lichess" ? profile?.lichess_username : profile?.chesscom_username;
+  if (!username) flash(PATH, "error", "Save your username first");
+  let text: string;
+  try {
+    text =
+      source === "lichess"
+        ? await fetchLichessPgn(username!, fetch)
+        : await fetchChesscomPgn(username!, fetch);
+  } catch (e) {
+    flash(PATH, "error", e instanceof SourceError ? e.message : "Could not fetch games");
+  }
+  await saveGames(source, text, "Synced");
+}
+
+export async function syncLichess() {
+  await sync("lichess");
+}
+
+export async function syncChesscom() {
+  await sync("chesscom");
 }
 
 export async function saveGameNotes(formData: FormData) {
