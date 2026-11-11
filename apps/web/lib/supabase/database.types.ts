@@ -400,6 +400,72 @@ export type Database = {
         };
         Relationships: [];
       };
+      chess_puzzles: {
+        Row: {
+          attempts: number;
+          box: number;
+          correct: number;
+          created_at: string;
+          deleted_at: string | null;
+          depth: number;
+          fen: string;
+          game_id: string;
+          id: string;
+          last_attempt_at: string | null;
+          loss_cp: number;
+          next_due_at: string;
+          ply: number;
+          played_uci: string;
+          revision: number;
+          side_to_move: string;
+          solution_uci: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          attempts?: number;
+          box?: number;
+          correct?: number;
+          created_at?: string;
+          deleted_at?: string | null;
+          depth?: number;
+          fen: string;
+          game_id: string;
+          id?: string;
+          last_attempt_at?: string | null;
+          loss_cp: number;
+          next_due_at?: string;
+          ply: number;
+          played_uci: string;
+          revision?: number;
+          side_to_move: string;
+          solution_uci: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          attempts?: number;
+          box?: number;
+          correct?: number;
+          created_at?: string;
+          deleted_at?: string | null;
+          depth?: number;
+          fen?: string;
+          game_id?: string;
+          id?: string;
+          last_attempt_at?: string | null;
+          loss_cp?: number;
+          next_due_at?: string;
+          ply?: number;
+          played_uci?: string;
+          revision?: number;
+          side_to_move?: string;
+          solution_uci?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       chess_profiles: {
         Row: {
           chesscom_username: string | null;

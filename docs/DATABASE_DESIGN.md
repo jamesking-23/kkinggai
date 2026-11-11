@@ -77,3 +77,5 @@ report results. Last runs: all checks passed (see `TESTING.md`).
 Migration `20261110000012_chess`: `chess_games` (private per user, soft delete, partial unique index on
 `(user_id, source, external_id)` so re-importing a game is a no-op) and `chess_profiles` (names and optional Lichess/Chess.com
 usernames). Owner-only RLS, no DELETE policies.
+
+Migration `20261112000013_chess_puzzles`: `chess_puzzles` (private per user; composite FK `(game_id, user_id)` to `chess_games`; unique per game and ply while not deleted; Leitner box and due date; soft delete, no DELETE policy).

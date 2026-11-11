@@ -456,3 +456,25 @@ export const chessNotesSchema = z.object({
   notes: z.string().max(4000).default(""),
   tags: vaultTags,
 });
+
+export const CHESS_PUZZLE_MIN_LOSS = 80; // centipawns; "mistake" or worse
+export const chessPuzzleSaveSchema = z.object({
+  gameId: z.string().uuid(),
+  items: z
+    .array(
+      z.object({
+        ply: z.number().int().min(1).max(1000),
+        best: z.string().regex(/^[a-h][1-8][a-h][1-8][qrbn]?$/),
+        loss: z.number().int().min(0).max(3000),
+        depth: z.number().int().min(0).max(60),
+      }),
+    )
+    .min(1, "No mistakes to save")
+    .max(100),
+});
+
+export const chessPuzzleAttemptSchema = z.object({
+  id: z.string().uuid(),
+  revision: z.coerce.number().int().min(1),
+  move: z.string().regex(/^([a-h][1-8][a-h][1-8][qrbn]?|reveal)$/),
+});

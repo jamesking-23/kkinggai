@@ -73,7 +73,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Next: chess slice 3b (save analyses, puzzles/training from your own mistakes; needs a migration), then running. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
+Next: finish chess (endgames, openings trainer, puzzle list/delete) or start the running module. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
 
 ## Update: task detail, milestones, reminders (code written, not exercised against a live database)
 
@@ -206,3 +206,22 @@ Next: chess slice 3b (save analyses, puzzles/training from your own mistakes; ne
 - Verified: lint, format, typecheck, 68 unit tests, build.
 - Still NOT built for chess: saved analyses, puzzles and training from your own mistakes, endgames, opening repertoire trainer,
   search integration, playable board. Running and future sports not started.
+
+## Update: Phase 11, chess slice 3b (puzzles from your own mistakes)
+
+- Migration `20261112000013_chess_puzzles` APPLIED: `chess_puzzles` (private per user, composite foreign key to the user's own game,
+  one puzzle per game and move, spaced-repetition fields, soft delete, no delete policy). `chess_games` gained a unique `(id, user_id)`.
+- After running the Stockfish analysis on a game, "Save my mistakes as puzzles" stores your mistakes and blunders (80+ centipawns lost).
+  The server re-derives the position and the move you played from the stored PGN, checks it was your side, and checks the engine's
+  suggestion is a legal, different move; the client supplies only the suggestion and the loss figure (self-reported by the in-browser
+  engine, so it is not independently verifiable). Needs your side to be known (saved player names).
+- `/chess/train`: shows the next due puzzle, you click a piece then a square. Only the engine's top move counts as correct, so another
+  good move is marked wrong. "Show answer" counts as a miss. Leitner schedule: correct moves up a box (1, 3, 7, 14, 30 days), a miss
+  resets to box 0 and retries in 10 minutes. The attempt is recorded server-side by comparing the submitted move with the saved solution.
+- Tests: `rls_chess_puzzles.sql` run live and rolled back, 13 results all as expected (including cross-user game link and
+  correct > attempts); advisors show only the accepted warnings. 6 unit tests for scheduling and click resolution. Lint, format,
+  typecheck, 74 web unit tests and build pass.
+- NOT verified: the training board and the save button were not exercised in a browser or signed in (the click logic is unit-tested;
+  the UI is not). Puzzles are not shown on other devices differently, and there is no list view to delete or browse saved puzzles yet.
+- Phase 11 chess still NOT built: endgame trainer, opening repertoire trainer, puzzles from outside sources, saved analyses, search
+  integration, playable board. Running and future sports not started.

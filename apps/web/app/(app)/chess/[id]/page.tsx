@@ -72,6 +72,8 @@ export default async function ChessGamePage({
             sans={played.sans}
             ucis={played.ucis}
             flip={g.user_color === "black"}
+            gameId={g.id}
+            canSavePuzzles={!!g.user_color}
           />
         </Card>
       ) : (

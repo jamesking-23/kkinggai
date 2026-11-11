@@ -23,7 +23,7 @@ export default async function ChessPage({ searchParams }: { searchParams: Promis
   const { error, message } = await searchParams;
   const supabase = await createClient();
 
-  const [{ data: games }, { data: profile }] = await Promise.all([
+  const [{ data: games }, { data: profile }, { count: dueCount }] = await Promise.all([
     supabase
       .from("chess_games")
       .select(
@@ -38,6 +38,11 @@ export default async function ChessPage({ searchParams }: { searchParams: Promis
       .select("player_names, lichess_username, chesscom_username")
       .eq("user_id", ctx.userId)
       .maybeSingle(),
+    supabase
+      .from("chess_puzzles")
+      .select("id", { count: "exact", head: true })
+      .is("deleted_at", null)
+      .lte("next_due_at", new Date().toISOString()),
   ]);
   const list = games ?? [];
   const stats = computeStats(list);
@@ -62,6 +67,12 @@ export default async function ChessPage({ searchParams }: { searchParams: Promis
           <p className="text-sm">{fmtRecord(stats.black)}</p>
         </Card>
       </div>
+
+      <p className="mb-6 text-sm">
+        <a href="/chess/train" className="text-primary">
+          Train on your mistakes{dueCount ? ` (${dueCount} due)` : ""}
+        </a>
+      </p>
 
       {(profile?.lichess_username || profile?.chesscom_username) && (
         <div className="mb-6 flex flex-wrap items-center gap-2 text-sm">

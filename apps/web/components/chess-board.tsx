@@ -11,6 +11,7 @@ import {
   type MoveClass,
 } from "../lib/analysis";
 import { analyseGame, type PositionEval } from "../lib/engine";
+import { savePuzzles } from "../app/(app)/chess/actions";
 
 const DEPTHS = [10, 14, 18] as const;
 const CLASS_STYLE: Record<MoveClass, string> = {
@@ -27,17 +28,22 @@ export function ChessBoard({
   sans,
   ucis,
   flip,
+  gameId,
+  canSavePuzzles,
 }: {
   fens: string[];
   sans: string[];
   ucis: string[];
   flip: boolean;
+  gameId: string;
+  canSavePuzzles: boolean;
 }) {
   const [ply, setPly] = useState(0);
   const [depth, setDepth] = useState<number>(14);
   const [evals, setEvals] = useState<PositionEval[] | null>(null);
   const [running, setRunning] = useState<{ done: number; total: number } | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
+  const [saveNote, setSaveNote] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
   const last = fens.length - 1;
   const go = (n: number) => setPly(Math.max(0, Math.min(last, n)));
@@ -55,8 +61,32 @@ export function ChessBoard({
 
   useEffect(() => () => abort.current?.abort(), []);
 
+  async function saveMistakes() {
+    if (!evals || !moves) return;
+    const items = moves
+      .filter((m) => m.cls === "mistake" || m.cls === "blunder")
+      .map((m) => ({
+        ply: m.ply,
+        best: evals[m.ply - 1]?.bestUci ?? "",
+        loss: Math.round(m.loss),
+        depth: evals[m.ply - 1]?.depth ?? 0,
+      }))
+      .filter((i) => i.best);
+    if (items.length === 0) return setSaveNote("No mistakes or blunders to save.");
+    setSaveNote("Saving...");
+    const res = await savePuzzles({ gameId, items });
+    setSaveNote(
+      res.ok
+        ? res.saved > 0
+          ? `Saved ${res.saved} puzzle${res.saved === 1 ? "" : "s"} from your moves.`
+          : "Nothing new to save (already saved, or not your moves)."
+        : res.error,
+    );
+  }
+
   async function run() {
     setFailure(null);
+    setSaveNote(null);
     setEvals(null);
     setRunning({ done: 0, total: fens.length });
     const ctl = new AbortController();
@@ -189,6 +219,18 @@ export function ChessBoard({
             </button>
           )}
         </div>
+        {summary && canSavePuzzles && (
+          <div className="mb-3 text-xs">
+            <button
+              type="button"
+              onClick={saveMistakes}
+              className="rounded-md border border-border px-3 py-1 text-sm"
+            >
+              Save my mistakes as puzzles
+            </button>
+            {saveNote && <span className="ml-2 text-muted">{saveNote}</span>}
+          </div>
+        )}
         {failure && <p className="mb-2 text-xs text-danger">{failure}</p>}
         {summary && (
           <div className="mb-3 grid grid-cols-2 gap-2 text-xs">
@@ -235,8 +277,9 @@ export function ChessBoard({
           ))}
         </ol>
         <p className="mt-2 text-xs text-muted">
-          Analysis runs in your browser with Stockfish 19 (lite build). Results are not saved.
-          Losses are estimated from evaluation changes at the chosen depth.
+          Analysis runs in your browser with Stockfish 19 (lite build). The analysis itself is not
+          saved; only mistakes you choose to save become puzzles. Losses are estimated from
+          evaluation changes at the chosen depth.
         </p>
       </div>
     </div>
