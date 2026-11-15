@@ -10,7 +10,7 @@ import { createClient } from "../../../../lib/supabase/server";
 
 const HISTORY_CHAR_BUDGET = 12_000;
 const MAX_OUTPUT_TOKENS = 700;
-export const COACH_TITLE_PREFIX = "Running coach: ";
+const COACH_TITLE_PREFIX = "Running coach: ";
 
 function back(id: string | null, kind: "error" | "message", text: string): never {
   const c = id ? `c=${id}&` : "";
