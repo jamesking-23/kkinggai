@@ -32,3 +32,4 @@ Engine check (manual, not in CI): `lib/engine.ts` bundled with esbuild and run i
 `rls_chess_puzzles.sql` (3 users): 13 results, all as expected.
 `rls_running.sql` (3 users): 15 results, all as expected.
 `rls_run_plans.sql` (3 users): 15 results, all as expected.
+`rls_strava.sql` (3 users): 9 results, all as expected.

@@ -23,6 +23,7 @@ import {
   subtleButton,
 } from "../../../components/ui";
 import { createRun, importGpx } from "./actions";
+import { disconnectStrava, syncStrava } from "./strava-actions";
 
 const total = (t: Totals) =>
   t.runs
@@ -44,6 +45,12 @@ export default async function RunningPage({
     .is("deleted_at", null)
     .order("started_at", { ascending: false })
     .limit(2000);
+  const { data: strava } = await supabase
+    .from("strava_connections")
+    .select("last_synced_at")
+    .eq("user_id", ctx.userId)
+    .maybeSingle();
+  const stravaConfigured = !!process.env.STRAVA_CLIENT_ID && !!process.env.STRAVA_CLIENT_SECRET;
   const runs = data ?? [];
   const sum = summariseRuns(runs, new Date(), ctx.timezone);
   const maxWeek = Math.max(1, ...sum.weeks.map((w) => w.distanceM));
@@ -251,6 +258,39 @@ export default async function RunningPage({
         </Card>
       </div>
 
+      <Card title="Strava" className="mb-6">
+        {!stravaConfigured ? (
+          <p className="text-sm text-muted">Strava is not configured on the server.</p>
+        ) : strava ? (
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <form action={syncStrava}>
+              <button type="submit" className={primaryButton}>
+                Sync Strava
+              </button>
+            </form>
+            <form action={disconnectStrava}>
+              <button type="submit" className={subtleButton}>
+                Disconnect
+              </button>
+            </form>
+            <span className="text-xs text-muted">
+              {strava.last_synced_at
+                ? `Last synced ${localDate(strava.last_synced_at, ctx.timezone)}`
+                : "Not synced yet"}
+            </span>
+          </div>
+        ) : (
+          <a href="/api/strava/connect" className={subtleButton}>
+            Connect Strava
+          </a>
+        )}
+        <p className="mt-2 text-xs text-muted">
+          Imports your runs (not rides or other sports) with distance, time, climb, heart rate and a
+          route outline, up to a year back on the first sync. Only read access to your own
+          activities is requested. Imported runs stay if you disconnect.
+        </p>
+      </Card>
+
       <h2 className="mb-3 text-sm font-medium">Activities ({runs.length})</h2>
       {runs.length ? (
         <ul className="space-y-2">
@@ -264,7 +304,7 @@ export default async function RunningPage({
                   <span className="block truncate">{r.name}</span>
                   <span className="block truncate text-xs text-muted">
                     {localDate(r.started_at, ctx.timezone)} · {KIND_LABELS[r.kind] ?? r.kind}
-                    {r.source === "gpx" ? " · GPX" : ""}
+                    {r.source === "gpx" ? " · GPX" : r.source === "strava" ? " · Strava" : ""}
                   </span>
                 </span>
                 <span className="shrink-0 text-right text-xs">

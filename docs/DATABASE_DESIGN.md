@@ -83,3 +83,5 @@ Migration `20261112000013_chess_puzzles`: `chess_puzzles` (private per user; com
 Migration `20261112000014_running`: `run_activities` (private per user; source in manual/gpx/strava/samsung; route jsonb array of at most 600 points; soft delete; no DELETE policy).
 
 Migration `20261115000015_run_plans`: `run_plans` (private per user, active/archived, soft delete) and `run_plan_sessions` (composite FK `(plan_id, user_id)`; status planned/done/skipped); no DELETE policies.
+
+Migration `20261115000016_strava`: `strava_connections` (one row per user, owner-only RLS with an owner DELETE policy; tokens readable by the owner's own session).

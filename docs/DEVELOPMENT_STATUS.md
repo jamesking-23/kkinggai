@@ -271,3 +271,25 @@ Next: future-sports architecture (Phase 11 close-out), then Phase 12 (business a
 - Verified: lint, format, typecheck, 104 web unit tests, build. NOT verified signed in or in a browser.
 - Running still NOT built: live GPS tracking, route library, Strava (needs your own Strava API app), Samsung Health (GPX/file import only),
   auto-matching runs to plan sessions, heart-rate zones, shoes, search integration. Future-sports architecture not started.
+
+## Update: Phase 11, running slice 3 (Strava)
+
+- Migration `20261115000016_strava` APPLIED: `strava_connections` (one row per user with the OAuth tokens Strava issued to this app). Owner-only
+  RLS including an owner DELETE policy (disconnecting deletes the row). RLS test run live and rolled back: 9 results, all as expected.
+- Server configuration: `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET` are set in Vercel (the secret as a sensitive variable). They are read only
+  in server code and are not in the repository. The owner pasted a client secret and personal tokens into the chat; those pasted tokens were NOT
+  used or stored. Recommendation: regenerate the client secret in the Strava API settings and update the Vercel variable.
+- Flow: `/running` shows "Connect Strava" -> `/api/strava/connect` (signed-in users only; random state in an httpOnly cookie) -> Strava's own
+  consent page -> `/api/strava/callback` (state and granted scope checked, code exchanged server-side, tokens stored). Scope requested:
+  `activity:read_all` (read-only). "Sync Strava" refreshes the access token when needed, reads activities (up to 5 pages of 100 per sync; the first
+  sync looks back one year), keeps runs only (Run, TrailRun, VirtualRun), skips ones already imported, and stores distance, time, climb, heart rate
+  and a route outline decoded from Strava's summary polyline. The sync point only advances after a complete pass. "Disconnect" asks Strava to revoke the
+  token (best effort) and deletes the stored tokens; imported runs are kept.
+- Known limits: the tokens are readable by the owner's own signed-in session (there is no server-only secret store in this setup); they only allow
+  reading that user's own Strava activities. The OAuth redirect uses the site's own origin, so connect from https://kkingg-ai.vercel.app (the callback
+  domain set in the Strava app must be `kkingg-ai.vercel.app`). A new Strava API app is limited to its owner as the only connected athlete until
+  Strava approves more. No webhook, so new runs appear only when you press Sync. Strava route data is a simplified outline.
+- **Tested with MOCKED responses only (13 unit tests: authorize URL, token exchange and refresh, activity paging, polyline decoding against the
+  published specification example, activity mapping). The sandbox cannot reach strava.com, so the real OAuth round trip and API field formats are unproven
+  until you connect once.**
+- Verified: lint, format, typecheck, 117 web unit tests, build. NOT verified signed in.
