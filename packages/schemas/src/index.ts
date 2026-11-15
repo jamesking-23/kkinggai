@@ -528,3 +528,18 @@ export const runEditSchema = z.object({
   effort: optionalInt(1, 10),
   notes: z.string().max(4000).default(""),
 });
+
+export const RUN_GOALS = ["5k", "10k", "half", "marathon"] as const;
+
+export const runPlanSchema = z.object({
+  goal: z.enum(RUN_GOALS),
+  raceDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose the race date"),
+  daysPerWeek: z.coerce.number().int().min(3, "Choose 3 to 6 days").max(6, "Choose 3 to 6 days"),
+  currentWeeklyKm: z.coerce.number().min(0).max(250, "Enter your weekly distance in km"),
+  name: optionalText(200),
+});
+
+export const runSessionStatusSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(["planned", "done", "skipped"]),
+});

@@ -54,6 +54,15 @@ export default async function RunningPage({
       <PageHeader title="Running" subtitle="Your runs, routes and weekly volume." />
       <Flash error={error} message={message} />
 
+      <p className="mb-6 flex gap-4 text-sm">
+        <a href="/running/plan" className="text-primary">
+          Training plan
+        </a>
+        <a href="/running/coach" className="text-primary">
+          Running coach
+        </a>
+      </p>
+
       <div className="mb-6 grid gap-4 md:grid-cols-3">
         <Card title="This week">
           <p className="text-sm">{total(sum.week)}</p>

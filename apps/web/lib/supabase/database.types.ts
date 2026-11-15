@@ -697,6 +697,102 @@ export type Database = {
         };
         Relationships: [];
       };
+      run_plan_sessions: {
+        Row: {
+          created_at: string;
+          description: string;
+          distance_m: number;
+          id: string;
+          kind: string;
+          plan_id: string;
+          planned_on: string;
+          revision: number;
+          status: string;
+          updated_at: string;
+          user_id: string;
+          week: number;
+        };
+        Insert: {
+          created_at?: string;
+          description: string;
+          distance_m: number;
+          id?: string;
+          kind: string;
+          plan_id: string;
+          planned_on: string;
+          revision?: number;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+          week: number;
+        };
+        Update: {
+          created_at?: string;
+          description?: string;
+          distance_m?: number;
+          id?: string;
+          kind?: string;
+          plan_id?: string;
+          planned_on?: string;
+          revision?: number;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+          week?: number;
+        };
+        Relationships: [];
+      };
+      run_plans: {
+        Row: {
+          created_at: string;
+          days_per_week: number;
+          deleted_at: string | null;
+          goal: string;
+          id: string;
+          name: string;
+          race_date: string;
+          revision: number;
+          start_date: string;
+          start_weekly_km: number;
+          status: string;
+          updated_at: string;
+          user_id: string;
+          weeks: number;
+        };
+        Insert: {
+          created_at?: string;
+          days_per_week: number;
+          deleted_at?: string | null;
+          goal: string;
+          id?: string;
+          name: string;
+          race_date: string;
+          revision?: number;
+          start_date: string;
+          start_weekly_km: number;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+          weeks: number;
+        };
+        Update: {
+          created_at?: string;
+          days_per_week?: number;
+          deleted_at?: string | null;
+          goal?: string;
+          id?: string;
+          name?: string;
+          race_date?: string;
+          revision?: number;
+          start_date?: string;
+          start_weekly_km?: number;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+          weeks?: number;
+        };
+        Relationships: [];
+      };
       run_activities: {
         Row: {
           avg_hr: number | null;

@@ -73,7 +73,7 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 ## Exact next action
 
 Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Next: running slice 2 (training plans, AI coach) or Strava; chess extras (endgames, openings trainer, puzzle list) remain. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
+Next: future-sports architecture (Phase 11 close-out), then Phase 12 (business and ventures). Strava, live GPS and chess extras remain open. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
 
 ## Update: task detail, milestones, reminders (code written, not exercised against a live database)
 
@@ -247,3 +247,27 @@ Next: running slice 2 (training plans, AI coach) or Strava; chess extras (endgam
   app and OAuth), Samsung Health (no public web API; GPX/file import is the realistic route), training plans, the AI running coach,
   shoes, heart-rate zones, search integration.
 - Future-sports architecture NOT started.
+
+## Update: Phase 11, running slice 2 (training plans, AI running coach)
+
+- Migration `20261115000015_run_plans` APPLIED: `run_plans` and `run_plan_sessions` (private per user, composite foreign key so a session
+  can only belong to the owner's own plan, archive/soft delete, no delete policies). RLS test run live and rolled back: 15 results, all
+  as expected; advisors show only the accepted warnings.
+- `/running/plan`: creates a plan for a 5 km, 10 km, half marathon or marathon (4 to 24 weeks, 3 to 6 runs a week). The plan is produced
+  by a deterministic generator (`lib/plan.ts`, 12 unit tests), NOT by AI: build about 8% a week from your current volume (prefilled from
+  your last 4 weeks), a lighter week every 4th week, a taper (1, 2 or 3 weeks by goal), long run on Sunday, one quality session a week
+  alternating tempo and intervals, a rest day before the race, race on the race date. It warns when the build cannot reach a sensible
+  peak. Sessions can be marked done, skipped or reset by hand (they are not auto-matched to logged runs yet). A new plan archives the
+  current one. It is a generic progression and does not know injuries, terrain or pace; effort descriptions, not paces, are given.
+- `/running/coach`: ask questions about your training. Each question builds a data block from the last 8 weeks (weekly totals, up to 15
+  recent runs with distance/time/pace/climb/heart rate/effort, and the active plan's sessions for this and next week) and sends it with
+  your message to the configured AI provider. Run names, notes and GPS routes are never included (unit-tested). The system prompt tells
+  the model to use only the data, not to give medical advice, and to refer pain or illness to a professional.
+- Coach chats are stored in the same `ai_conversations`/`ai_messages` tables as the assistant (titles start with "Running coach: ") and
+  share the 50 messages per day limit. They also appear in the Assistant's conversation list; continuing one there would lose the data
+  context (known limitation).
+- **The coach has NOT been run: no AI provider key is set on the server and I never called a real model.** The provider code, prompt
+  size and answer quality are untested against a real provider. Add `GEMINI_API_KEY` or `OPENROUTER_API_KEY` in Vercel and redeploy.
+- Verified: lint, format, typecheck, 104 web unit tests, build. NOT verified signed in or in a browser.
+- Running still NOT built: live GPS tracking, route library, Strava (needs your own Strava API app), Samsung Health (GPX/file import only),
+  auto-matching runs to plan sessions, heart-rate zones, shoes, search integration. Future-sports architecture not started.
