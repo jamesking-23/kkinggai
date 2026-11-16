@@ -102,6 +102,7 @@ registry.register({
   description: "Game history, PGN import and export, analysis",
   version: "0.1.0",
   status: "active",
+  group: "sports",
   nav: { label: "Chess", href: "/chess", icon: "crown", order: 70 },
 });
 
@@ -111,5 +112,15 @@ registry.register({
   description: "Activities, routes and training analytics",
   version: "0.1.0",
   status: "active",
+  group: "sports",
   nav: { label: "Running", href: "/running", icon: "footprints", order: 72 },
+});
+
+registry.register({
+  id: "sports",
+  name: "Sports",
+  description: "Overview of your sports modules",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Sports", href: "/sports", icon: "trophy", order: 68 },
 });

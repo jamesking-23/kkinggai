@@ -14,6 +14,7 @@ import {
   Repeat,
   Sparkles,
   Target,
+  Trophy,
   type LucideIcon,
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ const icons: Record<string, LucideIcon> = {
   lock: Lock,
   briefcase: Briefcase,
   crown: Crown,
+  trophy: Trophy,
   footprints: Footprints,
   "graduation-cap": GraduationCap,
   layers: Layers,

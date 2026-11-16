@@ -49,4 +49,33 @@ describe("ModuleRegistry", () => {
     expect(r.disableBlocker("vault", new Set(["home", "vault"]))).toBeNull();
     expect(r.disableBlocker("ai", on)).toBeNull();
   });
+
+  it("lists enabled modules of a group in navigation order", () => {
+    const r = new ModuleRegistry();
+    r.register({
+      ...base,
+      id: "run",
+      name: "Run",
+      status: "active",
+      group: "sports",
+      nav: { ...base.nav, order: 72 },
+    });
+    r.register({
+      ...base,
+      id: "chess",
+      name: "Chess",
+      status: "active",
+      group: "sports",
+      nav: { ...base.nav, order: 70 },
+    });
+    r.register({ ...base, id: "swim", name: "Swim", status: "planned", group: "sports" });
+    r.register({ ...base, id: "tasks", name: "Tasks", status: "active" });
+    const all = new Set(["run", "chess", "swim", "tasks"]);
+    expect(r.inGroup("sports", all).map((m) => m.id)).toEqual(["chess", "run"]);
+    expect(r.inGroup("sports", new Set(["run"])).map((m) => m.id)).toEqual(["run"]);
+    expect(r.inGroup("nothing", all)).toEqual([]);
+    expect(() =>
+      r.register({ ...base, id: "bad", name: "x", status: "active", group: "Bad Group" }),
+    ).toThrow();
+  });
 });

@@ -12,6 +12,11 @@ export const moduleDefinitionSchema = z.object({
   dependencies: z.array(z.string()).default([]),
   permissions: z.array(z.string()).default([]),
   core: z.boolean().default(false),
+  /** Optional category, e.g. "sports". Used by hub pages to list related modules. */
+  group: z
+    .string()
+    .regex(/^[a-z][a-z0-9-]*$/)
+    .optional(),
   nav: z.object({ label: z.string(), href: z.string(), icon: z.string(), order: z.number() }),
 });
 export type ModuleDefinition = z.infer<typeof moduleDefinitionSchema>;
@@ -55,6 +60,18 @@ export class ModuleRegistry {
 
   canEnable(id: string, enabled: ReadonlySet<string>): boolean {
     return this.unmetDependencies(id, enabled).length === 0;
+  }
+
+  /** Enabled, non-deprecated, non-planned modules in a group, in navigation order. */
+  inGroup(group: string, enabled: ReadonlySet<string>): ModuleDefinition[] {
+    return [...this.modules.values()]
+      .filter(
+        (m) =>
+          m.group === group &&
+          enabled.has(m.id) &&
+          (m.status === "active" || m.status === "experimental"),
+      )
+      .sort((a, b) => a.nav.order - b.nav.order);
   }
 
   /** Navigation is derived from the registry: only enabled, non-deprecated, non-planned modules. */

@@ -293,3 +293,10 @@ Next: future-sports architecture (Phase 11 close-out), then Phase 12 (business a
   published specification example, activity mapping). The sandbox cannot reach strava.com, so the real OAuth round trip and API field formats are unproven
   until you connect once.**
 - Verified: lint, format, typecheck, 117 web unit tests, build. NOT verified signed in.
+
+## Session update: Sports hub and future-sports architecture (2026-11-16)
+
+- Written: optional `group` field and `inGroup()` on the module registry (unit-tested); Chess and Running registered in group `sports`; new `/sports` hub module (migration `20261116000017_sports_hub.sql`, applied) showing live figures through per-sport adapters in `apps/web/lib/sports.ts`; `docs/SPORTS_ARCHITECTURE.md`.
+- Verified: lint, typecheck, unit tests (module-registry 5, web 117) and production build pass; security advisors show only the previously accepted warnings. The migration adds no tables, so no new RLS test.
+- Not verified: the `/sports` page has not been exercised signed in (no access from this sandbox); adapters have no unit tests (they read Supabase).
+- Not built: any sport beyond chess and running. Phase 11 is otherwise functionally complete as listed above; next is Phase 12.
