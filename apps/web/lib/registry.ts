@@ -124,3 +124,12 @@ registry.register({
   status: "active",
   nav: { label: "Sports", href: "/sports", icon: "trophy", order: 68 },
 });
+
+registry.register({
+  id: "business",
+  name: "Business",
+  description: "Ventures with an income and expense ledger",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Business", href: "/business", icon: "briefcase", order: 80 },
+});

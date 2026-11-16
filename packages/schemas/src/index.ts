@@ -543,3 +543,50 @@ export const runSessionStatusSchema = z.object({
   id: z.string().uuid(),
   status: z.enum(["planned", "done", "skipped"]),
 });
+
+// ---------- business ----------
+export const VENTURE_STAGES = [
+  "idea",
+  "validating",
+  "building",
+  "launched",
+  "paused",
+  "closed",
+] as const;
+export const ENTRY_KINDS = ["income", "expense"] as const;
+
+export const ventureSchema = z.object({
+  name: z.string().trim().min(1, "Enter a name").max(120),
+  stage: z.enum(VENTURE_STAGES).default("idea"),
+  currency: z.preprocess(
+    (v) => (typeof v === "string" ? v.trim().toUpperCase() : v),
+    z
+      .string()
+      .regex(/^[A-Z]{3}$/, "Use a 3-letter currency code such as UGX")
+      .default("UGX"),
+  ),
+  description: optionalText(4000),
+  website: optionalUrl,
+  startedOn: optionalDate,
+});
+
+export const ventureStageSchema = z.object({
+  id: z.string().uuid(),
+  stage: z.enum(VENTURE_STAGES),
+});
+
+export const ventureEntrySchema = z.object({
+  ventureId: z.string().uuid(),
+  kind: z.enum(ENTRY_KINDS),
+  amount: z.preprocess(
+    (v) => (typeof v === "string" ? v.replace(/,/g, "").trim() : v),
+    z.coerce
+      .number({ invalid_type_error: "Enter an amount" })
+      .positive("Amount must be more than zero")
+      .max(999_999_999_999, "Amount is too large")
+      .refine((n) => Math.round(n * 100) / 100 === n, "Use at most two decimal places"),
+  ),
+  occurredOn: optionalDate,
+  category: optionalText(60),
+  description: optionalText(500),
+});

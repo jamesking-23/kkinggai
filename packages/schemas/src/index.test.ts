@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema } from "./index";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  resetPasswordSchema,
+  ventureEntrySchema,
+  ventureSchema,
+} from "./index";
 
 describe("auth schemas", () => {
   it("normalises email on login", () => {
@@ -328,5 +335,24 @@ describe("research schemas", () => {
   it("validates reading status", () => {
     expect(researchStatusSchema.safeParse({ id, status: "reading" }).success).toBe(true);
     expect(researchStatusSchema.safeParse({ id, status: "done" }).success).toBe(false);
+  });
+});
+
+describe("venture schemas", () => {
+  it("normalises currency and defaults the stage", () => {
+    const v = ventureSchema.parse({ name: " Poultry ", currency: "ugx", website: "" });
+    expect(v).toMatchObject({ name: "Poultry", currency: "UGX", stage: "idea" });
+    expect(ventureSchema.safeParse({ name: "x", currency: "UG" }).success).toBe(false);
+    expect(ventureSchema.safeParse({ name: "x", website: "javascript:alert(1)" }).success).toBe(
+      false,
+    );
+  });
+  it("validates entry amounts", () => {
+    const base = { ventureId: "00000000-0000-4000-8000-000000000000", kind: "income" };
+    expect(ventureEntrySchema.parse({ ...base, amount: "1,500.50" }).amount).toBe(1500.5);
+    expect(ventureEntrySchema.safeParse({ ...base, amount: "0" }).success).toBe(false);
+    expect(ventureEntrySchema.safeParse({ ...base, amount: "1.234" }).success).toBe(false);
+    expect(ventureEntrySchema.safeParse({ ...base, amount: "abc" }).success).toBe(false);
+    expect(ventureEntrySchema.safeParse({ ...base, kind: "gift", amount: 1 }).success).toBe(false);
   });
 });

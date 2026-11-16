@@ -300,3 +300,11 @@ Next: future-sports architecture (Phase 11 close-out), then Phase 12 (business a
 - Verified: lint, typecheck, unit tests (module-registry 5, web 117) and production build pass; security advisors show only the previously accepted warnings. The migration adds no tables, so no new RLS test.
 - Not verified: the `/sports` page has not been exercised signed in (no access from this sandbox); adapters have no unit tests (they read Supabase).
 - Not built: any sport beyond chess and running. Phase 11 is otherwise functionally complete as listed above; next is Phase 12.
+
+## Session update: Phase 12 part 1, Business ventures (2026-11-17)
+
+- Assumption: the exact Phase 12 wording could not be recovered after context compaction, so this slice is a conservative reading: private ventures with an income and expense ledger. Adjust if the master prompt asks for more.
+- Written: migration `20261117000018_ventures.sql` (applied): `ventures` (stage, currency, soft delete, revision) and `venture_entries` (income or expense, amount numeric(14,2) > 0; composite FK `(venture_id, user_id)`); module `business` (`/business`, order 80), enabled for existing workspaces. Private per user, no DELETE policies, no workspace sharing. Schemas, `lib/ventures.ts` (cent-exact totals, monthly summary, money formatting), actions and page.
+- Verified: RLS test `rls_ventures.sql` run live and rolled back, 15 results all as expected; security advisors show only the accepted warnings; lint, typecheck, tests (schemas 31, web 122) and production build pass.
+- Not verified: the page has not been exercised signed in (sandbox cannot reach the site).
+- Limits: the page reads the latest 2,000 entries across all ventures, so totals are exact only below that; one currency per venture, no conversion; no editing of entries (remove and re-add); no invoices, contacts, tasks, goals or reports for ventures yet; not in universal search yet.

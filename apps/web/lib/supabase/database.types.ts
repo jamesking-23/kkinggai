@@ -898,6 +898,99 @@ export type Database = {
         };
         Relationships: [];
       };
+      ventures: {
+        Row: {
+          created_at: string;
+          currency: string;
+          deleted_at: string | null;
+          description: string;
+          id: string;
+          name: string;
+          notes: string;
+          revision: number;
+          stage: string;
+          started_on: string | null;
+          updated_at: string;
+          user_id: string;
+          website: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          currency?: string;
+          deleted_at?: string | null;
+          description?: string;
+          id?: string;
+          name: string;
+          notes?: string;
+          revision?: number;
+          stage?: string;
+          started_on?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          website?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          currency?: string;
+          deleted_at?: string | null;
+          description?: string;
+          id?: string;
+          name?: string;
+          notes?: string;
+          revision?: number;
+          stage?: string;
+          started_on?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          website?: string | null;
+        };
+        Relationships: [];
+      };
+      venture_entries: {
+        Row: {
+          amount: number;
+          category: string | null;
+          created_at: string;
+          deleted_at: string | null;
+          description: string;
+          id: string;
+          kind: string;
+          occurred_on: string;
+          revision: number;
+          updated_at: string;
+          user_id: string;
+          venture_id: string;
+        };
+        Insert: {
+          amount: number;
+          category?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          description?: string;
+          id?: string;
+          kind: string;
+          occurred_on?: string;
+          revision?: number;
+          updated_at?: string;
+          user_id?: string;
+          venture_id: string;
+        };
+        Update: {
+          amount?: number;
+          category?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          description?: string;
+          id?: string;
+          kind?: string;
+          occurred_on?: string;
+          revision?: number;
+          updated_at?: string;
+          user_id?: string;
+          venture_id?: string;
+        };
+        Relationships: [];
+      };
       study_notes: {
         Row: {
           body: string;
