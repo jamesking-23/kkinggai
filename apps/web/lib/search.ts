@@ -18,6 +18,9 @@ export const SEARCH_KINDS: Record<string, { label: string; module: string }> = {
   application: { label: "Job applications", module: "career" },
   interview: { label: "Interview questions", module: "career" },
   portfolio: { label: "Portfolio", module: "career" },
+  venture: { label: "Ventures", module: "business" },
+  chess_game: { label: "Chess games", module: "chess" },
+  run: { label: "Runs", module: "running" },
 };
 
 export type SearchGroup = { kind: string; label: string; hits: SearchHit[] };

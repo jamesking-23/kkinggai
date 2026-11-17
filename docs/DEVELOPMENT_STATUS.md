@@ -308,3 +308,9 @@ Next: future-sports architecture (Phase 11 close-out), then Phase 12 (business a
 - Verified: RLS test `rls_ventures.sql` run live and rolled back, 15 results all as expected; security advisors show only the accepted warnings; lint, typecheck, tests (schemas 31, web 122) and production build pass.
 - Not verified: the page has not been exercised signed in (sandbox cannot reach the site).
 - Limits: the page reads the latest 2,000 entries across all ventures, so totals are exact only below that; one currency per venture, no conversion; no editing of entries (remove and re-add); no invoices, contacts, tasks, goals or reports for ventures yet; not in universal search yet.
+
+## Session update: search covers business and sports (2026-11-17)
+
+- Written: migration `20261117000019_search_business_sports.sql` (applied) extends `search_workspace` with ventures, chess games and runs (private: owner only, SECURITY INVOKER); search page labels and module gating updated.
+- Verified: live rolled-back test `rls_search_business_sports.sql`: owner finds all three kinds, workspace admin and outsider find none, anon cannot call the function. The business deployment `33b235e` was READY.
+- Not verified: the search page signed in. Search is still ILIKE matching (no full-text ranking).
