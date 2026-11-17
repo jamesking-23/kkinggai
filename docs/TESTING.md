@@ -40,3 +40,5 @@ Engine check (manual, not in CI): `lib/engine.ts` bundled with esbuild and run i
 `rls_news.sql` (3 users plus anon): 15 results, all as expected. `feeds.test.ts`: 14 tests with mocked fetch and DNS only.
 `rls_media.sql` (3 users plus anon): 13 results, all as expected.
 `rls_notifications.sql` (3 users plus anon): 11 results, all as expected.
+
+`apps/mobile`: `format.test.ts` (4 tests). Android JS bundling checked with `expo export`; the app has not been run on a device or emulator.

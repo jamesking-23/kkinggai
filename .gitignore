@@ -11,3 +11,5 @@ coverage
 next-env.d.ts
 tsconfig.tsbuildinfo
 apps/web/public/engine
+apps/mobile/.expo
+apps/mobile/dist
