@@ -1,6 +1,13 @@
 import { createHash } from "node:crypto";
 
-export type TrackPoint = { lat: number; lon: number; ele: number | null; t: number | null };
+export type TrackPoint = {
+  lat: number;
+  lon: number;
+  ele: number | null;
+  t: number | null;
+  /** Heart rate in bpm when the file has it (TCX, or GPX with Garmin extensions). */
+  hr?: number | null;
+};
 
 export type GpxTrack = {
   name: string | null;
@@ -40,7 +47,14 @@ export function parseGpx(text: string): GpxTrack {
     const time = body.match(/<time>\s*([^<\s]+)\s*<\/time>/);
     const t = time ? Date.parse(time[1]!) : NaN;
     const e = ele ? Number(ele[1]) : NaN;
-    points.push({ lat, lon, ele: Number.isFinite(e) ? e : null, t: Number.isFinite(t) ? t : null });
+    const hrm = body.match(/<(?:\w+:)?hr>\s*(\d{2,3})\s*<\/(?:\w+:)?hr>/);
+    points.push({
+      lat,
+      lon,
+      ele: Number.isFinite(e) ? e : null,
+      t: Number.isFinite(t) ? t : null,
+      hr: hrm ? Number(hrm[1]) : null,
+    });
   }
   const trk = text.match(/<trk\b[^>]*>[\s\S]*?<name>([\s\S]*?)<\/name>/);
   const meta = text.match(/<metadata\b[^>]*>[\s\S]*?<name>([\s\S]*?)<\/name>/);

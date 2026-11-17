@@ -32,7 +32,7 @@ Engine check (manual, not in CI): `lib/engine.ts` bundled with esbuild and run i
 `rls_chess_puzzles.sql` (3 users): 13 results, all as expected.
 `rls_running.sql` (3 users): 15 results, all as expected.
 `rls_run_plans.sql` (3 users): 15 results, all as expected.
-`rls_strava.sql` (3 users): 9 results, all as expected.
+`rls_strava.sql` was removed together with the Strava connection (see the 2026-11-17 note in DEVELOPMENT_STATUS.md). `trackfile.test.ts`: 10 tests (TCX/GPX detection, gzip, FIT rejection, gzip-bomb cap, heart-rate average).
 `rls_ventures.sql` (3 users): 15 results, all as expected.
 `rls_search_business_sports.sql` (3 users plus anon): 4 results, all as expected.
 `rls_venture_contacts_tasks.sql` (3 users plus anon): 15 results, all as expected.

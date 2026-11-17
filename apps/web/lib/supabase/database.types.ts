@@ -859,45 +859,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      strava_connections: {
-        Row: {
-          access_token: string;
-          athlete_id: number;
-          created_at: string;
-          expires_at: string;
-          last_synced_at: string | null;
-          refresh_token: string;
-          revision: number;
-          scope: string;
-          updated_at: string;
-          user_id: string;
-        };
-        Insert: {
-          access_token: string;
-          athlete_id: number;
-          created_at?: string;
-          expires_at: string;
-          last_synced_at?: string | null;
-          refresh_token: string;
-          revision?: number;
-          scope?: string;
-          updated_at?: string;
-          user_id?: string;
-        };
-        Update: {
-          access_token?: string;
-          athlete_id?: number;
-          created_at?: string;
-          expires_at?: string;
-          last_synced_at?: string | null;
-          refresh_token?: string;
-          revision?: number;
-          scope?: string;
-          updated_at?: string;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
       ventures: {
         Row: {
           created_at: string;

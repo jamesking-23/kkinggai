@@ -99,3 +99,5 @@ Migration `20261117000023_entertainment_media`: `media_items` (private per user,
 Migrations `20261117000024_notifications` and `..25_notifications_schedule`: `notifications` (dedupe key per user; users may only update `read_at`; no insert or delete policies), `generate_notifications()` (security definer, not executable by API roles) and an hourly pg_cron job.
 
 Migration `20261117000026_multiplayer_chess`: `mp_games` (participants select only; insert, update and delete revoked from API roles; moves stored as UCI text[] up to 600; status waiting/active/resigned/draw/cancelled). Changes go through SECURITY DEFINER `mp_*` RPCs (execute for authenticated only). Rules of chess are not enforced in the database; results such as checkmate are derived from the moves by clients.
+
+Migration `20261117000027_remove_strava_add_mapmyrun`: drops `strava_connections` (it held no rows) and widens the `run_activities.source` check to manual/gpx/strava/samsung/mapmyrun. Existing 'strava' rows, if any, stay valid.

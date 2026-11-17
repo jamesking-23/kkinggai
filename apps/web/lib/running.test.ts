@@ -34,7 +34,7 @@ describe("parseGpx", () => {
     const t = parseGpx(
       '<gpx><trk><trkseg><trkpt lat="95" lon="0"></trkpt><trkpt lat="1" lon="2"/><trkpt lat="x" lon="2"></trkpt></trkseg></trk></gpx>',
     );
-    expect(t.points).toEqual([{ lat: 1, lon: 2, ele: null, t: null }]);
+    expect(t.points).toEqual([{ lat: 1, lon: 2, ele: null, t: null, hr: null }]);
   });
   it("does not expand entities or fetch anything", () => {
     const t = parseGpx(

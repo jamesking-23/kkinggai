@@ -516,9 +516,14 @@ export const runManualSchema = z
     path: ["minutes"],
   });
 
+export const RUN_IMPORT_ORIGINS = ["strava", "mapmyrun", "gpx"] as const;
+export const RUN_IMPORT_MAX_FILES = 20;
+
+/** Where the files came from. Only a label: the format is detected from each file. */
 export const runGpxSchema = z.object({
   name: optionalText(200),
   kind: z.enum(RUN_KINDS).default("easy"),
+  origin: z.enum(RUN_IMPORT_ORIGINS).default("gpx"),
 });
 
 export const runEditSchema = z.object({

@@ -1,8 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { RUN_MAX_GPX_BYTES, runEditSchema, runGpxSchema, runManualSchema } from "@kkingg/schemas";
-import { parseGpx, trackKey, trackStats } from "../../../lib/gpx";
+import {
+  RUN_IMPORT_MAX_FILES,
+  RUN_MAX_GPX_BYTES,
+  runEditSchema,
+  runGpxSchema,
+  runManualSchema,
+} from "@kkingg/schemas";
+import { trackKey, trackStats } from "../../../lib/gpx";
+import { averageHr, parseTrackFile } from "../../../lib/trackfile";
 import { firstIssue, flash } from "../../../lib/form";
 import { createClient } from "../../../lib/supabase/server";
 
@@ -35,46 +42,79 @@ export async function createRun(formData: FormData) {
 export async function importGpx(formData: FormData) {
   const meta = runGpxSchema.safeParse(Object.fromEntries(formData));
   if (!meta.success) flash(PATH, "error", firstIssue(meta.error));
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) flash(PATH, "error", "Choose a .gpx file");
-  const f = file as File;
-  if (f.size > RUN_MAX_GPX_BYTES) flash(PATH, "error", "That file is larger than 4 MB");
-
-  const track = parseGpx(await f.text());
-  const stats = trackStats(track.points);
-  if ("error" in stats) flash(PATH, "error", stats.error);
-  const s = stats as Exclude<typeof stats, { error: string }>;
-  const key = trackKey(track.points);
+  const files = formData.getAll("file").filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length === 0) flash(PATH, "error", "Choose at least one GPX or TCX file");
+  if (files.length > RUN_IMPORT_MAX_FILES)
+    flash(PATH, "error", `Upload at most ${RUN_IMPORT_MAX_FILES} files at a time`);
+  if (files.reduce((n, f) => n + f.size, 0) > RUN_MAX_GPX_BYTES)
+    flash(PATH, "error", "Those files add up to more than 4 MB. Upload fewer at a time");
 
   const supabase = await createClient();
-  const { data: have } = await supabase
-    .from("run_activities")
-    .select("id")
-    .eq("source", "gpx")
-    .eq("external_id", key)
-    .is("deleted_at", null)
-    .maybeSingle();
-  if (have) flash(PATH, "error", "That run is already in your history");
+  const origin = meta.data!.origin;
+  let imported = 0;
+  let lastId: string | null = null;
+  const skipped: string[] = [];
+  const failed: string[] = [];
 
-  const { data, error } = await supabase
-    .from("run_activities")
-    .insert({
-      source: "gpx",
-      external_id: key,
-      name: meta.data!.name ?? track.name ?? "Run",
-      kind: meta.data!.kind,
-      started_at: s.startedAt.toISOString(),
-      distance_m: s.distanceM,
-      moving_seconds: s.movingSeconds,
-      elapsed_seconds: s.elapsedSeconds,
-      elevation_gain_m: s.elevationGainM,
-      route: s.route,
-    })
-    .select("id")
-    .single();
-  if (error || !data) flash(PATH, "error", "Could not save the run");
+  for (const f of files) {
+    const parsed = parseTrackFile(f.name, new Uint8Array(await f.arrayBuffer()));
+    if ("error" in parsed) {
+      failed.push(`${f.name}: ${parsed.error}`);
+      continue;
+    }
+    const { track } = parsed;
+    const stats = trackStats(track.points);
+    if ("error" in stats) {
+      failed.push(`${f.name}: ${stats.error}`);
+      continue;
+    }
+    const key = trackKey(track.points);
+    // The same workout is a duplicate whichever site it came from.
+    const { data: have } = await supabase
+      .from("run_activities")
+      .select("id")
+      .eq("external_id", key)
+      .is("deleted_at", null)
+      .limit(1);
+    if (have?.length) {
+      skipped.push(f.name);
+      continue;
+    }
+    const { data, error } = await supabase
+      .from("run_activities")
+      .insert({
+        source: origin,
+        external_id: key,
+        // A name typed in the form only makes sense for a single file.
+        name: (files.length === 1 ? meta.data!.name : undefined) ?? track.name ?? "Run",
+        kind: meta.data!.kind,
+        started_at: stats.startedAt.toISOString(),
+        distance_m: stats.distanceM,
+        moving_seconds: stats.movingSeconds,
+        elapsed_seconds: stats.elapsedSeconds,
+        elevation_gain_m: stats.elevationGainM,
+        avg_hr: averageHr(track.points),
+        route: stats.route,
+      })
+      .select("id")
+      .single();
+    if (error || !data) {
+      failed.push(`${f.name}: could not save`);
+      continue;
+    }
+    imported++;
+    lastId = data.id;
+  }
+
   revalidatePath(PATH);
-  flash(`${PATH}/${data!.id}`, "message", "Run imported");
+  const parts = [`${imported} imported`];
+  if (skipped.length) parts.push(`${skipped.length} already in your history`);
+  if (failed.length) parts.push(`${failed.length} failed (${failed.join("; ").slice(0, 400)})`);
+  const text = parts.join(", ");
+  if (imported === 0) flash(PATH, "error", text);
+  if (imported === 1 && !skipped.length && !failed.length)
+    flash(`${PATH}/${lastId}`, "message", "Run imported");
+  flash(PATH, failed.length ? "error" : "message", text);
 }
 
 export async function saveRunEdit(formData: FormData) {

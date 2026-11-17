@@ -1,4 +1,4 @@
-import { RUN_KINDS } from "@kkingg/schemas";
+import { RUN_IMPORT_MAX_FILES, RUN_KINDS } from "@kkingg/schemas";
 import { requireModule } from "../../../lib/modules";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
@@ -23,7 +23,12 @@ import {
   subtleButton,
 } from "../../../components/ui";
 import { createRun, importGpx } from "./actions";
-import { disconnectStrava, syncStrava } from "./strava-actions";
+
+const SOURCE_LABELS: Record<string, string> = {
+  gpx: "Imported",
+  strava: "Strava",
+  mapmyrun: "MapMyRun",
+};
 
 const total = (t: Totals) =>
   t.runs
@@ -45,12 +50,6 @@ export default async function RunningPage({
     .is("deleted_at", null)
     .order("started_at", { ascending: false })
     .limit(2000);
-  const { data: strava } = await supabase
-    .from("strava_connections")
-    .select("last_synced_at")
-    .eq("user_id", ctx.userId)
-    .maybeSingle();
-  const stravaConfigured = !!process.env.STRAVA_CLIENT_ID && !!process.env.STRAVA_CLIENT_SECRET;
   const runs = data ?? [];
   const sum = summariseRuns(runs, new Date(), ctx.timezone);
   const maxWeek = Math.max(1, ...sum.weeks.map((w) => w.distanceM));
@@ -222,20 +221,31 @@ export default async function RunningPage({
             </button>
           </form>
         </Card>
-        <Card title="Import a GPX file">
+        <Card title="Import workouts">
           <form action={importGpx} className="space-y-2">
             <input
               type="file"
               name="file"
-              accept=".gpx,application/gpx+xml,text/xml"
+              multiple
+              accept=".gpx,.tcx,.gz,application/gpx+xml,text/xml"
               required
-              aria-label="GPX file"
+              aria-label="Workout files"
               className="text-sm"
             />
+            <select
+              name="origin"
+              defaultValue="strava"
+              aria-label="Exported from"
+              className={inputClass}
+            >
+              <option value="strava">Exported from Strava</option>
+              <option value="mapmyrun">Exported from MapMyRun</option>
+              <option value="gpx">Other (Garmin, Samsung, watch)</option>
+            </select>
             <input
               name="name"
               maxLength={200}
-              placeholder="Name (optional)"
+              placeholder="Name (optional, single file only)"
               aria-label="Name"
               className={inputClass}
             />
@@ -247,9 +257,10 @@ export default async function RunningPage({
               ))}
             </select>
             <p className="text-xs text-muted">
-              GPX exports from Strava, Garmin, Samsung Health and most watches work if they include
-              timestamps. Up to 4 MB. Distance, time and climb are calculated here, so they can
-              differ slightly from your watch.
+              Upload .gpx or .tcx files (also .gpx.gz / .tcx.gz from Strava&apos;s bulk export), up
+              to {RUN_IMPORT_MAX_FILES} files and 4 MB in total per upload. FIT files are not
+              supported. Files need timestamps. Distance, time and climb are calculated here, so
+              they can differ slightly from the app. Uploading a workout twice is skipped.
             </p>
             <button type="submit" className={subtleButton}>
               Import
@@ -257,39 +268,6 @@ export default async function RunningPage({
           </form>
         </Card>
       </div>
-
-      <Card title="Strava" className="mb-6">
-        {!stravaConfigured ? (
-          <p className="text-sm text-muted">Strava is not configured on the server.</p>
-        ) : strava ? (
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <form action={syncStrava}>
-              <button type="submit" className={primaryButton}>
-                Sync Strava
-              </button>
-            </form>
-            <form action={disconnectStrava}>
-              <button type="submit" className={subtleButton}>
-                Disconnect
-              </button>
-            </form>
-            <span className="text-xs text-muted">
-              {strava.last_synced_at
-                ? `Last synced ${localDate(strava.last_synced_at, ctx.timezone)}`
-                : "Not synced yet"}
-            </span>
-          </div>
-        ) : (
-          <a href="/api/strava/connect" className={subtleButton}>
-            Connect Strava
-          </a>
-        )}
-        <p className="mt-2 text-xs text-muted">
-          Imports your runs (not rides or other sports) with distance, time, climb, heart rate and a
-          route outline, up to a year back on the first sync. Only read access to your own
-          activities is requested. Imported runs stay if you disconnect.
-        </p>
-      </Card>
 
       <h2 className="mb-3 text-sm font-medium">Activities ({runs.length})</h2>
       {runs.length ? (
@@ -304,7 +282,7 @@ export default async function RunningPage({
                   <span className="block truncate">{r.name}</span>
                   <span className="block truncate text-xs text-muted">
                     {localDate(r.started_at, ctx.timezone)} · {KIND_LABELS[r.kind] ?? r.kind}
-                    {r.source === "gpx" ? " · GPX" : r.source === "strava" ? " · Strava" : ""}
+                    {SOURCE_LABELS[r.source] ? ` · ${SOURCE_LABELS[r.source]}` : ""}
                   </span>
                 </span>
                 <span className="shrink-0 text-right text-xs">

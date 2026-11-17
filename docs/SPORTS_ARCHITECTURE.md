@@ -17,7 +17,7 @@ repeatable. Chess and Running are the only sports that exist today.
    unique index on `(user_id, source, external_id)` so re-importing is a no-op.
 4. **Sources.** Each record has a `source` (manual, a file format, an external service). Imports parse and validate on the server, skip
    duplicates and report what was skipped. File formats used so far: PGN (chess), GPX (running). External services (Lichess, Chess.com,
-   Strava) are called only from server code with an injectable `fetch` so they can be unit-tested with mocked responses.
+   Strava, removed 2026-11-17) are called only from server code with an injectable `fetch` so they can be unit-tested with mocked responses.
 5. **Logic.** Pure functions in `apps/web/lib/<sport>.ts` (parsing, statistics, scheduling) with unit tests; pages stay thin.
 6. **Pages.** `/<sport>` dashboard plus detail pages and server actions, written like the existing ones (zod parse, `flash`, revision guard).
 7. **Verification.** An RLS test in `backend/supabase/tests/rls_<sport>.sql` (owner, workspace admin, outsider, anonymous; no literal
