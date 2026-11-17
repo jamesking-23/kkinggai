@@ -42,3 +42,5 @@ Engine check (manual, not in CI): `lib/engine.ts` bundled with esbuild and run i
 `rls_notifications.sql` (3 users plus anon): 11 results, all as expected.
 
 `apps/mobile`: `format.test.ts` (4 tests). Android JS bundling checked with `expo export`; the app has not been run on a device or emulator.
+
+`apps/desktop`: 2 Rust unit tests for the navigation allow-list (run on Linux). The Windows build is untested until the Desktop workflow has run.

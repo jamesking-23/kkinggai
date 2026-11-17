@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The window loads only the local start page and the hosted site, and is granted no native permissions.",
+  "windows": ["main"],
+  "permissions": []
+}

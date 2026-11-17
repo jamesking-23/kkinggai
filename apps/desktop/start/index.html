@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KKINGG AI</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: system-ui, sans-serif;
+        background: #faf8f4;
+        color: #1c1917;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #1c1917;
+          color: #f5f5f4;
+        }
+      }
+      main {
+        text-align: center;
+        max-width: 28rem;
+        padding: 1.5rem;
+      }
+      h1 {
+        font-size: 1.6rem;
+        margin: 0 0 0.5rem;
+        color: #8a6d1f;
+      }
+      p {
+        margin: 0.25rem 0 1rem;
+        opacity: 0.8;
+      }
+      button {
+        font: inherit;
+        padding: 0.6rem 1.2rem;
+        border: 0;
+        border-radius: 0.5rem;
+        background: #8a6d1f;
+        color: #fff;
+        cursor: pointer;
+      }
+      [hidden] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>KKINGG AI</h1>
+      <p id="status">Connecting…</p>
+      <button id="retry" hidden>Try again</button>
+    </main>
+    <script src="./loader.js"></script>
+  </body>
+</html>

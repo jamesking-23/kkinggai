@@ -10,10 +10,24 @@ export default tseslint.config(
       "**/.turbo/**",
       "**/next-env.d.ts",
       "apps/web/public/engine/**",
+      "apps/desktop/src-tauri/**",
     ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    files: ["apps/desktop/start/**/*.js"],
+    languageOptions: {
+      globals: {
+        window: "readonly",
+        document: "readonly",
+        fetch: "readonly",
+        AbortController: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+      },
+    },
+  },
   {
     files: ["**/*.mjs"],
     languageOptions: { globals: { URL: "readonly", console: "readonly" } },
