@@ -91,3 +91,5 @@ Migration `20261117000018_ventures`: `ventures` and `venture_entries` (private p
 Migration `20261117000020_venture_contacts_tasks`: `venture_contacts` and `venture_tasks` (private per user, composite FK `(venture_id, user_id)`, soft delete); no DELETE policies.
 
 Migration `20261117000021_personal_life`: `journal_entries` (one per user per day) and `important_dates` (validated calendar day); private per user, soft delete, no DELETE policies.
+
+Migration `20261117000022_news`: `news_feeds` (soft delete, unique URL per user) and `news_items` (unique per feed and guid); private per user; no DELETE policies; items are derived data hidden with their feed.

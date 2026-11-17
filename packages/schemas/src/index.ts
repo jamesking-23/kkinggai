@@ -662,3 +662,20 @@ export const importantDateSchema = z
     },
     { message: "That date does not exist", path: ["day"] },
   );
+
+// ---------- news ----------
+export const feedSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .max(500, "Use an address under 500 characters")
+    .url("Enter a valid web address")
+    .refine((u) => /^https?:\/\//i.test(u), "Addresses must start with http:// or https://"),
+  topic: optionalText(60),
+});
+
+export const newsItemStateSchema = z.object({
+  id: z.string().uuid(),
+  read: z.enum(["0", "1"]).optional(),
+  saved: z.enum(["0", "1"]).optional(),
+});

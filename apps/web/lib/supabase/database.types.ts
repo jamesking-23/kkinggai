@@ -1162,6 +1162,96 @@ export type Database = {
         };
         Relationships: [];
       };
+      news_feeds: {
+        Row: {
+          created_at: string;
+          deleted_at: string | null;
+          id: string;
+          last_error: string | null;
+          last_fetched_at: string | null;
+          revision: number;
+          title: string;
+          topic: string | null;
+          updated_at: string;
+          url: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          last_error?: string | null;
+          last_fetched_at?: string | null;
+          revision?: number;
+          title?: string;
+          topic?: string | null;
+          updated_at?: string;
+          url: string;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          last_error?: string | null;
+          last_fetched_at?: string | null;
+          revision?: number;
+          title?: string;
+          topic?: string | null;
+          updated_at?: string;
+          url?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      news_items: {
+        Row: {
+          created_at: string;
+          feed_id: string;
+          guid: string;
+          id: string;
+          link: string | null;
+          published_at: string | null;
+          read_at: string | null;
+          revision: number;
+          saved: boolean;
+          summary: string;
+          title: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          feed_id: string;
+          guid: string;
+          id?: string;
+          link?: string | null;
+          published_at?: string | null;
+          read_at?: string | null;
+          revision?: number;
+          saved?: boolean;
+          summary?: string;
+          title: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          feed_id?: string;
+          guid?: string;
+          id?: string;
+          link?: string | null;
+          published_at?: string | null;
+          read_at?: string | null;
+          revision?: number;
+          saved?: boolean;
+          summary?: string;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       study_notes: {
         Row: {
           body: string;

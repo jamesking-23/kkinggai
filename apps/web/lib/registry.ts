@@ -142,3 +142,12 @@ registry.register({
   status: "active",
   nav: { label: "Personal", href: "/personal", icon: "heart", order: 90 },
 });
+
+registry.register({
+  id: "news",
+  name: "News",
+  description: "RSS and Atom feeds you choose",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "News", href: "/news", icon: "newspaper", order: 85 },
+});

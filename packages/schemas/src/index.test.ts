@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  feedSchema,
   forgotPasswordSchema,
   importantDateSchema,
   journalSchema,
   loginSchema,
+  newsItemStateSchema,
   registerSchema,
   resetPasswordSchema,
   ventureContactSchema,
@@ -413,5 +415,21 @@ describe("personal schemas", () => {
     expect(importantDateSchema.safeParse({ title: "x", month: "13", day: "1" }).success).toBe(
       false,
     );
+  });
+});
+
+describe("news schemas", () => {
+  it("accepts only http(s) feed addresses", () => {
+    expect(
+      feedSchema.parse({ url: " https://example.com/feed.xml ", topic: "" }).topic,
+    ).toBeUndefined();
+    expect(feedSchema.safeParse({ url: "ftp://example.com/f" }).success).toBe(false);
+    expect(feedSchema.safeParse({ url: "javascript:alert(1)" }).success).toBe(false);
+    expect(feedSchema.safeParse({ url: "not a url" }).success).toBe(false);
+  });
+  it("validates item state changes", () => {
+    const id = "00000000-0000-4000-8000-000000000000";
+    expect(newsItemStateSchema.safeParse({ id, read: "1" }).success).toBe(true);
+    expect(newsItemStateSchema.safeParse({ id, saved: "yes" }).success).toBe(false);
   });
 });
