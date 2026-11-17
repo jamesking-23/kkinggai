@@ -89,3 +89,5 @@ Migration `20261115000016_strava`: `strava_connections` (one row per user, owner
 Migration `20261117000018_ventures`: `ventures` and `venture_entries` (private per user, soft delete, composite FK `(venture_id, user_id)`, amount > 0); no DELETE policies.
 
 Migration `20261117000020_venture_contacts_tasks`: `venture_contacts` and `venture_tasks` (private per user, composite FK `(venture_id, user_id)`, soft delete); no DELETE policies.
+
+Migration `20261117000021_personal_life`: `journal_entries` (one per user per day) and `important_dates` (validated calendar day); private per user, soft delete, no DELETE policies.

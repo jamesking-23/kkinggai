@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   forgotPasswordSchema,
+  importantDateSchema,
+  journalSchema,
   loginSchema,
   registerSchema,
   resetPasswordSchema,
@@ -382,5 +384,34 @@ describe("venture contact and task schemas", () => {
     expect(
       ventureTaskStatusSchema.safeParse({ id: ventureId, ventureId, status: "blocked" }).success,
     ).toBe(false);
+  });
+});
+
+describe("personal schemas", () => {
+  it("parses journal tags and optional mood", () => {
+    const j = journalSchema.parse({
+      entryDate: "2026-11-17",
+      body: " hi ",
+      tags: "Run, Family ,",
+      mood: "",
+    });
+    expect(j).toMatchObject({ body: "hi", tags: ["run", "family"] });
+    expect(j.mood).toBeUndefined();
+    expect(journalSchema.safeParse({ entryDate: "2026-11-17", body: "  " }).success).toBe(false);
+    expect(journalSchema.safeParse({ entryDate: "2026-11-17", body: "x", mood: "6" }).success).toBe(
+      false,
+    );
+  });
+  it("rejects dates that do not exist", () => {
+    expect(importantDateSchema.safeParse({ title: "x", month: "2", day: "30" }).success).toBe(
+      false,
+    );
+    expect(importantDateSchema.safeParse({ title: "x", month: "2", day: "29" }).success).toBe(true);
+    expect(
+      importantDateSchema.safeParse({ title: "x", month: "2", day: "29", year: "2027" }).success,
+    ).toBe(false);
+    expect(importantDateSchema.safeParse({ title: "x", month: "13", day: "1" }).success).toBe(
+      false,
+    );
   });
 });

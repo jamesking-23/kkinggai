@@ -1078,6 +1078,90 @@ export type Database = {
         };
         Relationships: [];
       };
+      journal_entries: {
+        Row: {
+          body: string;
+          created_at: string;
+          deleted_at: string | null;
+          entry_date: string;
+          id: string;
+          mood: number | null;
+          revision: number;
+          tags: string[];
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          body: string;
+          created_at?: string;
+          deleted_at?: string | null;
+          entry_date: string;
+          id?: string;
+          mood?: number | null;
+          revision?: number;
+          tags?: string[];
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          deleted_at?: string | null;
+          entry_date?: string;
+          id?: string;
+          mood?: number | null;
+          revision?: number;
+          tags?: string[];
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      important_dates: {
+        Row: {
+          created_at: string;
+          day: number;
+          deleted_at: string | null;
+          id: string;
+          kind: string;
+          month: number;
+          notes: string;
+          revision: number;
+          title: string;
+          updated_at: string;
+          user_id: string;
+          year: number | null;
+        };
+        Insert: {
+          created_at?: string;
+          day: number;
+          deleted_at?: string | null;
+          id?: string;
+          kind?: string;
+          month: number;
+          notes?: string;
+          revision?: number;
+          title: string;
+          updated_at?: string;
+          user_id?: string;
+          year?: number | null;
+        };
+        Update: {
+          created_at?: string;
+          day?: number;
+          deleted_at?: string | null;
+          id?: string;
+          kind?: string;
+          month?: number;
+          notes?: string;
+          revision?: number;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+          year?: number | null;
+        };
+        Relationships: [];
+      };
       study_notes: {
         Row: {
           body: string;

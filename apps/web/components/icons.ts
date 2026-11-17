@@ -1,6 +1,7 @@
 import {
   Box,
   Briefcase,
+  Heart,
   Calendar,
   CheckSquare,
   Crown,
@@ -28,6 +29,7 @@ const icons: Record<string, LucideIcon> = {
   lightbulb: Lightbulb,
   lock: Lock,
   briefcase: Briefcase,
+  heart: Heart,
   crown: Crown,
   trophy: Trophy,
   footprints: Footprints,

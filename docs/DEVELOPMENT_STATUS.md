@@ -320,3 +320,10 @@ Next: future-sports architecture (Phase 11 close-out), then Phase 12 (business a
 - Written: migration `20261117000020_venture_contacts_tasks.sql` (applied): `venture_contacts` and `venture_tasks`, private per user, composite FK to the owner's venture, soft delete, no DELETE policies. Page `/business/[id]` with task list (status, due dates, overdue marker) and contact list; link from each venture card. Schemas and unit tests added.
 - Verified: live rolled-back test `rls_venture_contacts_tasks.sql`, 15 results all as expected; lint, typecheck, tests (schemas 33, web 122) and build pass.
 - Not verified: the pages signed in. Not built: editing tasks or contacts (remove and re-add), venture reports, invoices, a Phase 12 reading beyond this slice if the master prompt asks for more. Tasks and contacts are not in universal search.
+
+## Session update: Phase 13 part 1, Personal (journal and important dates) (2026-11-17)
+
+- Assumption: the exact Phase 13 wording could not be recovered after context compaction, so this slice is a conservative reading: a private journal (one entry per day, optional mood and tags) and yearly important dates with an "upcoming" list. Adjust if the master prompt asks for more (for example health, relationships, finance links).
+- Written: migration `20261117000021_personal_life.sql` (applied): `journal_entries` (unique per user and day while not deleted) and `important_dates` (month/day validated including leap years, optional year); module `personal` (`/personal`, order 90), enabled for existing workspaces. `lib/personal.ts` (next-occurrence maths; 29 Feb observed on 28 Feb in non-leap years), schemas, actions, page.
+- Verified: live rolled-back test `rls_personal.sql`, 16 results all as expected; security advisors show only accepted warnings; lint, typecheck, tests (schemas 35, web 127) and build pass.
+- Not verified: the page signed in. Not built: editing entries (remove and rewrite), search integration (journal text is deliberately not in universal search), reminders for upcoming dates, health or finance tracking.

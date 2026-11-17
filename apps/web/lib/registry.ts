@@ -133,3 +133,12 @@ registry.register({
   status: "active",
   nav: { label: "Business", href: "/business", icon: "briefcase", order: 80 },
 });
+
+registry.register({
+  id: "personal",
+  name: "Personal",
+  description: "Private journal and important dates",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Personal", href: "/personal", icon: "heart", order: 90 },
+});

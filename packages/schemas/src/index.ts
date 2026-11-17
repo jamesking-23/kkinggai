@@ -622,3 +622,43 @@ export const ventureTaskStatusSchema = z.object({
   ventureId: z.string().uuid(),
   status: z.enum(VENTURE_TASK_STATUSES),
 });
+
+// ---------- personal ----------
+export const DATE_KINDS = ["birthday", "anniversary", "deadline", "other"] as const;
+
+export const journalSchema = z.object({
+  entryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a date"),
+  mood: z.preprocess(blank, z.coerce.number().int().min(1).max(5).optional()),
+  body: z
+    .string()
+    .trim()
+    .min(1, "Write something first")
+    .max(20000, "Use at most 20,000 characters"),
+  tags: z.preprocess(
+    (v) =>
+      typeof v === "string"
+        ? v
+            .split(",")
+            .map((t) => t.trim().toLowerCase())
+            .filter(Boolean)
+        : v,
+    z.array(z.string().max(40)).max(20).default([]),
+  ),
+});
+
+export const importantDateSchema = z
+  .object({
+    title: z.string().trim().min(1, "Enter a title").max(160),
+    kind: z.enum(DATE_KINDS).default("other"),
+    month: z.coerce.number().int().min(1).max(12),
+    day: z.coerce.number().int().min(1).max(31),
+    year: z.preprocess(blank, z.coerce.number().int().min(1900).max(2200).optional()),
+    notes: optionalText(1000),
+  })
+  .refine(
+    (v) => {
+      const d = new Date(Date.UTC(v.year ?? 2000, v.month - 1, v.day));
+      return d.getUTCMonth() === v.month - 1 && d.getUTCDate() === v.day;
+    },
+    { message: "That date does not exist", path: ["day"] },
+  );

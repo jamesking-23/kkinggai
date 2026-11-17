@@ -36,3 +36,4 @@ Engine check (manual, not in CI): `lib/engine.ts` bundled with esbuild and run i
 `rls_ventures.sql` (3 users): 15 results, all as expected.
 `rls_search_business_sports.sql` (3 users plus anon): 4 results, all as expected.
 `rls_venture_contacts_tasks.sql` (3 users plus anon): 15 results, all as expected.
+`rls_personal.sql` (3 users plus anon): 16 results, all as expected.
