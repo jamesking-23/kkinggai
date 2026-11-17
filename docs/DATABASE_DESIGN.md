@@ -87,3 +87,5 @@ Migration `20261115000015_run_plans`: `run_plans` (private per user, active/arch
 Migration `20261115000016_strava`: `strava_connections` (one row per user, owner-only RLS with an owner DELETE policy; tokens readable by the owner's own session).
 
 Migration `20261117000018_ventures`: `ventures` and `venture_entries` (private per user, soft delete, composite FK `(venture_id, user_id)`, amount > 0); no DELETE policies.
+
+Migration `20261117000020_venture_contacts_tasks`: `venture_contacts` and `venture_tasks` (private per user, composite FK `(venture_id, user_id)`, soft delete); no DELETE policies.

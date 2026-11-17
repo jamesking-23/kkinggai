@@ -138,6 +138,9 @@ export default async function BusinessPage({
                   </a>
                 )}
                 {v.started_on && <span className="text-muted">Started {v.started_on}</span>}
+                <a href={`/business/${v.id}`} className="text-primary">
+                  Tasks and contacts
+                </a>
                 <form action={deleteVenture} className="ml-auto">
                   <input type="hidden" name="id" value={v.id} />
                   <input type="hidden" name="revision" value={v.revision} />

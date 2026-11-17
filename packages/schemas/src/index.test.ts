@@ -4,8 +4,11 @@ import {
   loginSchema,
   registerSchema,
   resetPasswordSchema,
+  ventureContactSchema,
   ventureEntrySchema,
   ventureSchema,
+  ventureTaskSchema,
+  ventureTaskStatusSchema,
 } from "./index";
 
 describe("auth schemas", () => {
@@ -354,5 +357,30 @@ describe("venture schemas", () => {
     expect(ventureEntrySchema.safeParse({ ...base, amount: "1.234" }).success).toBe(false);
     expect(ventureEntrySchema.safeParse({ ...base, amount: "abc" }).success).toBe(false);
     expect(ventureEntrySchema.safeParse({ ...base, kind: "gift", amount: 1 }).success).toBe(false);
+  });
+});
+
+describe("venture contact and task schemas", () => {
+  const ventureId = "00000000-0000-4000-8000-000000000000";
+  it("validates contacts", () => {
+    expect(ventureContactSchema.parse({ ventureId, name: " Ann ", email: "" })).toMatchObject({
+      name: "Ann",
+      role: "other",
+    });
+    expect(ventureContactSchema.safeParse({ ventureId, name: "x", email: "nope" }).success).toBe(
+      false,
+    );
+    expect(ventureContactSchema.safeParse({ ventureId, name: "x", role: "boss" }).success).toBe(
+      false,
+    );
+  });
+  it("validates tasks and status changes", () => {
+    expect(ventureTaskSchema.safeParse({ ventureId, title: "" }).success).toBe(false);
+    expect(
+      ventureTaskSchema.parse({ ventureId, title: "Register", dueOn: "" }).dueOn,
+    ).toBeUndefined();
+    expect(
+      ventureTaskStatusSchema.safeParse({ id: ventureId, ventureId, status: "blocked" }).success,
+    ).toBe(false);
   });
 });

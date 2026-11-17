@@ -946,6 +946,93 @@ export type Database = {
         };
         Relationships: [];
       };
+      venture_contacts: {
+        Row: {
+          created_at: string;
+          deleted_at: string | null;
+          email: string | null;
+          id: string;
+          name: string;
+          notes: string;
+          phone: string | null;
+          revision: number;
+          role: string;
+          updated_at: string;
+          user_id: string;
+          venture_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          deleted_at?: string | null;
+          email?: string | null;
+          id?: string;
+          name: string;
+          notes?: string;
+          phone?: string | null;
+          revision?: number;
+          role?: string;
+          updated_at?: string;
+          user_id?: string;
+          venture_id: string;
+        };
+        Update: {
+          created_at?: string;
+          deleted_at?: string | null;
+          email?: string | null;
+          id?: string;
+          name?: string;
+          notes?: string;
+          phone?: string | null;
+          revision?: number;
+          role?: string;
+          updated_at?: string;
+          user_id?: string;
+          venture_id?: string;
+        };
+        Relationships: [];
+      };
+      venture_tasks: {
+        Row: {
+          created_at: string;
+          deleted_at: string | null;
+          due_on: string | null;
+          id: string;
+          notes: string;
+          revision: number;
+          status: string;
+          title: string;
+          updated_at: string;
+          user_id: string;
+          venture_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          deleted_at?: string | null;
+          due_on?: string | null;
+          id?: string;
+          notes?: string;
+          revision?: number;
+          status?: string;
+          title: string;
+          updated_at?: string;
+          user_id?: string;
+          venture_id: string;
+        };
+        Update: {
+          created_at?: string;
+          deleted_at?: string | null;
+          due_on?: string | null;
+          id?: string;
+          notes?: string;
+          revision?: number;
+          status?: string;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+          venture_id?: string;
+        };
+        Relationships: [];
+      };
       venture_entries: {
         Row: {
           amount: number;

@@ -590,3 +590,35 @@ export const ventureEntrySchema = z.object({
   category: optionalText(60),
   description: optionalText(500),
 });
+
+export const CONTACT_ROLES = [
+  "customer",
+  "supplier",
+  "partner",
+  "investor",
+  "mentor",
+  "other",
+] as const;
+export const VENTURE_TASK_STATUSES = ["todo", "doing", "done"] as const;
+
+export const ventureContactSchema = z.object({
+  ventureId: z.string().uuid(),
+  name: z.string().trim().min(1, "Enter a name").max(120),
+  role: z.enum(CONTACT_ROLES).default("other"),
+  email: z.preprocess(blank, z.string().trim().max(200).email("Enter a valid email").optional()),
+  phone: optionalText(40),
+  notes: optionalText(2000),
+});
+
+export const ventureTaskSchema = z.object({
+  ventureId: z.string().uuid(),
+  title: z.string().trim().min(1, "Enter a title").max(200),
+  dueOn: optionalDate,
+  notes: optionalText(2000),
+});
+
+export const ventureTaskStatusSchema = z.object({
+  id: z.string().uuid(),
+  ventureId: z.string().uuid(),
+  status: z.enum(VENTURE_TASK_STATUSES),
+});

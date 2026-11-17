@@ -314,3 +314,9 @@ Next: future-sports architecture (Phase 11 close-out), then Phase 12 (business a
 - Written: migration `20261117000019_search_business_sports.sql` (applied) extends `search_workspace` with ventures, chess games and runs (private: owner only, SECURITY INVOKER); search page labels and module gating updated.
 - Verified: live rolled-back test `rls_search_business_sports.sql`: owner finds all three kinds, workspace admin and outsider find none, anon cannot call the function. The business deployment `33b235e` was READY.
 - Not verified: the search page signed in. Search is still ILIKE matching (no full-text ranking).
+
+## Session update: Phase 12 part 2, venture tasks and contacts (2026-11-17)
+
+- Written: migration `20261117000020_venture_contacts_tasks.sql` (applied): `venture_contacts` and `venture_tasks`, private per user, composite FK to the owner's venture, soft delete, no DELETE policies. Page `/business/[id]` with task list (status, due dates, overdue marker) and contact list; link from each venture card. Schemas and unit tests added.
+- Verified: live rolled-back test `rls_venture_contacts_tasks.sql`, 15 results all as expected; lint, typecheck, tests (schemas 33, web 122) and build pass.
+- Not verified: the pages signed in. Not built: editing tasks or contacts (remove and re-add), venture reports, invoices, a Phase 12 reading beyond this slice if the master prompt asks for more. Tasks and contacts are not in universal search.
