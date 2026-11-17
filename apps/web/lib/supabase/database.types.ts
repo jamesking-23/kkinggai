@@ -1252,6 +1252,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      media_items: {
+        Row: {
+          created_at: string;
+          creator: string | null;
+          deleted_at: string | null;
+          finished_on: string | null;
+          id: string;
+          kind: string;
+          notes: string;
+          rating: number | null;
+          revision: number;
+          started_on: string | null;
+          status: string;
+          tags: string[];
+          title: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          creator?: string | null;
+          deleted_at?: string | null;
+          finished_on?: string | null;
+          id?: string;
+          kind: string;
+          notes?: string;
+          rating?: number | null;
+          revision?: number;
+          started_on?: string | null;
+          status?: string;
+          tags?: string[];
+          title: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          creator?: string | null;
+          deleted_at?: string | null;
+          finished_on?: string | null;
+          id?: string;
+          kind?: string;
+          notes?: string;
+          rating?: number | null;
+          revision?: number;
+          started_on?: string | null;
+          status?: string;
+          tags?: string[];
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       study_notes: {
         Row: {
           body: string;

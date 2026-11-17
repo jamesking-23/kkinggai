@@ -336,3 +336,10 @@ Next: future-sports architecture (Phase 11 close-out), then Phase 12 (business a
 - Verified: live rolled-back RLS test `rls_news.sql`, 15 results all as expected; security advisors unchanged; 14 unit tests for the parser and fetcher using mocked responses; lint, typecheck, tests (schemas 37, web 141) and build pass.
 - NOT verified: no real feed has been fetched (this sandbox cannot reach the web), so behaviour against real-world feeds (odd encodings, huge feeds, sites that block server user agents) is unknown. The page has not been opened signed in. Nothing refreshes automatically; scheduled refresh belongs to Phase 16.
 - Not built: item search, folders beyond a free-text topic, OPML import, full-article reading, summaries.
+
+## Session update: Phase 15 part 1, Entertainment media log (2026-11-17)
+
+- Assumption: the exact Phase 15 wording could not be recovered, so this slice is a conservative reading: a private log of books, films, shows, games, music and podcasts (status, 1-5 rating, dates, notes, tags). No lifestyle features (recipes, travel, wellbeing), no recommendations and no external catalogue lookups yet.
+- Written: migration `20261117000023_entertainment_media.sql` (applied): `media_items`, owner only, soft delete, no DELETE policy; module `entertainment` (`/entertainment`, order 95). `lib/media.ts` (yearly summary, average rating on finished items, stars), schemas, actions, page with status and kind filters. Marking an item done stamps today's date in the viewer's time zone when no finish date exists.
+- Verified: live rolled-back RLS test `rls_media.sql`, 13 results all as expected; lint, typecheck, tests (schemas 40, web 144) and build pass.
+- Not verified: the page signed in. Not built: editing title or notes (remove and re-add), search integration, cover art or metadata lookup, the lifestyle half of this phase.

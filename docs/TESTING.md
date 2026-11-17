@@ -38,3 +38,4 @@ Engine check (manual, not in CI): `lib/engine.ts` bundled with esbuild and run i
 `rls_venture_contacts_tasks.sql` (3 users plus anon): 15 results, all as expected.
 `rls_personal.sql` (3 users plus anon): 16 results, all as expected.
 `rls_news.sql` (3 users plus anon): 15 results, all as expected. `feeds.test.ts`: 14 tests with mocked fetch and DNS only.
+`rls_media.sql` (3 users plus anon): 13 results, all as expected.

@@ -5,6 +5,8 @@ import {
   importantDateSchema,
   journalSchema,
   loginSchema,
+  mediaSchema,
+  mediaStatusSchema,
   newsItemStateSchema,
   registerSchema,
   resetPasswordSchema,
@@ -431,5 +433,36 @@ describe("news schemas", () => {
     const id = "00000000-0000-4000-8000-000000000000";
     expect(newsItemStateSchema.safeParse({ id, read: "1" }).success).toBe(true);
     expect(newsItemStateSchema.safeParse({ id, saved: "yes" }).success).toBe(false);
+  });
+});
+
+describe("media schemas", () => {
+  it("parses a media item with tags and optional fields", () => {
+    const m = mediaSchema.parse({
+      kind: "book",
+      title: " Dune ",
+      tags: "SciFi, classic",
+      rating: "",
+      startedOn: "",
+    });
+    expect(m).toMatchObject({ title: "Dune", status: "wishlist", tags: ["scifi", "classic"] });
+    expect(m.rating).toBeUndefined();
+  });
+  it("rejects bad kinds, ratings and date order", () => {
+    expect(mediaSchema.safeParse({ kind: "painting", title: "x" }).success).toBe(false);
+    expect(mediaSchema.safeParse({ kind: "book", title: "x", rating: "6" }).success).toBe(false);
+    expect(
+      mediaSchema.safeParse({
+        kind: "book",
+        title: "x",
+        startedOn: "2026-02-01",
+        finishedOn: "2026-01-01",
+      }).success,
+    ).toBe(false);
+  });
+  it("validates status updates", () => {
+    const id = "00000000-0000-4000-8000-000000000000";
+    expect(mediaStatusSchema.parse({ id, status: "done", rating: "4" }).rating).toBe(4);
+    expect(mediaStatusSchema.safeParse({ id, status: "finished" }).success).toBe(false);
   });
 });

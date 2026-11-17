@@ -151,3 +151,12 @@ registry.register({
   status: "active",
   nav: { label: "News", href: "/news", icon: "newspaper", order: 85 },
 });
+
+registry.register({
+  id: "entertainment",
+  name: "Entertainment",
+  description: "Books, films, shows, games and music you track",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Entertainment", href: "/entertainment", icon: "film", order: 95 },
+});

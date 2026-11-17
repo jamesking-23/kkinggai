@@ -679,3 +679,39 @@ export const newsItemStateSchema = z.object({
   read: z.enum(["0", "1"]).optional(),
   saved: z.enum(["0", "1"]).optional(),
 });
+
+// ---------- entertainment ----------
+export const MEDIA_KINDS = ["book", "movie", "show", "game", "music", "podcast", "other"] as const;
+export const MEDIA_STATUSES = ["wishlist", "in_progress", "done", "dropped"] as const;
+
+export const mediaSchema = z
+  .object({
+    kind: z.enum(MEDIA_KINDS),
+    title: z.string().trim().min(1, "Enter a title").max(200),
+    creator: optionalText(160),
+    status: z.enum(MEDIA_STATUSES).default("wishlist"),
+    rating: z.preprocess(blank, z.coerce.number().int().min(1).max(5).optional()),
+    startedOn: optionalDate,
+    finishedOn: optionalDate,
+    notes: optionalText(4000),
+    tags: z.preprocess(
+      (v) =>
+        typeof v === "string"
+          ? v
+              .split(",")
+              .map((t) => t.trim().toLowerCase())
+              .filter(Boolean)
+          : v,
+      z.array(z.string().max(40)).max(20).default([]),
+    ),
+  })
+  .refine((v) => !v.startedOn || !v.finishedOn || v.finishedOn >= v.startedOn, {
+    message: "The finish date cannot be before the start date",
+    path: ["finishedOn"],
+  });
+
+export const mediaStatusSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(MEDIA_STATUSES),
+  rating: z.preprocess(blank, z.coerce.number().int().min(1).max(5).optional()),
+});
