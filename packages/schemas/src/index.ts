@@ -715,3 +715,6 @@ export const mediaStatusSchema = z.object({
   status: z.enum(MEDIA_STATUSES),
   rating: z.preprocess(blank, z.coerce.number().int().min(1).max(5).optional()),
 });
+
+// ---------- notifications ----------
+export const notificationReadSchema = z.object({ id: z.string().uuid() });

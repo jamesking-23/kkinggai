@@ -8,6 +8,7 @@ import {
   mediaSchema,
   mediaStatusSchema,
   newsItemStateSchema,
+  notificationReadSchema,
   registerSchema,
   resetPasswordSchema,
   ventureContactSchema,
@@ -464,5 +465,14 @@ describe("media schemas", () => {
     const id = "00000000-0000-4000-8000-000000000000";
     expect(mediaStatusSchema.parse({ id, status: "done", rating: "4" }).rating).toBe(4);
     expect(mediaStatusSchema.safeParse({ id, status: "finished" }).success).toBe(false);
+  });
+});
+
+describe("notification schema", () => {
+  it("requires a uuid", () => {
+    expect(
+      notificationReadSchema.safeParse({ id: "00000000-0000-4000-8000-000000000000" }).success,
+    ).toBe(true);
+    expect(notificationReadSchema.safeParse({ id: "nope" }).success).toBe(false);
   });
 });

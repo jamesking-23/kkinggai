@@ -1,5 +1,6 @@
 import {
   Box,
+  Bell,
   Briefcase,
   Film,
   Heart,
@@ -30,6 +31,7 @@ const icons: Record<string, LucideIcon> = {
   repeat: Repeat,
   lightbulb: Lightbulb,
   lock: Lock,
+  bell: Bell,
   briefcase: Briefcase,
   film: Film,
   heart: Heart,

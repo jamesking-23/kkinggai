@@ -160,3 +160,12 @@ registry.register({
   status: "active",
   nav: { label: "Entertainment", href: "/entertainment", icon: "film", order: 95 },
 });
+
+registry.register({
+  id: "notifications",
+  name: "Notifications",
+  description: "Inbox for deadlines, dates and reminders",
+  version: "0.1.0",
+  status: "active",
+  nav: { label: "Notifications", href: "/notifications", icon: "bell", order: 5 },
+});

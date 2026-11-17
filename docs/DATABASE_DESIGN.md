@@ -95,3 +95,5 @@ Migration `20261117000021_personal_life`: `journal_entries` (one per user per da
 Migration `20261117000022_news`: `news_feeds` (soft delete, unique URL per user) and `news_items` (unique per feed and guid); private per user; no DELETE policies; items are derived data hidden with their feed.
 
 Migration `20261117000023_entertainment_media`: `media_items` (private per user, soft delete, kind/status/rating/date checks); no DELETE policy.
+
+Migrations `20261117000024_notifications` and `..25_notifications_schedule`: `notifications` (dedupe key per user; users may only update `read_at`; no insert or delete policies), `generate_notifications()` (security definer, not executable by API roles) and an hourly pg_cron job.
