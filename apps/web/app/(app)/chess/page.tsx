@@ -72,6 +72,10 @@ export default async function ChessPage({ searchParams }: { searchParams: Promis
         <a href="/chess/train" className="text-primary">
           Train on your mistakes{dueCount ? ` (${dueCount} due)` : ""}
         </a>
+        {" · "}
+        <a href="/chess/play" className="text-primary">
+          Play a friend
+        </a>
       </p>
 
       {(profile?.lichess_username || profile?.chesscom_username) && (

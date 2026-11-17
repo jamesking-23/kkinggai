@@ -1334,6 +1334,54 @@ export type Database = {
         };
         Relationships: [];
       };
+      mp_games: {
+        Row: {
+          black_id: string | null;
+          black_name: string | null;
+          created_at: string;
+          creator_id: string;
+          draw_offer_by: string | null;
+          id: string;
+          invite_code: string | null;
+          moves: string[];
+          resigned_by: string | null;
+          status: string;
+          updated_at: string;
+          white_id: string | null;
+          white_name: string | null;
+        };
+        Insert: {
+          black_id?: string | null;
+          black_name?: string | null;
+          created_at?: string;
+          creator_id?: string;
+          draw_offer_by?: string | null;
+          id?: string;
+          invite_code?: string | null;
+          moves?: string[];
+          resigned_by?: string | null;
+          status?: string;
+          updated_at?: string;
+          white_id?: string | null;
+          white_name?: string | null;
+        };
+        Update: {
+          black_id?: string | null;
+          black_name?: string | null;
+          created_at?: string;
+          creator_id?: string;
+          draw_offer_by?: string | null;
+          id?: string;
+          invite_code?: string | null;
+          moves?: string[];
+          resigned_by?: string | null;
+          status?: string;
+          updated_at?: string;
+          white_id?: string | null;
+          white_name?: string | null;
+        };
+        Relationships: [];
+      };
       study_notes: {
         Row: {
           body: string;
@@ -2121,6 +2169,11 @@ export type Database = {
           title: string;
         }[];
       };
+      mp_create: { Args: { color: string }; Returns: { id: string; invite_code: string }[] };
+      mp_join: { Args: { code: string }; Returns: string };
+      mp_move: { Args: { game: string; expected_ply: number; uci: string }; Returns: number };
+      mp_resign: { Args: { game: string }; Returns: undefined };
+      mp_draw: { Args: { game: string; action: string }; Returns: undefined };
       can_write_workspace: { Args: { ws: string }; Returns: boolean };
       has_workspace_role: {
         Args: { roles: Database["public"]["Enums"]["workspace_role"][]; ws: string };
