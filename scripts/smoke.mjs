@@ -1,3 +1,4 @@
+import process from "node:process";
 // Unauthenticated smoke test against a locally started production build (`pnpm --filter @kkingg/web start`).
 // Checks that every app route redirects to /login without a session, that the public pages render, and that the page
 // logs no console errors. It does NOT sign in, so it says nothing about signed-in behaviour.
