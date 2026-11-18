@@ -96,3 +96,34 @@ export async function drawAction(formData: FormData) {
   revalidatePath(path);
   redirect(path);
 }
+
+export async function rematchGame(formData: FormData) {
+  const id = uuid.safeParse(formData.get("id"));
+  if (!id.success) flash(PLAY, "error", "Invalid game");
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("mp_rematch", { game: id.data! });
+  if (error || !data)
+    flash(`${PLAY}/${id.data}`, "error", error ? reason(error) : "Could not offer a rematch");
+  revalidatePath(PLAY);
+  redirect(`${PLAY}/${data}`);
+}
+
+export async function acceptInvite(formData: FormData) {
+  const id = uuid.safeParse(formData.get("id"));
+  if (!id.success) flash(PLAY, "error", "Invalid game");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("mp_accept", { game: id.data! });
+  if (error) flash(PLAY, "error", reason(error));
+  revalidatePath(PLAY);
+  redirect(`${PLAY}/${id.data}`);
+}
+
+export async function declineInvite(formData: FormData) {
+  const id = uuid.safeParse(formData.get("id"));
+  if (!id.success) flash(PLAY, "error", "Invalid game");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("mp_decline", { game: id.data! });
+  if (error) flash(PLAY, "error", reason(error));
+  revalidatePath(PLAY);
+  flash(PLAY, "message", "Invitation declined");
+}

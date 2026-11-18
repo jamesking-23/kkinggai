@@ -101,3 +101,5 @@ Migrations `20261117000024_notifications` and `..25_notifications_schedule`: `no
 Migration `20261117000026_multiplayer_chess`: `mp_games` (participants select only; insert, update and delete revoked from API roles; moves stored as UCI text[] up to 600; status waiting/active/resigned/draw/cancelled). Changes go through SECURITY DEFINER `mp_*` RPCs (execute for authenticated only). Rules of chess are not enforced in the database; results such as checkmate are derived from the moves by clients.
 
 Migration `20261117000027_remove_strava_add_mapmyrun`: drops `strava_connections` (it held no rows) and widens the `run_activities.source` check to manual/gpx/strava/samsung/mapmyrun. Existing 'strava' rows, if any, stay valid.
+
+Migration `20261118000028_mp_rematch`: `mp_games` gains `invited_id` and `rematch_of` (one non-cancelled rematch per game); the select policy also admits the invited user. New SECURITY DEFINER RPCs `mp_rematch`, `mp_accept`, `mp_decline` (authenticated only); `mp_resign` also clears the reservation when a waiting game is cancelled.

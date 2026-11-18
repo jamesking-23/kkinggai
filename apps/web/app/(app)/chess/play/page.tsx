@@ -10,8 +10,9 @@ import {
   inputClass,
   PageHeader,
   primaryButton,
+  subtleButton,
 } from "../../../../components/ui";
-import { createGame } from "./actions";
+import { acceptInvite, createGame, declineInvite } from "./actions";
 
 export default async function PlayPage({ searchParams }: { searchParams: Promise<FlashParams> }) {
   const ctx = await getAppContext();
@@ -21,7 +22,7 @@ export default async function PlayPage({ searchParams }: { searchParams: Promise
   const { data: games } = await supabase
     .from("mp_games")
     .select(
-      "id, status, moves, white_id, black_id, white_name, black_name, resigned_by, updated_at",
+      "id, status, moves, white_id, black_id, white_name, black_name, resigned_by, invited_id, updated_at",
     )
     .order("updated_at", { ascending: false })
     .limit(50);
@@ -57,6 +58,30 @@ export default async function PlayPage({ searchParams }: { searchParams: Promise
       {games?.length ? (
         <ul className="space-y-2">
           {games.map((g) => {
+            if (g.invited_id === ctx.userId && g.status === "waiting") {
+              const from = g.white_id ? g.white_name : g.black_name;
+              return (
+                <li
+                  key={g.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-3 text-sm"
+                >
+                  <span>
+                    {from ?? "Someone"} invited you to a rematch (you play{" "}
+                    {g.white_id ? "black" : "white"})
+                  </span>
+                  <span className="flex gap-2">
+                    <form action={acceptInvite}>
+                      <input type="hidden" name="id" value={g.id} />
+                      <button className={primaryButton}>Accept</button>
+                    </form>
+                    <form action={declineInvite}>
+                      <input type="hidden" name="id" value={g.id} />
+                      <button className={subtleButton}>Decline</button>
+                    </form>
+                  </span>
+                </li>
+              );
+            }
             const mineWhite = g.white_id === ctx.userId;
             const opp = mineWhite ? g.black_name : g.white_name;
             const s = summarise(g, replayMoves(g.moves));

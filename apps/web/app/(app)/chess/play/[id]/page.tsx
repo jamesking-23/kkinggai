@@ -5,9 +5,9 @@ import { getAppContext } from "../../../../../lib/session";
 import { createClient } from "../../../../../lib/supabase/server";
 import { movePairs, replayMoves, sideOf, summarise } from "../../../../../lib/mp";
 import type { FlashParams } from "../../../../../lib/form";
-import { Card, Flash, PageHeader, subtleButton } from "../../../../../components/ui";
+import { Card, Flash, PageHeader, primaryButton, subtleButton } from "../../../../../components/ui";
 import { MpBoard } from "../../../../../components/mp-board";
-import { drawAction, resignGame } from "../actions";
+import { acceptInvite, declineInvite, drawAction, resignGame, rematchGame } from "../actions";
 
 const START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -40,6 +40,17 @@ export default async function GamePage({
   const offerByMe = g.draw_offer_by === ctx.userId;
   const offerByThem = !!g.draw_offer_by && !offerByMe;
   const opp = side === "white" ? g.black_name : g.white_name;
+  const invitedMe = g.status === "waiting" && g.invited_id === ctx.userId;
+  const { data: rematch } = side
+    ? await supabase
+        .from("mp_games")
+        .select("id")
+        .eq("rematch_of", g.id)
+        .neq("status", "cancelled")
+        .maybeSingle()
+    : { data: null };
+  const canRematch =
+    !!side && !rematch && g.moves.length > 0 && (s.finished || g.status === "active");
   const hidden = (name: string, v: string) => <input type="hidden" name={name} value={v} />;
 
   return (
@@ -55,7 +66,7 @@ export default async function GamePage({
       />
       <Flash error={error} message={message} />
 
-      {g.status === "waiting" && link && (
+      {g.status === "waiting" && link && !g.invited_id && (
         <Card>
           <p className="mb-2 text-sm">Send this link to your opponent:</p>
           <input
@@ -64,6 +75,34 @@ export default async function GamePage({
             className="w-full rounded-md border border-border p-2 text-xs"
           />
         </Card>
+      )}
+
+      {g.status === "waiting" && g.invited_id && !invitedMe && (
+        <Card>
+          <p className="text-sm">Waiting for your opponent to accept this rematch.</p>
+        </Card>
+      )}
+      {invitedMe && (
+        <Card>
+          <p className="mb-2 text-sm">You have been invited to this game.</p>
+          <div className="flex gap-2">
+            <form action={acceptInvite}>
+              {hidden("id", g.id)}
+              <button className={primaryButton}>Accept</button>
+            </form>
+            <form action={declineInvite}>
+              {hidden("id", g.id)}
+              <button className={subtleButton}>Decline</button>
+            </form>
+          </div>
+        </Card>
+      )}
+      {rematch && (
+        <p className="mt-2 text-sm">
+          <a href={`/chess/play/${rematch.id}`} className="text-primary">
+            Go to the rematch →
+          </a>
+        </p>
       )}
 
       <div className="mt-4 flex flex-wrap gap-6">
@@ -83,6 +122,12 @@ export default async function GamePage({
               <span className="text-muted">No moves yet</span>
             )}
           </div>
+          {canRematch && s.finished && (
+            <form action={rematchGame}>
+              {hidden("id", g.id)}
+              <button className={subtleButton}>Offer rematch</button>
+            </form>
+          )}
           {side && (g.status === "waiting" || active) && (
             <div className="flex flex-wrap gap-2">
               <form action={resignGame}>

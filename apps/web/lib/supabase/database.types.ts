@@ -1304,6 +1304,8 @@ export type Database = {
           draw_offer_by: string | null;
           id: string;
           invite_code: string | null;
+          invited_id: string | null;
+          rematch_of: string | null;
           moves: string[];
           resigned_by: string | null;
           status: string;
@@ -1319,6 +1321,8 @@ export type Database = {
           draw_offer_by?: string | null;
           id?: string;
           invite_code?: string | null;
+          invited_id?: string | null;
+          rematch_of?: string | null;
           moves?: string[];
           resigned_by?: string | null;
           status?: string;
@@ -1334,6 +1338,8 @@ export type Database = {
           draw_offer_by?: string | null;
           id?: string;
           invite_code?: string | null;
+          invited_id?: string | null;
+          rematch_of?: string | null;
           moves?: string[];
           resigned_by?: string | null;
           status?: string;
@@ -2130,6 +2136,9 @@ export type Database = {
           title: string;
         }[];
       };
+      mp_rematch: { Args: { game: string }; Returns: string };
+      mp_accept: { Args: { game: string }; Returns: string };
+      mp_decline: { Args: { game: string }; Returns: undefined };
       mp_create: { Args: { color: string }; Returns: { id: string; invite_code: string }[] };
       mp_join: { Args: { code: string }; Returns: string };
       mp_move: { Args: { game: string; expected_ply: number; uci: string }; Returns: number };
