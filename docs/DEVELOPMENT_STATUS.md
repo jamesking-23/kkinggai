@@ -387,3 +387,9 @@ Next: future-sports architecture (Phase 11 close-out), then Phase 12 (business a
 - Verified: live rolled-back test `rls_mp_rematch.sql`: 16 results as expected in the main run (offer, colour swap, one-open-rematch, self-accept blocked, outsider blocked from seeing/accepting/declining, accept seats the invited user, black cannot move first, anon blocked), plus a separate run confirming the decline path (decliner no longer sees the cancelled game, status is cancelled, and a new rematch is then allowed). Because the decline checks were split across two runs, the file contains them in one script that was not run exactly as saved. Repo lint, typecheck, tests and build pass. Advisors: only accepted warnings plus 3 intentional ones (the new RPCs are executable by signed-in users).
 - NOT verified: no real two-account play in a browser. The database cannot tell that a game ended by checkmate, so a rematch can be offered from any game that has moves (the button shows once the client sees the game is over).
 - Still not built: clocks, Elo ratings, realtime (still polling), spectators.
+
+## Session update: Phase 20 part 2, route-protection smoke test (2026-11-18)
+
+- Written: `scripts/smoke.mjs` (`pnpm smoke`), which discovers every page route and loads it in headless Chromium against a local production build.
+- Verified: 41 routes, 0 failures, 0 console errors. Every protected route redirects to /login when signed out; the public pages render.
+- NOT verified: anything signed in. Still needed: the manual smoke test in RELEASE_CHECKLIST.md with a real account.

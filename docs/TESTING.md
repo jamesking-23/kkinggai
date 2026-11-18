@@ -46,3 +46,5 @@ Engine check (manual, not in CI): `lib/engine.ts` bundled with esbuild and run i
 `apps/mobile`: `format.test.ts` (4 tests). Android JS bundling checked with `expo export`; the app has not been run on a device or emulator.
 
 `apps/desktop`: 2 Rust unit tests for the navigation allow-list (run on Linux). The Desktop workflow has built Windows installers on `windows-latest` (Rust tests and bundling passed); the installers have not been run.
+
+Unauthenticated smoke test (`pnpm smoke`, manual, not in CI): start the production build locally (`NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:9 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=dummy next start -p 3100` in `apps/web`), then `NODE_PATH=$(npm root -g) pnpm smoke`. Run on 2026-11-18: all 41 page routes checked in headless Chromium; the 37 app routes redirect to /login without a session and the 4 public pages (login, register, forgot-password, reset-password) load with no console errors. It does not sign in, so it proves route protection only, not any signed-in behaviour.
