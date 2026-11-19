@@ -428,3 +428,10 @@ Other open items are in the per-phase notes below.
 - Test gap: the "untimed game" claim check was refused with "Game not found" (the second player was not in that game), so the "clock is not running" branch itself is untested.
 - NOT verified: the live countdown in a browser, and two real accounts playing a timed game.
 - Known limits: nothing flags a game by itself; an abandoned timed game stays "active" until the opponent claims. A timeout win against a side with insufficient material is not scored as a draw. Draw offers and acceptances are not blocked once a clock has run out. The countdown is a display only; the database is the authority. Still not built: Elo ratings, realtime (still polling), spectators.
+
+## Session update: unread badge in the navigation (2026-11-19)
+
+- Written: the Notifications entry in the sidebar shows the number of unread notifications (99+ above 99; a small corner badge when the sidebar is collapsed). The count is one lightweight query (`head` count, no rows) in the app layout, only when the Notifications module is enabled; if it fails, no badge is shown.
+- Verified: unit tests for the badge text (2 new, web now 184 passing); lint, typecheck, build and format pass.
+- NOT verified: how it looks in a browser, or that "Mark all read" updates the badge without a reload (it relies on the page revalidation re-rendering the layout).
+- Still open for notifications: delivery by push, email or SMS (needs a provider account and keys from the owner; nothing is stubbed), retention of old notifications.

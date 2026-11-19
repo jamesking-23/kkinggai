@@ -1,11 +1,12 @@
 "use client";
 
+import { badgeLabel } from "../lib/badge";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronsUpDown, LogOut, Menu, PanelLeft, Search, Settings, X } from "lucide-react";
 import { iconFor } from "./icons";
 
-export type NavItem = { id: string; label: string; href: string; icon: string };
+export type NavItem = { id: string; label: string; href: string; icon: string; badge?: number };
 type Workspace = { id: string; name: string; kind: string };
 
 type ShellProps = {
@@ -74,12 +75,20 @@ export function Shell(props: ShellProps) {
             href={item.href}
             title={item.label}
             aria-current={active ? "page" : undefined}
-            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm ${
+            className={`relative flex items-center gap-3 rounded-md px-3 py-2 text-sm ${
               active ? "bg-raised text-text" : "text-muted hover:bg-raised hover:text-text"
             }`}
           >
             <Icon size={18} className={active ? "text-primary" : ""} />
             {!collapsed && <span>{item.label}</span>}
+            {item.badge ? (
+              <span
+                className={`rounded-full bg-primary px-1.5 text-xs font-semibold text-white ${collapsed ? "absolute right-1 top-1" : "ml-auto"}`}
+                aria-label={`${item.badge} unread`}
+              >
+                {badgeLabel(item.badge)}
+              </span>
+            ) : null}
           </a>
         );
       })}
