@@ -1367,6 +1367,51 @@ export type Database = {
         };
         Relationships: [];
       };
+      task_attachments: {
+        Row: {
+          created_at: string;
+          created_by: string;
+          deleted_at: string | null;
+          file_name: string;
+          id: string;
+          mime_type: string;
+          revision: number;
+          size_bytes: number;
+          storage_path: string;
+          task_id: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          file_name: string;
+          id?: string;
+          mime_type: string;
+          revision?: number;
+          size_bytes: number;
+          storage_path: string;
+          task_id: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string;
+          deleted_at?: string | null;
+          file_name?: string;
+          id?: string;
+          mime_type?: string;
+          revision?: number;
+          size_bytes?: number;
+          storage_path?: string;
+          task_id?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
       study_notes: {
         Row: {
           body: string;

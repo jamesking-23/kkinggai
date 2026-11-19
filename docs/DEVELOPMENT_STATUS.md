@@ -32,7 +32,7 @@ others 22), production build, `pnpm audit` clean, a signed-out route smoke test 
 Assumption for Phases 12-19: the exact wording of those phases was lost when the conversation was compacted, so each was built
 on a conservative reading. If the master prompt asks for more, treat these as the base to extend.
 
-Known gaps (Phase 5): task attachments, planning views, push/email reminders.
+Known gaps (Phase 5): planning views, push/email reminders.
 Other open items are in the per-phase notes below.
 
 ## Exact next action
@@ -450,3 +450,11 @@ Other open items are in the per-phase notes below.
 - NOT verified: in a browser, or the action against the live database (only the SQL function was run live).
 - Known limits: reopening a completed recurring task does not remove the copy already created. Subtasks, reminders and attachments are not copied to the next occurrence. A monthly task due on the 29th-31st drifts to a shorter day after a short month (31 Jan, 28 Feb, 28 Mar) because the original day is not stored. Only the five fixed repeat choices exist (no "every 2 weeks" or chosen weekdays).
 - Still open for Phase 5: task attachments, planning views.
+
+## Session update: task attachments (2026-11-19)
+
+- Written: migration `20261119000031_task_attachments` (applied). Private bucket `task-files` (25 MB bucket limit, mime allowlist without legacy .doc) and table `task_attachments`, shared by the workspace: members read, owner/admin/member write, viewers and outsiders cannot. Files live under `<workspace id>/<task id>/`, enforced by a check constraint and by storage policies that tolerate malformed folder names. No delete or update policy on the table or the bucket: removing an attachment soft-deletes the row and keeps the file. Task page `/tasks/[id]` gained an Attachments card (list, signed 5-minute download links, upload, remove).
+- Upload order: metadata row first, file second. The bucket has no delete policy, so a file uploaded before a failed insert could never be cleaned up; if the upload fails the row is soft-deleted instead.
+- Verified: live rolled-back test `rls_task_attachments.sql`, 19 results as expected (owner, viewer, outsider, anon; path of another task, spoofed created_by, foreign workspace folder, malformed folder, root-level object all refused; soft delete bumps revision; no delete/update policies). 9 action tests with a mocked database, 1 schema test. Web 220, schemas 44 passing; lint, typecheck, build and format pass. Advisors unchanged.
+- Not verified: the upload and download through a signed-in browser against the real bucket (the bucket's mime allowlist and 25 MB limit were not exercised from the app). Removed files stay in storage. Attachments are not copied to the next copy of a recurring task, are not in universal search, and files are capped at 4 MB by the hosting request limit.
+- Still open for Phase 5: planning views.

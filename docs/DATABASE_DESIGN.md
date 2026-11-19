@@ -107,3 +107,5 @@ Migration `20261118000028_mp_rematch`: `mp_games` gains `invited_id` and `rematc
 Migration `20261119000029_mp_clocks`: `mp_games` gains `clock_seconds`, `clock_increment`, `white_ms`, `black_ms`, `clock_started_at`, `timed_out_by`; status adds `timeout`. `mp_create(color, minutes, increment)` replaces `mp_create(color)`; `mp_move` deducts time and records a loss instead of a late move; new `mp_claim_timeout`; `mp_rematch` copies the time control.
 
 Migration `20261119000030_task_recurrence`: check constraint limiting `tasks.recurrence_rule` to five fixed rules; `complete_task(task_id, expected_revision, next_due)` (SECURITY INVOKER) completes a task, records the completion and creates the next copy atomically.
+
+Migration `20261119000031_task_attachments`: private bucket `task-files` and `task_attachments` (workspace-shared; select for members, insert/update for writers, no delete policy). Paths are `<workspace id>/<task id>/<uuid>-<name>`, enforced by a check constraint and by `storage.objects` select/insert policies (no update or delete policy on the bucket, so files are kept when an attachment is removed).

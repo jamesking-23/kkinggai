@@ -57,3 +57,5 @@ Unauthenticated smoke test (`pnpm smoke`, manual, not in CI): start the producti
 `apps/web/app/(app)/edit-actions.test.ts`: 8 tests of `updateProject`, `updateGoal` and `updateEvent` with a mocked database (no real database): update payloads, revision guard, clearing blank fields, validation, conflict message, UTC conversion of event times.
 
 `rls_task_recurrence.sql` (3 users plus anon): 16 results as expected. `lib/recurrence.test.ts` (9 tests) and `app/(app)/tasks/actions.test.ts` (7 tests, mocked database) cover the recurring-task logic.
+
+`rls_task_attachments.sql` (3 users plus anon): 19 results as expected, covering the table and the `task-files` storage policies. `app/(app)/tasks/[id]/attachments.test.ts` (9 tests, mocked database and storage) covers validation, insert-then-upload order and soft delete.

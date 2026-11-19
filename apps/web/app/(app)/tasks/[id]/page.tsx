@@ -17,6 +17,15 @@ import type { FlashParams } from "../../../../lib/form";
 import { dismissReminder } from "../../reminder-actions";
 import { idForRule, RECURRENCES } from "../../../../lib/recurrence";
 import { addReminder, addSubtask, toggleSubtask, updateTask } from "./actions";
+import { addAttachment, removeAttachment } from "./attachments";
+
+const SIGNED_URL_SECONDS = 300;
+
+function fileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
 
 export default async function TaskDetailPage({
   params,
@@ -41,26 +50,42 @@ export default async function TaskDetailPage({
     .maybeSingle();
   if (!task) notFound();
 
-  const [{ data: subtasks }, { data: reminders }, { data: projects }] = await Promise.all([
-    supabase
-      .from("tasks")
-      .select("id, title, status, revision")
-      .eq("parent_task_id", id)
-      .is("deleted_at", null)
-      .order("created_at"),
-    supabase
-      .from("reminders")
-      .select("id, message, remind_at")
-      .eq("target_type", "task")
-      .eq("target_id", id)
-      .is("dismissed_at", null)
-      .order("remind_at"),
-    supabase
-      .from("projects")
-      .select("id, name")
-      .eq("workspace_id", ctx.current.id)
-      .eq("status", "active"),
-  ]);
+  const [{ data: subtasks }, { data: reminders }, { data: projects }, { data: attachments }] =
+    await Promise.all([
+      supabase
+        .from("tasks")
+        .select("id, title, status, revision")
+        .eq("parent_task_id", id)
+        .is("deleted_at", null)
+        .order("created_at"),
+      supabase
+        .from("reminders")
+        .select("id, message, remind_at")
+        .eq("target_type", "task")
+        .eq("target_id", id)
+        .is("dismissed_at", null)
+        .order("remind_at"),
+      supabase
+        .from("projects")
+        .select("id, name")
+        .eq("workspace_id", ctx.current.id)
+        .eq("status", "active"),
+      supabase
+        .from("task_attachments")
+        .select("id, file_name, size_bytes, storage_path, revision, created_at")
+        .eq("task_id", id)
+        .is("deleted_at", null)
+        .order("created_at"),
+    ]);
+  const attachmentPaths = (attachments ?? []).map((a) => a.storage_path);
+  const signed = attachmentPaths.length
+    ? ((
+        await supabase.storage
+          .from("task-files")
+          .createSignedUrls(attachmentPaths, SIGNED_URL_SECONDS)
+      ).data ?? [])
+    : [];
+  const urlFor = new Map(signed.map((s) => [s.path, s.signedUrl]));
   const when = new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -209,6 +234,59 @@ export default async function TaskDetailPage({
           </form>
         </Card>
       )}
+
+      <Card title="Attachments" className="mb-6">
+        {attachments?.length ? (
+          <ul className="mb-4 space-y-2">
+            {attachments.map((a) => {
+              const url = urlFor.get(a.storage_path);
+              return (
+                <li key={a.id} className="flex items-center justify-between gap-3 text-sm">
+                  <span>
+                    {url ? (
+                      <a href={url} className="text-primary" target="_blank" rel="noreferrer">
+                        {a.file_name}
+                      </a>
+                    ) : (
+                      a.file_name
+                    )}{" "}
+                    <span className="text-xs text-muted">· {fileSize(a.size_bytes)}</span>
+                  </span>
+                  <form action={removeAttachment}>
+                    <input type="hidden" name="id" value={a.id} />
+                    <input type="hidden" name="taskId" value={id} />
+                    <input type="hidden" name="revision" value={a.revision} />
+                    <button type="submit" className={subtleButton}>
+                      Remove
+                    </button>
+                  </form>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="mb-4">
+            <Empty>No files attached.</Empty>
+          </div>
+        )}
+        <form action={addAttachment} className="flex flex-wrap gap-2">
+          <input type="hidden" name="taskId" value={id} />
+          <input
+            name="file"
+            type="file"
+            required
+            aria-label="File to attach"
+            className={inputClass}
+          />
+          <button type="submit" className={subtleButton}>
+            Attach
+          </button>
+        </form>
+        <p className="mt-3 text-xs text-muted">
+          Up to 4 MB: PDF, images, text, Word (.docx) or Excel. Visible to everyone in the
+          workspace. Removing hides the file; it is not erased from storage.
+        </p>
+      </Card>
 
       <Card title="Reminders">
         {reminders?.length ? (

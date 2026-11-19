@@ -497,3 +497,12 @@ describe("task repeat", () => {
     ).toBe(false);
   });
 });
+
+describe("task attachment limits", () => {
+  it("shares the vault limit and drops legacy .doc", async () => {
+    const m = await import("./index");
+    expect(m.TASK_FILE_MAX_BYTES).toBe(m.VAULT_MAX_UPLOAD_BYTES);
+    expect(m.TASK_FILE_MIME_TYPES).not.toContain("application/msword");
+    expect(m.TASK_FILE_MIME_TYPES).toContain("application/pdf");
+  });
+});

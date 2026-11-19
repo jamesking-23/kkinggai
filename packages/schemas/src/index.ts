@@ -187,6 +187,11 @@ export const VAULT_MIME_TYPES = [
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ] as const;
 
+// ---------- task attachments ----------
+/** Same limit and list as the vault, minus legacy .doc, because the task-files bucket does not accept it. */
+export const TASK_FILE_MAX_BYTES = VAULT_MAX_UPLOAD_BYTES;
+export const TASK_FILE_MIME_TYPES = VAULT_MIME_TYPES.filter((t) => t !== "application/msword");
+
 const vaultTags = z.preprocess(
   (v) =>
     typeof v === "string"
