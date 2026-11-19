@@ -33,3 +33,7 @@ This is a self-review by the developer (Claude) of what was checked and what was
 - No dependency vulnerability audit was run in this pass.
 - No review of Vercel project settings (preview protection, env scoping) beyond what was configured earlier.
 - Mobile app and desktop shell have never run on a real device.
+
+## Dependency audit (2026-11-19)
+
+`pnpm audit` found 6 production and 15 total advisories at the start of the session (PostCSS via Next, zod 3, minimatch via Expo, and a group in the Vitest test toolchain, 3 of them critical but only reachable when running Vitest's UI or dev server). Fixed by: zod 3 to 4.6.7 (one API change, `invalid_type_error` to `error`; amount messages re-checked by hand), pnpm overrides for `postcss` (>=8.5.23) and `minimatch` (>=11.0.1), and Vitest 2 to 4.1.12 with Vite 6.4.4. After the change `pnpm audit` reports no known vulnerabilities, and lint, typecheck, all tests (web 182, schemas 41) and the build pass. The audit only covers known advisories in the lockfile at that moment; rerun it before a release. The overrides force newer PostCSS and minimatch than their parents ask for; they build and pass the tests, but watch for breakage when Next or Expo is upgraded.

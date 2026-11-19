@@ -32,5 +32,6 @@ Mark each item only when it has actually been done. "Written" is not "tested".
 
 ## Release
 
+- [ ] Run `pnpm audit` again
 - [ ] Update `DEVELOPMENT_STATUS.md` with what was actually observed
 - [ ] Tag `v0.1.0` only after the smoke test above passes

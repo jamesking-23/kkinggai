@@ -586,7 +586,7 @@ export const ventureEntrySchema = z.object({
   amount: z.preprocess(
     (v) => (typeof v === "string" ? v.replace(/,/g, "").trim() : v),
     z.coerce
-      .number({ invalid_type_error: "Enter an amount" })
+      .number({ error: "Enter an amount" })
       .positive("Amount must be more than zero")
       .max(999_999_999_999, "Amount is too large")
       .refine((n) => Math.round(n * 100) / 100 === n, "Use at most two decimal places"),
