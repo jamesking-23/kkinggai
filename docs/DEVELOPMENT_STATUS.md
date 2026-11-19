@@ -32,7 +32,7 @@ others 22), production build, `pnpm audit` clean, a signed-out route smoke test 
 Assumption for Phases 12-19: the exact wording of those phases was lost when the conversation was compacted, so each was built
 on a conservative reading. If the master prompt asks for more, treat these as the base to extend.
 
-Known gaps (Phase 5): planning views, push/email reminders.
+Known gaps (Phase 5): push/email reminders (parked), richer planning (drag to reschedule, week/day grid).
 Other open items are in the per-phase notes below.
 
 ## Exact next action
@@ -458,3 +458,10 @@ Other open items are in the per-phase notes below.
 - Verified: live rolled-back test `rls_task_attachments.sql`, 19 results as expected (owner, viewer, outsider, anon; path of another task, spoofed created_by, foreign workspace folder, malformed folder, root-level object all refused; soft delete bumps revision; no delete/update policies). 9 action tests with a mocked database, 1 schema test. Web 220, schemas 44 passing; lint, typecheck, build and format pass. Advisors unchanged.
 - Not verified: the upload and download through a signed-in browser against the real bucket (the bucket's mime allowlist and 25 MB limit were not exercised from the app). Removed files stay in storage. Attachments are not copied to the next copy of a recurring task, are not in universal search, and files are capped at 4 MB by the hosting request limit.
 - Still open for Phase 5: planning views.
+
+## Session update: task planning view (2026-11-19)
+
+- Written: `/tasks?view=plan` (Open / Plan / All switch). Open tasks are grouped into Overdue, Today, Tomorrow, Next 7 days, Later and No due date, by due date in the user's time zone (`lib/planning.ts`). Same rows as the list (complete, open, delete). No database change.
+- Verified: 5 unit tests for the bucket boundaries, the Kampala/UTC day edge, undated and finished tasks. Web 225 passing; lint, typecheck, build and format pass. CI for the attachments commit `797dbbe` passed.
+- Not verified: the page signed in. Limits: reads the same 200 open tasks as the list, so a larger backlog is cut off; no drag-to-reschedule, no day/week time grid; subtasks are not shown.
+- Phase 5 is now closed except push/email reminder delivery, which the owner parked.

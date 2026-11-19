@@ -2,6 +2,8 @@ import { requireModule } from "../../../lib/modules";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
 import { isOverdue, PRIORITY_LABELS } from "../../../lib/productivity";
+import { PLAN_BUCKETS, planTasks } from "../../../lib/planning";
+import { localDate } from "../../../lib/time";
 import { labelForRule, RECURRENCES } from "../../../lib/recurrence";
 import {
   Card,
@@ -30,12 +32,13 @@ type Task = {
 export default async function TasksPage({
   searchParams,
 }: {
-  searchParams: Promise<FlashParams & { show?: string }>;
+  searchParams: Promise<FlashParams & { show?: string; view?: string }>;
 }) {
   const ctx = await getAppContext();
   requireModule(ctx, "tasks");
-  const { error, message, show } = await searchParams;
-  const showDone = show === "all";
+  const { error, message, show, view } = await searchParams;
+  const planView = view === "plan";
+  const showDone = !planView && show === "all";
 
   const supabase = await createClient();
   let query = supabase
@@ -61,7 +64,66 @@ export default async function TasksPage({
     (projects ?? []).map((p: { id: string; name: string }) => [p.id, p.name]),
   );
   const now = new Date();
+  const plan = planTasks(
+    (tasks as Task[] | null) ?? [],
+    localDate(now, ctx.timezone),
+    ctx.timezone,
+  );
   const fmt = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: ctx.timezone });
+
+  const row = (t: Task) => {
+    const done = t.status === "done";
+    const overdue = isOverdue(t, now);
+    return (
+      <li
+        key={t.id}
+        className="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3"
+      >
+        <form action={toggleTask}>
+          <input type="hidden" name="id" value={t.id} />
+          <input type="hidden" name="revision" value={t.revision} />
+          <input type="hidden" name="done" value={done ? "0" : "1"} />
+          <button
+            type="submit"
+            aria-label={done ? "Reopen task" : "Mark done"}
+            className={`h-5 w-5 rounded-full border ${done ? "border-success bg-success" : "border-muted"}`}
+          />
+        </form>
+        <div className="min-w-0 flex-1">
+          <a
+            href={`/tasks/${t.id}`}
+            className={`block truncate text-sm hover:underline ${done ? "text-muted line-through" : ""}`}
+          >
+            {t.title}
+          </a>
+          <p className="mt-0.5 text-xs text-muted">
+            {PRIORITY_LABELS[t.priority]}
+            {t.recurrence_rule
+              ? ` · ↻ ${labelForRule(t.recurrence_rule)?.toLowerCase() ?? "repeats"}`
+              : ""}
+            {t.category ? ` · ${t.category}` : ""}
+            {t.project_id && projectName.get(t.project_id)
+              ? ` · ${projectName.get(t.project_id)}`
+              : ""}
+            {t.due_at ? (
+              <span className={overdue ? "text-danger" : ""}>
+                {" "}
+                · Due {fmt.format(new Date(t.due_at))}
+                {overdue ? " (overdue)" : ""}
+              </span>
+            ) : null}
+          </p>
+        </div>
+        <form action={deleteTask}>
+          <input type="hidden" name="id" value={t.id} />
+          <input type="hidden" name="revision" value={t.revision} />
+          <button type="submit" className={subtleButton}>
+            Delete
+          </button>
+        </form>
+      </li>
+    );
+  };
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -131,8 +193,12 @@ export default async function TasksPage({
       </Card>
 
       <div className="mb-3 flex gap-2 text-sm">
-        <a href="/tasks" className={showDone ? "text-muted" : "font-medium"}>
+        <a href="/tasks" className={!planView && !showDone ? "font-medium" : "text-muted"}>
           Open
+        </a>
+        <span className="text-muted">·</span>
+        <a href="/tasks?view=plan" className={planView ? "font-medium" : "text-muted"}>
+          Plan
         </a>
         <span className="text-muted">·</span>
         <a href="/tasks?show=all" className={showDone ? "font-medium" : "text-muted"}>
@@ -140,62 +206,28 @@ export default async function TasksPage({
         </a>
       </div>
 
-      {(tasks as Task[] | null)?.length ? (
-        <ul className="space-y-2">
-          {(tasks as Task[]).map((t) => {
-            const done = t.status === "done";
-            const overdue = isOverdue(t, now);
+      {planView ? (
+        <div className="space-y-6">
+          {PLAN_BUCKETS.map((b) => {
+            const items = plan[b.id];
+            if (items.length === 0) return null;
             return (
-              <li
-                key={t.id}
-                className="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3"
-              >
-                <form action={toggleTask}>
-                  <input type="hidden" name="id" value={t.id} />
-                  <input type="hidden" name="revision" value={t.revision} />
-                  <input type="hidden" name="done" value={done ? "0" : "1"} />
-                  <button
-                    type="submit"
-                    aria-label={done ? "Reopen task" : "Mark done"}
-                    className={`h-5 w-5 rounded-full border ${done ? "border-success bg-success" : "border-muted"}`}
-                  />
-                </form>
-                <div className="min-w-0 flex-1">
-                  <a
-                    href={`/tasks/${t.id}`}
-                    className={`block truncate text-sm hover:underline ${done ? "text-muted line-through" : ""}`}
-                  >
-                    {t.title}
-                  </a>
-                  <p className="mt-0.5 text-xs text-muted">
-                    {PRIORITY_LABELS[t.priority]}
-                    {t.recurrence_rule
-                      ? ` · ↻ ${labelForRule(t.recurrence_rule)?.toLowerCase() ?? "repeats"}`
-                      : ""}
-                    {t.category ? ` · ${t.category}` : ""}
-                    {t.project_id && projectName.get(t.project_id)
-                      ? ` · ${projectName.get(t.project_id)}`
-                      : ""}
-                    {t.due_at ? (
-                      <span className={overdue ? "text-danger" : ""}>
-                        {" "}
-                        · Due {fmt.format(new Date(t.due_at))}
-                        {overdue ? " (overdue)" : ""}
-                      </span>
-                    ) : null}
-                  </p>
-                </div>
-                <form action={deleteTask}>
-                  <input type="hidden" name="id" value={t.id} />
-                  <input type="hidden" name="revision" value={t.revision} />
-                  <button type="submit" className={subtleButton}>
-                    Delete
-                  </button>
-                </form>
-              </li>
+              <section key={b.id}>
+                <h2
+                  className={`mb-2 text-sm font-medium ${b.id === "overdue" ? "text-danger" : ""}`}
+                >
+                  {b.label} <span className="text-muted">({items.length})</span>
+                </h2>
+                <ul className="space-y-2">{items.map((t) => row(t))}</ul>
+              </section>
             );
           })}
-        </ul>
+          {PLAN_BUCKETS.every((b) => plan[b.id].length === 0) && (
+            <Empty>Nothing to plan. Add a task above.</Empty>
+          )}
+        </div>
+      ) : (tasks as Task[] | null)?.length ? (
+        <ul className="space-y-2">{(tasks as Task[]).map((t) => row(t))}</ul>
       ) : (
         <Empty>{showDone ? "No tasks yet." : "No open tasks. Add one above."}</Empty>
       )}
