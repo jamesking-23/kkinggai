@@ -89,7 +89,7 @@ export default async function ProjectsPage({
       {(projects as Project[] | null)?.length ? (
         <ul className="space-y-3">
           {(projects as Project[]).map((p) => (
-            <li key={p.id} className="rounded-lg border border-border bg-surface p-4">
+            <li key={p.id} className="row-card rounded-xl border border-border p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium">{p.name}</p>

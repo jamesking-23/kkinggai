@@ -53,10 +53,18 @@ export function Shell(props: ShellProps) {
   const sidebar = (
     <nav
       aria-label="Modules"
-      className="flex h-full flex-col gap-1 border-r border-border bg-surface p-3"
+      className="flex h-full flex-col gap-1 border-r border-border bg-surface/80 p-3 backdrop-blur"
     >
       <div className="mb-3 flex items-center justify-between px-2">
-        {!collapsed && <span className="font-semibold tracking-wide">KKINGG AI</span>}
+        <span className="flex items-center gap-2.5">
+          <span
+            aria-hidden
+            className="brand-mark flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white"
+          >
+            K
+          </span>
+          {!collapsed && <span className="font-semibold tracking-[0.14em]">KKINGG AI</span>}
+        </span>
         <button
           type="button"
           onClick={toggleCollapsed}
@@ -75,10 +83,18 @@ export function Shell(props: ShellProps) {
             href={item.href}
             title={item.label}
             aria-current={active ? "page" : undefined}
-            className={`relative flex items-center gap-3 rounded-md px-3 py-2 text-sm ${
-              active ? "bg-raised text-text" : "text-muted hover:bg-raised hover:text-text"
+            className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+              active
+                ? "bg-gradient-to-r from-primary/20 to-transparent text-text"
+                : "text-muted hover:bg-raised hover:text-text"
             }`}
           >
+            {active && (
+              <span
+                aria-hidden
+                className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-primary"
+              />
+            )}
             <Icon size={18} className={active ? "text-primary" : ""} />
             {!collapsed && <span>{item.label}</span>}
             {item.badge ? (
@@ -114,7 +130,7 @@ export function Shell(props: ShellProps) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-border bg-surface px-4 py-2.5 print:hidden">
+        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-bg/70 px-4 py-2.5 backdrop-blur-md print:hidden">
           <button
             type="button"
             onClick={() => setMobileOpen((o) => !o)}
@@ -154,7 +170,7 @@ export function Shell(props: ShellProps) {
           <details className="relative ml-auto">
             <summary
               aria-label="Account menu"
-              className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-full bg-accent text-sm font-semibold"
+              className="brand-mark flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-full text-sm font-semibold text-white"
             >
               {props.displayName.trim().charAt(0).toUpperCase() || "?"}
             </summary>
@@ -181,7 +197,7 @@ export function Shell(props: ShellProps) {
           </details>
         </header>
 
-        <main className="flex-1 p-6">{props.children}</main>
+        <main className="page-rise flex-1 p-4 sm:p-6 lg:p-8">{props.children}</main>
       </div>
     </div>
   );

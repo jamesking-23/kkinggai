@@ -1,17 +1,20 @@
 import type { ReactNode } from "react";
 
 export const inputClass =
-  "w-full rounded-md border border-border bg-bg px-3 py-2 text-sm placeholder:text-muted";
-export const primaryButton =
-  "rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90";
+  "w-full rounded-lg border border-border bg-bg/80 px-3 py-2 text-sm placeholder:text-muted";
+export const primaryButton = "btn-primary rounded-lg px-4 py-2 text-sm font-semibold text-white";
 export const subtleButton =
-  "rounded-md border border-border px-3 py-1.5 text-xs text-muted hover:bg-raised hover:text-text";
+  "rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition hover:border-[#3a4152] hover:bg-raised hover:text-text";
 
 export function PageHeader(props: { title: string; subtitle?: string }) {
   return (
-    <header className="mb-6">
-      <h1 className="text-2xl font-semibold">{props.title}</h1>
-      {props.subtitle && <p className="mt-1 text-sm text-muted">{props.subtitle}</p>}
+    <header className="mb-7">
+      <h1 className="text-[1.7rem] font-semibold leading-tight tracking-tight">{props.title}</h1>
+      <div
+        className="mt-2 h-0.5 w-10 rounded-full"
+        style={{ background: "var(--brand-gradient)" }}
+      />
+      {props.subtitle && <p className="mt-2 text-sm text-muted">{props.subtitle}</p>}
     </header>
   );
 }
@@ -21,7 +24,7 @@ export function Flash(props: { error?: string; message?: string }) {
     return (
       <p
         role="alert"
-        className="mb-4 rounded-md border border-danger/40 px-3 py-2 text-sm text-danger"
+        className="mb-4 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger"
       >
         {props.error}
       </p>
@@ -30,7 +33,7 @@ export function Flash(props: { error?: string; message?: string }) {
     return (
       <p
         role="status"
-        className="mb-4 rounded-md border border-success/40 px-3 py-2 text-sm text-success"
+        className="mb-4 rounded-lg border border-success/40 bg-success/10 px-3 py-2 text-sm text-success"
       >
         {props.message}
       </p>
@@ -40,8 +43,10 @@ export function Flash(props: { error?: string; message?: string }) {
 
 export function Card(props: { title?: string; children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-lg border border-border bg-surface p-5 ${props.className ?? ""}`}>
-      {props.title && <h2 className="mb-3 font-medium">{props.title}</h2>}
+    <section className={`surface rounded-xl p-5 ${props.className ?? ""}`}>
+      {props.title && (
+        <h2 className="mb-3 text-[0.95rem] font-semibold tracking-tight">{props.title}</h2>
+      )}
       {props.children}
     </section>
   );
@@ -60,7 +65,10 @@ export function ProgressBar({ percent }: { percent: number }) {
       aria-valuemax={100}
       className="h-2 w-full overflow-hidden rounded-full bg-raised"
     >
-      <div className="h-full bg-primary" style={{ width: `${percent}%` }} />
+      <div
+        className="h-full rounded-full transition-[width] duration-500"
+        style={{ width: `${percent}%`, background: "var(--brand-gradient)" }}
+      />
     </div>
   );
 }

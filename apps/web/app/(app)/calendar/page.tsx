@@ -197,7 +197,7 @@ export default async function CalendarPage({
       {monthEvents.length ? (
         <ul className="space-y-2">
           {monthEvents.map((e) => (
-            <li key={e.id} className="rounded-lg border border-border bg-surface px-4 py-3">
+            <li key={e.id} className="row-card rounded-xl border border-border px-4 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm">{e.title}</p>

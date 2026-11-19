@@ -107,7 +107,7 @@ export default async function GoalsPage({ searchParams }: { searchParams: Promis
               g.target_value === null ? null : Number(g.target_value),
             );
             return (
-              <li key={g.id} className="rounded-lg border border-border bg-surface p-4">
+              <li key={g.id} className="row-card rounded-xl border border-border p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-medium">{g.title}</p>

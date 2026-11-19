@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { fenToBoard } from "../lib/board";
+import { Board } from "./board";
 import {
   analyseMoves,
   barPercent,
@@ -122,69 +123,68 @@ export function ChessBoard({
   const rows = fenToBoard(fens[ply] ?? fens[0]!);
   const ranks = flip ? [...rows].reverse().map((r) => [...r].reverse()) : rows;
 
+  const FILES = "abcdefgh";
+  const sq = (r: number, c: number) => `${FILES[flip ? 7 - c : c]}${flip ? r + 1 : 8 - r}`;
+  const lastUci = ply > 0 ? ucis[ply - 1] : undefined;
+
   return (
-    <div className="grid gap-4 md:grid-cols-[auto_1fr]">
-      <div>
-        {cur && (
-          <div className="mb-2 max-w-[26rem]">
-            <div
-              className="h-3 overflow-hidden rounded-sm border border-border bg-black"
-              role="img"
-              aria-label={`Evaluation ${formatScore(cur.white)} (white's view)`}
-            >
-              <div className="h-full bg-white" style={{ width: `${barPercent(cur.white)}%` }} />
-            </div>
-            <p className="mt-1 text-xs text-muted">
-              {formatScore(cur.white)} for white · depth {cur.depth}
-              {cur.bestSan ? ` · engine suggests ${cur.bestSan}` : ""}
-            </p>
-          </div>
-        )}
-        <div
-          role="img"
-          aria-label={`Board after ${ply === 0 ? "the start" : `move ${ply}`}`}
-          className="grid w-full max-w-[26rem] grid-cols-8 overflow-hidden rounded-md border border-border"
-        >
-          {ranks.flatMap((row, r) =>
-            row.map((piece, c) => (
+    <div className="grid items-start gap-6 xl:grid-cols-[auto_1fr]">
+      <Board
+        rows={ranks}
+        square={sq}
+        label={`Board after ${ply === 0 ? "the start" : `move ${ply}`}`}
+        last={lastUci ? { from: lastUci.slice(0, 2), to: lastUci.slice(2, 4) } : null}
+        before={
+          cur ? (
+            <div className="mb-2">
               <div
-                key={`${r}-${c}`}
-                className={`flex aspect-square items-center justify-center text-3xl leading-none sm:text-4xl ${
-                  (r + c) % 2 === 0 ? "bg-[#e8d9b8] text-black" : "bg-[#9c7a52] text-black"
-                }`}
+                className="h-3 overflow-hidden rounded-full border border-border bg-black"
+                role="img"
+                aria-label={`Evaluation ${formatScore(cur.white)} (white's view)`}
               >
-                {piece}
+                <div
+                  className="h-full bg-white transition-[width] duration-500"
+                  style={{ width: `${barPercent(cur.white)}%` }}
+                />
               </div>
-            )),
-          )}
-        </div>
-        <div className="mt-2 flex gap-2">
-          {(
-            [
-              ["Start", () => go(0), "⏮"],
-              ["Previous move", () => go(ply - 1), "◀"],
-              ["Next move", () => go(ply + 1), "▶"],
-              ["End", () => go(last), "⏭"],
-            ] as const
-          ).map(([label, fn, glyph]) => (
-            <button
-              key={label}
-              type="button"
-              onClick={fn}
-              aria-label={label}
-              className="rounded-md border border-border px-3 py-1 text-sm"
-            >
-              {glyph}
-            </button>
-          ))}
-        </div>
-        {played && alt?.bestSan && played.cls !== "best" && (
-          <p className="mt-2 max-w-[26rem] text-xs text-muted">
-            {CLASS_LABELS[played.cls]} (about {played.loss} centipawns lost). The engine preferred{" "}
-            {alt.bestSan}.
-          </p>
-        )}
-      </div>
+              <p className="mt-1 text-xs text-muted">
+                {formatScore(cur.white)} for white · depth {cur.depth}
+                {cur.bestSan ? ` · engine suggests ${cur.bestSan}` : ""}
+              </p>
+            </div>
+          ) : null
+        }
+        after={
+          <>
+            <div className="mt-3 flex gap-2">
+              {(
+                [
+                  ["Start", () => go(0), "⏮"],
+                  ["Previous move", () => go(ply - 1), "◀"],
+                  ["Next move", () => go(ply + 1), "▶"],
+                  ["End", () => go(last), "⏭"],
+                ] as const
+              ).map(([label, fn, glyph]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={fn}
+                  aria-label={label}
+                  className="flex-1 rounded-md border border-border px-3 py-1.5 text-sm transition hover:bg-raised"
+                >
+                  {glyph}
+                </button>
+              ))}
+            </div>
+            {played && alt?.bestSan && played.cls !== "best" && (
+              <p className="mt-2 text-xs text-muted">
+                {CLASS_LABELS[played.cls]} (about {played.loss} centipawns lost). The engine
+                preferred {alt.bestSan}.
+              </p>
+            )}
+          </>
+        }
+      />
 
       <div>
         <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">

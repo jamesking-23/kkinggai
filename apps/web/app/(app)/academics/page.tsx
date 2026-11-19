@@ -131,7 +131,7 @@ export default async function AcademicsPage({
                 )
               : null;
             return (
-              <li key={c.id} className="rounded-lg border border-border bg-surface p-4">
+              <li key={c.id} className="row-card rounded-xl border border-border p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-medium">{c.code ? `${c.code} · ${c.name}` : c.name}</p>
@@ -326,7 +326,7 @@ export default async function AcademicsPage({
       {notes?.length ? (
         <ul className="space-y-3">
           {notes.map((n) => (
-            <li key={n.id} className="rounded-lg border border-border bg-surface p-4">
+            <li key={n.id} className="row-card rounded-xl border border-border p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium">{n.title}</p>

@@ -148,7 +148,7 @@ export default async function CareerPage({ searchParams }: { searchParams: Promi
       {appList.length ? (
         <ul className="mb-8 space-y-3">
           {appList.map((a) => (
-            <li key={a.id} className="rounded-lg border border-border bg-surface p-4">
+            <li key={a.id} className="row-card rounded-xl border border-border p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium">
@@ -275,7 +275,7 @@ export default async function CareerPage({ searchParams }: { searchParams: Promi
       {prep?.length ? (
         <ul className="mb-8 space-y-3">
           {prep.map((q) => (
-            <li key={q.id} className="rounded-lg border border-border bg-surface p-4">
+            <li key={q.id} className="row-card rounded-xl border border-border p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium">{q.question}</p>
@@ -355,7 +355,7 @@ export default async function CareerPage({ searchParams }: { searchParams: Promi
       {items?.length ? (
         <ul className="space-y-3">
           {items.map((i) => (
-            <li key={i.id} className="rounded-lg border border-border bg-surface p-4">
+            <li key={i.id} className="row-card rounded-xl border border-border p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium">

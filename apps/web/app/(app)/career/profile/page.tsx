@@ -163,7 +163,7 @@ export default async function CareerProfilePage({
       {sorted.length ? (
         <ul className="space-y-3">
           {sorted.map((e) => (
-            <li key={e.id} className="rounded-lg border border-border bg-surface p-4">
+            <li key={e.id} className="row-card rounded-xl border border-border p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium">{e.title}</p>

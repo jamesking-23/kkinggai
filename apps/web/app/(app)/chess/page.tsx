@@ -206,7 +206,7 @@ export default async function ChessPage({ searchParams }: { searchParams: Promis
               <li key={g.id}>
                 <a
                   href={`/chess/${g.id}`}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm hover:bg-bg"
+                  className="flex items-center justify-between gap-3 row-card rounded-xl border border-border px-4 py-3 text-sm hover:bg-bg"
                 >
                   <span className="min-w-0">
                     <span className="block truncate">

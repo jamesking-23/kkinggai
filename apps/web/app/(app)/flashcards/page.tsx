@@ -166,7 +166,7 @@ export default async function FlashcardsPage({
             const inDeck = cardList.filter((c) => c.deck_id === d.id);
             const dueInDeck = inDeck.filter((c) => c.due_at <= nowIso).length;
             return (
-              <li key={d.id} className="rounded-lg border border-border bg-surface p-4">
+              <li key={d.id} className="row-card rounded-xl border border-border p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-medium">{d.name}</p>

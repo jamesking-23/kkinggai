@@ -36,3 +36,159 @@ body {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+
+/* ---------- premium surface layer ---------- */
+:root {
+  --glow-primary: rgba(47, 123, 255, 0.16);
+  --glow-accent: rgba(124, 108, 240, 0.14);
+  --edge: rgba(255, 255, 255, 0.06);
+  --shadow-soft: 0 1px 0 var(--edge) inset, 0 10px 30px -12px rgba(0, 0, 0, 0.55);
+  --shadow-lift: 0 1px 0 var(--edge) inset, 0 18px 40px -14px rgba(0, 0, 0, 0.7);
+  --brand-gradient: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+}
+
+body {
+  background:
+    radial-gradient(900px 500px at 8% -10%, var(--glow-primary), transparent 60%),
+    radial-gradient(800px 480px at 100% 0%, var(--glow-accent), transparent 55%), var(--color-bg);
+  background-attachment: fixed;
+  font-feature-settings: "cv11", "ss01";
+  letter-spacing: -0.003em;
+}
+
+::selection {
+  background: rgba(47, 123, 255, 0.35);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #343a48 transparent;
+}
+
+.surface {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 40%),
+    var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+.surface:hover {
+  border-color: #3a4152;
+  box-shadow: var(--shadow-lift);
+}
+.surface-raised {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0) 50%),
+    var(--color-raised);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+}
+
+.brand-text {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brand-mark {
+  background: var(--brand-gradient);
+  box-shadow: 0 6px 18px -6px rgba(47, 123, 255, 0.7);
+}
+
+.btn-primary {
+  background: var(--brand-gradient);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+    0 8px 20px -8px rgba(47, 123, 255, 0.7);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+.btn-primary:hover {
+  filter: brightness(1.08);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.3) inset,
+    0 12px 26px -8px rgba(47, 123, 255, 0.85);
+}
+.btn-primary:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+input:not([type="checkbox"]):not([type="range"]):not([type="color"]):not([type="file"]),
+select,
+textarea {
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+input:not([type="checkbox"]):not([type="range"]):not([type="color"]):focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(47, 123, 255, 0.22);
+}
+
+/* list rows that are links or cards */
+.row-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent), var(--color-surface);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+.row-card:hover {
+  border-color: #3a4152;
+  transform: translateY(-1px);
+}
+
+/* chess board */
+.board-frame {
+  box-shadow:
+    0 0 0 6px #1a1d25,
+    0 0 0 7px var(--color-border),
+    0 28px 60px -20px rgba(0, 0, 0, 0.8);
+  margin: 7px;
+}
+.board-piece {
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+  transition: transform 0.12s ease;
+}
+.board-square:not(:disabled):hover .board-piece {
+  transform: scale(1.06);
+}
+.board-square:not(:disabled) {
+  cursor: pointer;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.page-rise {
+  animation: rise 0.35s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-rise {
+    animation: none;
+  }
+  .surface,
+  .row-card,
+  .btn-primary,
+  .board-piece {
+    transition: none;
+  }
+}

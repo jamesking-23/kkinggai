@@ -129,7 +129,7 @@ export default async function VaultPage({ searchParams }: { searchParams: Promis
             const href =
               i.kind === "link" ? i.url : i.storage_path ? urlFor.get(i.storage_path) : null;
             return (
-              <li key={i.id} className="rounded-lg border border-border bg-surface p-4">
+              <li key={i.id} className="row-card rounded-xl border border-border p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-medium">

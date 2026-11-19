@@ -51,7 +51,7 @@ export default async function QuizPage({ searchParams }: { searchParams: Promise
             const chosen = answers[id] ? byId.get(answers[id]!) : undefined;
             const right = answers[id] === id;
             return (
-              <li key={id} className="rounded-lg border border-border bg-surface p-4">
+              <li key={id} className="row-card rounded-xl border border-border p-4">
                 <p className="text-sm font-medium">{card.front}</p>
                 <p className={`mt-2 text-sm ${right ? "text-success" : "text-danger"}`}>
                   {right ? "Correct" : chosen ? `Your answer: ${chosen.back}` : "No answer"}

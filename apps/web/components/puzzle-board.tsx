@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Chess } from "chess.js";
 import { fenToBoard } from "../lib/board";
-import { resolveClick } from "../lib/puzzles";
+import { legalTargets, resolveClick } from "../lib/puzzles";
+import { Board } from "./board";
 import { recordPuzzleAttempt } from "../app/(app)/chess/actions";
 
 const FILES = "abcdefgh";
@@ -55,32 +56,15 @@ export function PuzzleBoard({
 
   return (
     <div>
-      <div
-        className="grid w-full max-w-[26rem] grid-cols-8 overflow-hidden rounded-md border border-border"
-        role="group"
-        aria-label={`Puzzle board, ${side} to move`}
-      >
-        {rows.flatMap((row, r) =>
-          row.map((glyph, c) => {
-            const s = sq(r, c);
-            const dark = (r + c) % 2 === 1;
-            return (
-              <button
-                key={s}
-                type="button"
-                onClick={() => click(s)}
-                disabled={done}
-                aria-label={`${s}${glyph ? ` ${glyph}` : ""}`}
-                className={`flex aspect-square items-center justify-center text-3xl leading-none text-black sm:text-4xl ${
-                  from === s ? "bg-yellow-300" : dark ? "bg-[#9c7a52]" : "bg-[#e8d9b8]"
-                }`}
-              >
-                {glyph}
-              </button>
-            );
-          }),
-        )}
-      </div>
+      <Board
+        rows={rows}
+        square={sq}
+        label={`Puzzle board, ${side} to move`}
+        onSquare={(square) => click(square)}
+        disabled={done}
+        selected={from}
+        targets={from ? legalTargets(fen, from) : undefined}
+      />
 
       {!done ? (
         <div className="mt-3 flex items-center gap-3 text-sm">

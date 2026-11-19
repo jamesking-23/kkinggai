@@ -152,7 +152,7 @@ export default async function ResearchPage({
       {sources?.length ? (
         <ul className="space-y-3">
           {sources.map((s) => (
-            <li key={s.id} className="rounded-lg border border-border bg-surface p-4">
+            <li key={s.id} className="row-card rounded-xl border border-border p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium">

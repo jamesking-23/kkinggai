@@ -44,3 +44,13 @@ export function resolveClick(
   const pick = m.find((x) => x.promotion === wanted) ?? m.find((x) => x.promotion === "q") ?? m[0]!;
   return { uci: from + to + (pick.promotion ?? ""), san: pick.san };
 }
+
+/** Squares the piece on `from` can legally move to in this position (empty if there is none or the FEN is invalid). */
+export function legalTargets(fen: string, from: string): Set<string> {
+  try {
+    const c = new Chess(fen);
+    return new Set(c.moves({ square: from as never, verbose: true }).map((m) => m.to));
+  } catch {
+    return new Set();
+  }
+}

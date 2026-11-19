@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { fenToBoard } from "../lib/board";
-import { resolveClick } from "../lib/puzzles";
+import { legalTargets, resolveClick } from "../lib/puzzles";
+import { Board } from "./board";
 import { playMove } from "../app/(app)/chess/play/actions";
 
 const FILES = "abcdefgh";
@@ -69,40 +70,16 @@ export function MpBoard({
   }
 
   return (
-    <div
-      className={`grid w-full max-w-[28rem] grid-cols-8 overflow-hidden rounded-md border border-border ${
-        pending ? "opacity-60" : ""
-      }`}
-      role="group"
-      aria-label={`Chess board, you play ${side}`}
-    >
-      {rows.flatMap((row, r) =>
-        row.map((glyph, c) => {
-          const s = sq(r, c);
-          const dark = (r + c) % 2 === 1;
-          const hi = last && (last.from === s || last.to === s);
-          return (
-            <button
-              key={s}
-              type="button"
-              onClick={() => click(s, glyph)}
-              disabled={!canMove || pending}
-              aria-label={`${s}${glyph ? ` ${glyph}` : ""}`}
-              className={`flex aspect-square items-center justify-center text-3xl leading-none text-black sm:text-4xl ${
-                from === s
-                  ? "bg-yellow-300"
-                  : hi
-                    ? "bg-yellow-200"
-                    : dark
-                      ? "bg-[#9c7a52]"
-                      : "bg-[#e8d9b8]"
-              }`}
-            >
-              {glyph}
-            </button>
-          );
-        }),
-      )}
-    </div>
+    <Board
+      rows={rows}
+      square={sq}
+      label={`Chess board, you play ${side}`}
+      onSquare={click}
+      disabled={!canMove || pending}
+      selected={from}
+      last={last}
+      targets={from ? legalTargets(fen, from) : undefined}
+      busy={pending}
+    />
   );
 }

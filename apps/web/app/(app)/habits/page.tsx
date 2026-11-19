@@ -87,7 +87,7 @@ export default async function HabitsPage({ searchParams }: { searchParams: Promi
             return (
               <li
                 key={h.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3"
+                className="flex items-center justify-between gap-3 row-card rounded-xl border border-border px-4 py-3"
               >
                 <div>
                   <p className="text-sm font-medium">{h.name}</p>

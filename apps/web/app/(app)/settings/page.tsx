@@ -30,7 +30,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
 
       <form
         action={updateProfile}
-        className="mt-6 space-y-4 rounded-lg border border-border bg-surface p-6"
+        className="mt-6 space-y-4 row-card rounded-xl border border-border p-6"
       >
         <label className="block text-sm">
           Name

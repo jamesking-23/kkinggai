@@ -80,7 +80,9 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto max-w-4xl">
       <p className="text-sm text-muted">{dateLabel}</p>
-      <h1 className="mt-1 text-2xl font-semibold">Welcome, {ctx.displayName}</h1>
+      <h1 className="mt-1 text-3xl font-semibold tracking-tight">
+        Welcome, <span className="brand-text">{ctx.displayName}</span>
+      </h1>
       <p className="mt-1 text-sm text-muted">Workspace: {ctx.current.name}</p>
 
       {isEmpty && (

@@ -77,7 +77,7 @@ export default async function TasksPage({
     return (
       <li
         key={t.id}
-        className="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3"
+        className="flex items-center gap-3 row-card rounded-xl border border-border px-4 py-3"
       >
         <form action={toggleTask}>
           <input type="hidden" name="id" value={t.id} />
