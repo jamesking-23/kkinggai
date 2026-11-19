@@ -55,3 +55,5 @@ Unauthenticated smoke test (`pnpm smoke`, manual, not in CI): start the producti
 `apps/web/app/(app)/chess/play/actions.test.ts`: 12 tests of the multiplayer chess server actions with a mocked database client (no real database): legal move recorded with the right ply, illegal move, wrong turn, non-participant, signed-out, finished/waiting/missing game, move after checkmate while status is still active, malformed ids and moves, database error messages, join/create/resign/draw input validation. Mutation checks: ignoring game-over and skipping the legality check each make a test fail.
 
 `apps/web/app/(app)/edit-actions.test.ts`: 8 tests of `updateProject`, `updateGoal` and `updateEvent` with a mocked database (no real database): update payloads, revision guard, clearing blank fields, validation, conflict message, UTC conversion of event times.
+
+`rls_task_recurrence.sql` (3 users plus anon): 16 results as expected. `lib/recurrence.test.ts` (9 tests) and `app/(app)/tasks/actions.test.ts` (7 tests, mocked database) cover the recurring-task logic.

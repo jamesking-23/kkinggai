@@ -2162,6 +2162,10 @@ export type Database = {
         Returns: { id: string; invite_code: string }[];
       };
       mp_claim_timeout: { Args: { game: string }; Returns: undefined };
+      complete_task: {
+        Args: { task_id: string; expected_revision: number; next_due?: string | null };
+        Returns: string | null;
+      };
       mp_join: { Args: { code: string }; Returns: string };
       mp_move: { Args: { game: string; expected_ply: number; uci: string }; Returns: number };
       mp_resign: { Args: { game: string }; Returns: undefined };

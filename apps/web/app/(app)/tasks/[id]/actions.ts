@@ -5,6 +5,7 @@ import { reminderSchema, subtaskSchema, taskEditSchema } from "@kkingg/schemas";
 import { firstIssue, flash } from "../../../../lib/form";
 import { getAppContext } from "../../../../lib/session";
 import { createClient } from "../../../../lib/supabase/server";
+import { ruleFor } from "../../../../lib/recurrence";
 import { zonedTimeToUtc } from "../../../../lib/time";
 
 const STALE = "This task was changed elsewhere. Reload and try again.";
@@ -27,6 +28,7 @@ export async function updateTask(formData: FormData) {
       priority: t.priority,
       category: t.category ?? null,
       project_id: t.projectId ?? null,
+      recurrence_rule: t.repeat ? ruleFor(t.repeat) : null,
       due_at: t.dueDate ? zonedTimeToUtc(`${t.dueDate}T23:59`, ctx.timezone).toISOString() : null,
     })
     .eq("id", t.id)

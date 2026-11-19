@@ -65,6 +65,11 @@ export const taskSchema = z.object({
   dueDate: optionalDate,
   projectId: z.preprocess(blank, z.string().uuid().optional()),
   category: optionalText(60),
+  /** How the task repeats. Blank means it does not. The matching rule is stored by the web app. */
+  repeat: z.preprocess(
+    blank,
+    z.enum(["daily", "weekdays", "weekly", "monthly", "yearly"]).optional(),
+  ),
 });
 
 export const projectSchema = z.object({
@@ -145,6 +150,10 @@ export const taskEditSchema = z.object({
   dueDate: optionalDate,
   projectId: z.preprocess(blank, z.string().uuid().optional()),
   category: optionalText(60),
+  repeat: z.preprocess(
+    blank,
+    z.enum(["daily", "weekdays", "weekly", "monthly", "yearly"]).optional(),
+  ),
 });
 
 export const subtaskSchema = z.object({

@@ -476,3 +476,24 @@ describe("notification schema", () => {
     expect(notificationReadSchema.safeParse({ id: "nope" }).success).toBe(false);
   });
 });
+
+describe("task repeat", () => {
+  it("accepts the five repeat choices and treats blank as none", () => {
+    for (const repeat of ["daily", "weekdays", "weekly", "monthly", "yearly"]) {
+      expect(taskSchema.safeParse({ title: "x", repeat }).success).toBe(true);
+    }
+    const blank = taskSchema.safeParse({ title: "x", repeat: "" });
+    expect(blank.success && blank.data.repeat).toBeUndefined();
+  });
+  it("rejects anything else, in both task schemas", () => {
+    expect(taskSchema.safeParse({ title: "x", repeat: "hourly" }).success).toBe(false);
+    expect(
+      taskEditSchema.safeParse({
+        id: "11111111-1111-4111-8111-111111111111",
+        title: "x",
+        priority: 2,
+        repeat: "FREQ=SECONDLY",
+      }).success,
+    ).toBe(false);
+  });
+});

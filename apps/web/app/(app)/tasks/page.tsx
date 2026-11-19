@@ -2,6 +2,7 @@ import { requireModule } from "../../../lib/modules";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
 import { isOverdue, PRIORITY_LABELS } from "../../../lib/productivity";
+import { labelForRule, RECURRENCES } from "../../../lib/recurrence";
 import {
   Card,
   Empty,
@@ -23,6 +24,7 @@ type Task = {
   due_at: string | null;
   revision: number;
   project_id: string | null;
+  recurrence_rule: string | null;
 };
 
 export default async function TasksPage({
@@ -38,7 +40,7 @@ export default async function TasksPage({
   const supabase = await createClient();
   let query = supabase
     .from("tasks")
-    .select("id, title, status, priority, category, due_at, revision, project_id")
+    .select("id, title, status, priority, category, due_at, revision, project_id, recurrence_rule")
     .eq("workspace_id", ctx.current.id)
     .is("deleted_at", null)
     .is("parent_task_id", null)
@@ -102,12 +104,25 @@ export default async function TasksPage({
               </option>
             ))}
           </select>
+          <select
+            name="repeat"
+            defaultValue=""
+            aria-label="Repeats"
+            className={`${inputClass} sm:col-span-3`}
+          >
+            <option value="">Does not repeat</option>
+            {RECURRENCES.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.label}
+              </option>
+            ))}
+          </select>
           <input
             name="category"
             maxLength={60}
             placeholder="Category (optional)"
             aria-label="Category"
-            className={`${inputClass} sm:col-span-4`}
+            className={`${inputClass} sm:col-span-3`}
           />
           <button type="submit" className={`${primaryButton} sm:col-span-2`}>
             Add task
@@ -154,6 +169,9 @@ export default async function TasksPage({
                   </a>
                   <p className="mt-0.5 text-xs text-muted">
                     {PRIORITY_LABELS[t.priority]}
+                    {t.recurrence_rule
+                      ? ` · ↻ ${labelForRule(t.recurrence_rule)?.toLowerCase() ?? "repeats"}`
+                      : ""}
                     {t.category ? ` · ${t.category}` : ""}
                     {t.project_id && projectName.get(t.project_id)
                       ? ` · ${projectName.get(t.project_id)}`

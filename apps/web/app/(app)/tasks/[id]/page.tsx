@@ -15,6 +15,7 @@ import {
 } from "../../../../components/ui";
 import type { FlashParams } from "../../../../lib/form";
 import { dismissReminder } from "../../reminder-actions";
+import { idForRule, RECURRENCES } from "../../../../lib/recurrence";
 import { addReminder, addSubtask, toggleSubtask, updateTask } from "./actions";
 
 export default async function TaskDetailPage({
@@ -131,13 +132,26 @@ export default async function TaskDetailPage({
               </option>
             ))}
           </select>
+          <select
+            name="repeat"
+            defaultValue={idForRule(task.recurrence_rule)}
+            aria-label="Repeats"
+            className={`${inputClass} sm:col-span-3`}
+          >
+            <option value="">Does not repeat</option>
+            {RECURRENCES.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.label}
+              </option>
+            ))}
+          </select>
           <input
             name="category"
             maxLength={60}
             defaultValue={task.category ?? ""}
             placeholder="Category"
             aria-label="Category"
-            className={`${inputClass} sm:col-span-4`}
+            className={`${inputClass} sm:col-span-3`}
           />
           <button type="submit" className={`${primaryButton} sm:col-span-2`}>
             Save changes

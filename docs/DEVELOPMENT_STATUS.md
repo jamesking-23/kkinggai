@@ -32,7 +32,7 @@ others 22), production build, `pnpm audit` clean, a signed-out route smoke test 
 Assumption for Phases 12-19: the exact wording of those phases was lost when the conversation was compacted, so each was built
 on a conservative reading. If the master prompt asks for more, treat these as the base to extend.
 
-Known gaps (Phase 5): task recurrence and attachments, planning views, push/email reminders.
+Known gaps (Phase 5): task attachments, planning views, push/email reminders.
 Other open items are in the per-phase notes below.
 
 ## Exact next action
@@ -442,3 +442,11 @@ Other open items are in the per-phase notes below.
 - Verified: 8 action tests with a mocked database (payloads, revision filter, blank clearing, validation, conflicts, UTC conversion) and 2 time-helper tests; web now 194 passing; lint, typecheck and build pass.
 - NOT verified: the forms in a browser or against the live database; whether the `<details>` panels look right on a phone.
 - Closes part of the Phase 5 gaps (edit forms for projects, goals, events). Still open: task recurrence and attachments, planning views.
+
+## Session update: recurring tasks (2026-11-19)
+
+- Written: migration `20261119000030_task_recurrence` (applied). A task can repeat daily, every weekday, weekly, monthly or yearly (set when adding a task or on its detail page; the list shows a repeat marker). Completing a recurring task marks it done, records the completion and creates the next copy (same title, description, priority, category, project) in one database transaction (`complete_task`, SECURITY INVOKER, so row-level security applies to every statement). The next due date is the next occurrence after the old due date that is not already in the past, so finishing late does not leave a pile of overdue copies. A database check limits `recurrence_rule` to the five rules.
+- Verified: live rolled-back test `rls_task_recurrence.sql`, 16 results as expected (arbitrary rule blocked, stale revision refused, completion row and next copy, second completion refused, non-recurring and no-next-date make no copy, outsider/viewer/anon refused, open-task count unchanged). 9 unit tests for the date maths (month-end clamping, leap years, weekdays, skipping missed dates), 7 action tests with a mocked database (rule stored, next date computed in the workspace time zone, late completion, conflict message, reopen), 2 schema tests. Web 210, schemas 43 passing; lint, typecheck, build and format pass. Advisors unchanged (the new function is SECURITY INVOKER).
+- NOT verified: in a browser, or the action against the live database (only the SQL function was run live).
+- Known limits: reopening a completed recurring task does not remove the copy already created. Subtasks, reminders and attachments are not copied to the next occurrence. A monthly task due on the 29th-31st drifts to a shorter day after a short month (31 Jan, 28 Feb, 28 Mar) because the original day is not stored. Only the five fixed repeat choices exist (no "every 2 weeks" or chosen weekdays).
+- Still open for Phase 5: task attachments, planning views.
