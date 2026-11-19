@@ -16,6 +16,7 @@ import type { FlashParams } from "../../../lib/form";
 import {
   addMilestone,
   createGoal,
+  updateGoal,
   setGoalStatus,
   toggleMilestone,
   updateGoalProgress,
@@ -131,6 +132,49 @@ export default async function GoalsPage({ searchParams }: { searchParams: Promis
                     </form>
                   )}
                 </div>
+                <details className="mt-3">
+                  <summary className="cursor-pointer text-xs text-muted">Edit</summary>
+                  <form action={updateGoal} className="mt-2 grid gap-2 sm:grid-cols-6">
+                    <input type="hidden" name="id" value={g.id} />
+                    <input type="hidden" name="revision" value={g.revision} />
+                    <input
+                      name="title"
+                      required
+                      maxLength={200}
+                      defaultValue={g.title}
+                      aria-label="Goal title"
+                      className={`${inputClass} sm:col-span-6`}
+                    />
+                    <input
+                      name="targetValue"
+                      type="number"
+                      step="any"
+                      min="0"
+                      defaultValue={g.target_value ?? ""}
+                      placeholder="Target"
+                      aria-label="Target"
+                      className={`${inputClass} sm:col-span-2`}
+                    />
+                    <input
+                      name="unit"
+                      maxLength={30}
+                      defaultValue={g.unit ?? ""}
+                      placeholder="Unit"
+                      aria-label="Unit"
+                      className={`${inputClass} sm:col-span-2`}
+                    />
+                    <input
+                      name="deadline"
+                      type="date"
+                      defaultValue={g.deadline ?? ""}
+                      aria-label="Deadline"
+                      className={`${inputClass} sm:col-span-2`}
+                    />
+                    <button type="submit" className={`${subtleButton} sm:col-span-6`}>
+                      Save changes
+                    </button>
+                  </form>
+                </details>
                 {pct !== null && (
                   <div className="mt-3">
                     <ProgressBar percent={pct} />

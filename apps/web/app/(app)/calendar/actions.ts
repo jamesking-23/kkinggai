@@ -43,3 +43,30 @@ export async function deleteEvent(formData: FormData) {
   revalidatePath(PATH);
   flash(PATH, "message", "Event deleted");
 }
+
+export async function updateEvent(formData: FormData) {
+  const parsed = eventSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) flash(PATH, "error", firstIssue(parsed.error));
+  const ctx = await getAppContext();
+  const id = String(formData.get("id") ?? "");
+  const revision = Number(formData.get("revision"));
+  const e = parsed.data;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("events")
+    .update({
+      title: e.title,
+      location: e.location ?? null,
+      starts_at: zonedTimeToUtc(e.startsAt, ctx.timezone).toISOString(),
+      ends_at: zonedTimeToUtc(e.endsAt, ctx.timezone).toISOString(),
+    })
+    .eq("id", id)
+    .eq("revision", revision)
+    .is("deleted_at", null)
+    .select("id");
+  if (error) flash(PATH, "error", "Could not save the event");
+  if (!data || data.length === 0)
+    flash(PATH, "error", "This event was changed elsewhere. Reload and try again.");
+  revalidatePath(PATH);
+  flash(PATH, "message", "Event saved");
+}

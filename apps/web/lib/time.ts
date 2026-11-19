@@ -33,6 +33,21 @@ export function zonedTimeToUtc(local: string, tz: string): Date {
   return new Date(result);
 }
 
+/** "YYYY-MM-DDTHH:mm" of the instant as seen in `tz`, the format of a datetime-local input. */
+export function zonedLocalInput(instant: Date | string, tz: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date(instant));
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
+}
+
 /** "YYYY-MM-DD" of the instant as seen in `tz`. */
 export function localDate(instant: Date | string, tz: string): string {
   const parts = new Intl.DateTimeFormat("en-CA", {

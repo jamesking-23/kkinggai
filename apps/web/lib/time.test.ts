@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { addDays, isValidMonth, localDate, monthGrid, shiftMonth, zonedTimeToUtc } from "./time";
+import {
+  addDays,
+  isValidMonth,
+  localDate,
+  monthGrid,
+  shiftMonth,
+  zonedLocalInput,
+  zonedTimeToUtc,
+} from "./time";
 
 describe("zonedTimeToUtc", () => {
   it("converts Kampala (UTC+3, no DST)", () => {
@@ -50,5 +58,19 @@ describe("calendar helpers", () => {
     expect(isValidMonth("2026-13")).toBe(false);
     expect(isValidMonth("2026-11")).toBe(true);
     expect(isValidMonth(undefined)).toBe(false);
+  });
+});
+
+describe("zonedLocalInput", () => {
+  it("formats an instant as a datetime-local value in the time zone", () => {
+    expect(zonedLocalInput("2026-11-07T07:00:00.000Z", "Africa/Kampala")).toBe("2026-11-07T10:00");
+    expect(zonedLocalInput("2026-11-07T21:30:00.000Z", "Africa/Kampala")).toBe("2026-11-08T00:30");
+    expect(zonedLocalInput(new Date("2026-01-01T00:00:00Z"), "UTC")).toBe("2026-01-01T00:00");
+  });
+  it("round-trips with zonedTimeToUtc", () => {
+    for (const tz of ["Africa/Kampala", "America/New_York", "Europe/London"]) {
+      const local = "2026-03-15T13:45";
+      expect(zonedLocalInput(zonedTimeToUtc(local, tz), tz)).toBe(local);
+    }
   });
 });

@@ -32,7 +32,7 @@ others 22), production build, `pnpm audit` clean, a signed-out route smoke test 
 Assumption for Phases 12-19: the exact wording of those phases was lost when the conversation was compacted, so each was built
 on a conservative reading. If the master prompt asks for more, treat these as the base to extend.
 
-Known gaps (Phase 5): task recurrence and attachments, edit forms for projects/goals/events, planning views, push/email reminders.
+Known gaps (Phase 5): task recurrence and attachments, planning views, push/email reminders.
 Other open items are in the per-phase notes below.
 
 ## Exact next action
@@ -435,3 +435,10 @@ Other open items are in the per-phase notes below.
 - Verified: unit tests for the badge text (2 new, web now 184 passing); lint, typecheck, build and format pass.
 - NOT verified: how it looks in a browser, or that "Mark all read" updates the badge without a reload (it relies on the page revalidation re-rendering the layout).
 - Still open for notifications: delivery by push, email or SMS (needs a provider account and keys from the owner; nothing is stubbed), retention of old notifications.
+
+## Session update: edit forms for projects, goals and events (2026-11-19)
+
+- Written: an "Edit" section on each project (name, description, due date), goal (title, target, unit, deadline) and event (title, start, end, location) on their list pages. Saves are revision-guarded like the existing status buttons, so a change made elsewhere shows "changed elsewhere" instead of overwriting. Blank optional fields clear the value. Event times are shown and saved in the workspace time zone (new `zonedLocalInput` helper, round-trip tested).
+- Verified: 8 action tests with a mocked database (payloads, revision filter, blank clearing, validation, conflicts, UTC conversion) and 2 time-helper tests; web now 194 passing; lint, typecheck and build pass.
+- NOT verified: the forms in a browser or against the live database; whether the `<details>` panels look right on a phone.
+- Closes part of the Phase 5 gaps (edit forms for projects, goals, events). Still open: task recurrence and attachments, planning views.

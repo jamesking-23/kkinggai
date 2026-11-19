@@ -43,3 +43,26 @@ export async function setProjectStatus(formData: FormData) {
   revalidatePath(PATH);
   flash(PATH, "message", "Project updated");
 }
+
+export async function updateProject(formData: FormData) {
+  const parsed = projectSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) flash(PATH, "error", firstIssue(parsed.error));
+  const id = String(formData.get("id") ?? "");
+  const revision = Number(formData.get("revision"));
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .update({
+      name: parsed.data.name,
+      description: parsed.data.description ?? "",
+      due_date: parsed.data.dueDate ?? null,
+    })
+    .eq("id", id)
+    .eq("revision", revision)
+    .select("id");
+  if (error) flash(PATH, "error", "Could not save the project");
+  if (!data || data.length === 0)
+    flash(PATH, "error", "This project was changed elsewhere. Reload and try again.");
+  revalidatePath(PATH);
+  flash(PATH, "message", "Project saved");
+}

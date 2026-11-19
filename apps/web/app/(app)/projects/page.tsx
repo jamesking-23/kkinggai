@@ -11,7 +11,7 @@ import {
   subtleButton,
 } from "../../../components/ui";
 import type { FlashParams } from "../../../lib/form";
-import { createProject, setProjectStatus } from "./actions";
+import { createProject, setProjectStatus, updateProject } from "./actions";
 
 type Project = {
   id: string;
@@ -118,6 +118,38 @@ export default async function ProjectsPage({
                   )}
                 </form>
               </div>
+              <details className="mt-3">
+                <summary className="cursor-pointer text-xs text-muted">Edit</summary>
+                <form action={updateProject} className="mt-2 grid gap-2 sm:grid-cols-6">
+                  <input type="hidden" name="id" value={p.id} />
+                  <input type="hidden" name="revision" value={p.revision} />
+                  <input
+                    name="name"
+                    required
+                    maxLength={200}
+                    defaultValue={p.name}
+                    aria-label="Project name"
+                    className={`${inputClass} sm:col-span-4`}
+                  />
+                  <input
+                    name="dueDate"
+                    type="date"
+                    defaultValue={p.due_date ?? ""}
+                    aria-label="Due date"
+                    className={`${inputClass} sm:col-span-2`}
+                  />
+                  <input
+                    name="description"
+                    maxLength={2000}
+                    defaultValue={p.description}
+                    aria-label="Description"
+                    className={`${inputClass} sm:col-span-4`}
+                  />
+                  <button type="submit" className={`${subtleButton} sm:col-span-2`}>
+                    Save changes
+                  </button>
+                </form>
+              </details>
             </li>
           ))}
         </ul>

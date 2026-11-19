@@ -1,7 +1,14 @@
 import { requireModule } from "../../../lib/modules";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
-import { addDays, isValidMonth, localDate, monthGrid, shiftMonth } from "../../../lib/time";
+import {
+  addDays,
+  isValidMonth,
+  localDate,
+  zonedLocalInput,
+  monthGrid,
+  shiftMonth,
+} from "../../../lib/time";
 import {
   Card,
   Empty,
@@ -12,7 +19,7 @@ import {
   subtleButton,
 } from "../../../components/ui";
 import type { FlashParams } from "../../../lib/form";
-import { createEvent, deleteEvent } from "./actions";
+import { createEvent, deleteEvent, updateEvent } from "./actions";
 
 type Event = {
   id: string;
@@ -190,25 +197,70 @@ export default async function CalendarPage({
       {monthEvents.length ? (
         <ul className="space-y-2">
           {monthEvents.map((e) => (
-            <li
-              key={e.id}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3"
-            >
-              <div className="min-w-0">
-                <p className="truncate text-sm">{e.title}</p>
-                <p className="text-xs text-muted">
-                  {localDate(e.starts_at, ctx.timezone)} · {time.format(new Date(e.starts_at))}–
-                  {time.format(new Date(e.ends_at))}
-                  {e.location ? ` · ${e.location}` : ""}
-                </p>
+            <li key={e.id} className="rounded-lg border border-border bg-surface px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm">{e.title}</p>
+                  <p className="text-xs text-muted">
+                    {localDate(e.starts_at, ctx.timezone)} · {time.format(new Date(e.starts_at))}–
+                    {time.format(new Date(e.ends_at))}
+                    {e.location ? ` · ${e.location}` : ""}
+                  </p>
+                </div>
+                <form action={deleteEvent}>
+                  <input type="hidden" name="id" value={e.id} />
+                  <input type="hidden" name="revision" value={e.revision} />
+                  <button type="submit" className={subtleButton}>
+                    Delete
+                  </button>
+                </form>
               </div>
-              <form action={deleteEvent}>
-                <input type="hidden" name="id" value={e.id} />
-                <input type="hidden" name="revision" value={e.revision} />
-                <button type="submit" className={subtleButton}>
-                  Delete
-                </button>
-              </form>
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs text-muted">Edit</summary>
+                <form action={updateEvent} className="mt-2 grid gap-2 sm:grid-cols-6">
+                  <input type="hidden" name="id" value={e.id} />
+                  <input type="hidden" name="revision" value={e.revision} />
+                  <input
+                    name="title"
+                    required
+                    maxLength={300}
+                    defaultValue={e.title}
+                    aria-label="Event title"
+                    className={`${inputClass} sm:col-span-6`}
+                  />
+                  <label className="text-xs text-muted sm:col-span-3">
+                    Starts
+                    <input
+                      name="startsAt"
+                      type="datetime-local"
+                      required
+                      defaultValue={zonedLocalInput(e.starts_at, ctx.timezone)}
+                      className={`${inputClass} mt-1`}
+                    />
+                  </label>
+                  <label className="text-xs text-muted sm:col-span-3">
+                    Ends
+                    <input
+                      name="endsAt"
+                      type="datetime-local"
+                      required
+                      defaultValue={zonedLocalInput(e.ends_at, ctx.timezone)}
+                      className={`${inputClass} mt-1`}
+                    />
+                  </label>
+                  <input
+                    name="location"
+                    maxLength={200}
+                    defaultValue={e.location ?? ""}
+                    placeholder="Location (optional)"
+                    aria-label="Location"
+                    className={`${inputClass} sm:col-span-4`}
+                  />
+                  <button type="submit" className={`${subtleButton} sm:col-span-2`}>
+                    Save changes
+                  </button>
+                </form>
+              </details>
             </li>
           ))}
         </ul>

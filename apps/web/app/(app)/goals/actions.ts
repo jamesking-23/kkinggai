@@ -90,3 +90,27 @@ export async function toggleMilestone(formData: FormData) {
   revalidatePath(PATH);
   flash(PATH, "message", done ? "Milestone completed" : "Milestone reopened");
 }
+
+export async function updateGoal(formData: FormData) {
+  const parsed = goalSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) flash(PATH, "error", firstIssue(parsed.error));
+  const id = String(formData.get("id") ?? "");
+  const revision = Number(formData.get("revision"));
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("goals")
+    .update({
+      title: parsed.data.title,
+      target_value: parsed.data.targetValue ?? null,
+      unit: parsed.data.unit ?? null,
+      deadline: parsed.data.deadline ?? null,
+    })
+    .eq("id", id)
+    .eq("revision", revision)
+    .select("id");
+  if (error) flash(PATH, "error", "Could not save the goal");
+  if (!data || data.length === 0)
+    flash(PATH, "error", "This goal was changed elsewhere. Reload and try again.");
+  revalidatePath(PATH);
+  flash(PATH, "message", "Goal saved");
+}
