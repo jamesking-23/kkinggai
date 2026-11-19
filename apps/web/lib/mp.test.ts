@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { INVITE_CODE, isLegalNext, movePairs, replayMoves, sideOf, summarise } from "./mp";
+import {
+  clocksAt,
+  formatClock,
+  INVITE_CODE,
+  isLegalNext,
+  movePairs,
+  replayMoves,
+  sideOf,
+  summarise,
+  timeControl,
+  TIME_CONTROLS,
+} from "./mp";
 
 const SCHOLARS = ["e2e4", "e7e5", "d1h5", "b8c6", "f1c4", "g8f6", "h5f7"];
 
@@ -119,5 +130,65 @@ describe("helpers", () => {
     expect(INVITE_CODE.test("0123456789abcdef0123456789abcdef")).toBe(true);
     expect(INVITE_CODE.test("../etc/passwd")).toBe(false);
     expect(INVITE_CODE.test("ABCDEF0123456789ABCDEF0123456789")).toBe(false);
+  });
+});
+
+describe("clocks", () => {
+  const base = {
+    status: "active",
+    moves: ["e2e4", "e7e5", "g1f3"],
+    clock_seconds: 300,
+    white_ms: 290_000,
+    black_ms: 300_000,
+    clock_started_at: "2026-11-19T10:00:00.000Z",
+  };
+  const t0 = Date.parse("2026-11-19T10:00:00.000Z");
+
+  it("returns null for an untimed game", () => {
+    expect(
+      clocksAt({ ...base, clock_seconds: null, white_ms: null, black_ms: null }, t0),
+    ).toBeNull();
+  });
+  it("runs only the side to move, and only after both sides have moved", () => {
+    expect(clocksAt(base, t0 + 5000)).toEqual({ whiteMs: 290_000, blackMs: 295_000, running: "b" });
+    expect(clocksAt({ ...base, moves: ["e2e4", "e7e5"] }, t0 + 5000)).toEqual({
+      whiteMs: 285_000,
+      blackMs: 300_000,
+      running: "w",
+    });
+    expect(clocksAt({ ...base, moves: ["e2e4"] }, t0 + 60_000)).toEqual({
+      whiteMs: 290_000,
+      blackMs: 300_000,
+      running: null,
+    });
+    expect(clocksAt({ ...base, moves: [] }, t0 + 60_000)?.running).toBeNull();
+  });
+  it("stops when the game is over and never goes below zero", () => {
+    expect(clocksAt({ ...base, status: "resigned" }, t0 + 60_000)?.running).toBeNull();
+    expect(clocksAt(base, t0 + 999_999)?.blackMs).toBe(0);
+  });
+  it("formats times", () => {
+    expect(formatClock(245_000)).toBe("4:05");
+    expect(formatClock(3_725_000)).toBe("1:02:05");
+    expect(formatClock(7_300)).toBe("0:07.3");
+    expect(formatClock(-5)).toBe("0:00.0");
+  });
+  it("lists valid time controls only", () => {
+    expect(timeControl("5+0")).toMatchObject({ minutes: 5, increment: 0 });
+    expect(timeControl("none")?.minutes).toBeNull();
+    expect(timeControl("1+99")).toBeNull();
+    for (const t of TIME_CONTROLS) expect(t.increment).toBeLessThanOrEqual(60);
+  });
+  it("describes a loss on time", () => {
+    const g = {
+      status: "timeout",
+      moves: ["e2e4", "e7e5"],
+      white_id: "w",
+      black_id: "b",
+      resigned_by: null,
+      timed_out_by: "b",
+    };
+    const s = summarise(g, replayMoves(g.moves));
+    expect(s).toEqual({ finished: true, result: "1-0", text: "Black lost on time. White wins" });
   });
 });

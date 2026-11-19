@@ -3,10 +3,11 @@ import { notFound } from "next/navigation";
 import { requireModule } from "../../../../../lib/modules";
 import { getAppContext } from "../../../../../lib/session";
 import { createClient } from "../../../../../lib/supabase/server";
-import { movePairs, replayMoves, sideOf, summarise } from "../../../../../lib/mp";
+import { clocksAt, movePairs, replayMoves, sideOf, summarise } from "../../../../../lib/mp";
 import type { FlashParams } from "../../../../../lib/form";
 import { Card, Flash, PageHeader, primaryButton, subtleButton } from "../../../../../components/ui";
 import { MpBoard } from "../../../../../components/mp-board";
+import { MpClock } from "../../../../../components/mp-clock";
 import { acceptInvite, declineInvite, drawAction, resignGame, rematchGame } from "../actions";
 
 const START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -28,6 +29,7 @@ export default async function GamePage({
   if (!g) notFound();
 
   const side = sideOf(g, ctx.userId);
+  const clocks = clocksAt(g, Date.now());
   const rep = replayMoves(g.moves);
   const s = summarise(g, rep);
   const fen = rep.ok ? rep.fen : START;
@@ -106,14 +108,25 @@ export default async function GamePage({
       )}
 
       <div className="mt-4 flex flex-wrap gap-6">
-        <MpBoard
-          gameId={g.id}
-          fen={fen}
-          side={side ?? "white"}
-          canMove={active && myTurn}
-          waiting={(active && !myTurn) || g.status === "waiting"}
-          last={rep.ok ? rep.last : null}
-        />
+        <div>
+          {clocks && (
+            <MpClock
+              gameId={g.id}
+              whiteMs={clocks.whiteMs}
+              blackMs={clocks.blackMs}
+              running={clocks.running}
+              viewer={side}
+            />
+          )}
+          <MpBoard
+            gameId={g.id}
+            fen={fen}
+            side={side ?? "white"}
+            canMove={active && myTurn}
+            waiting={(active && !myTurn) || g.status === "waiting"}
+            last={rep.ok ? rep.last : null}
+          />
+        </div>
         <div className="min-w-48 flex-1 space-y-3 text-sm">
           <div className="max-h-64 overflow-auto font-mono">
             {rep.ok && rep.sans.length ? (

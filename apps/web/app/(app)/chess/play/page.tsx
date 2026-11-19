@@ -1,7 +1,7 @@
 import { requireModule } from "../../../../lib/modules";
 import { getAppContext } from "../../../../lib/session";
 import { createClient } from "../../../../lib/supabase/server";
-import { replayMoves, summarise } from "../../../../lib/mp";
+import { replayMoves, summarise, TIME_CONTROLS } from "../../../../lib/mp";
 import type { FlashParams } from "../../../../lib/form";
 import {
   Card,
@@ -48,6 +48,16 @@ export default async function PlayPage({ searchParams }: { searchParams: Promise
               <option value="random">Random</option>
               <option value="white">White</option>
               <option value="black">Black</option>
+            </select>
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block text-muted">Time control</span>
+            <select name="control" defaultValue="none" className={inputClass}>
+              {TIME_CONTROLS.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
             </select>
           </label>
           <button className={primaryButton}>New game</button>

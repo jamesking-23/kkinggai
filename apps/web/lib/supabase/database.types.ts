@@ -1297,6 +1297,12 @@ export type Database = {
       };
       mp_games: {
         Row: {
+          clock_increment: number;
+          clock_seconds: number | null;
+          clock_started_at: string | null;
+          black_ms: number | null;
+          white_ms: number | null;
+          timed_out_by: string | null;
           black_id: string | null;
           black_name: string | null;
           created_at: string;
@@ -1314,6 +1320,12 @@ export type Database = {
           white_name: string | null;
         };
         Insert: {
+          clock_increment?: number;
+          clock_seconds?: number | null;
+          clock_started_at?: string | null;
+          black_ms?: number | null;
+          white_ms?: number | null;
+          timed_out_by?: string | null;
           black_id?: string | null;
           black_name?: string | null;
           created_at?: string;
@@ -1331,6 +1343,12 @@ export type Database = {
           white_name?: string | null;
         };
         Update: {
+          clock_increment?: number;
+          clock_seconds?: number | null;
+          clock_started_at?: string | null;
+          black_ms?: number | null;
+          white_ms?: number | null;
+          timed_out_by?: string | null;
           black_id?: string | null;
           black_name?: string | null;
           created_at?: string;
@@ -2139,7 +2157,11 @@ export type Database = {
       mp_rematch: { Args: { game: string }; Returns: string };
       mp_accept: { Args: { game: string }; Returns: string };
       mp_decline: { Args: { game: string }; Returns: undefined };
-      mp_create: { Args: { color: string }; Returns: { id: string; invite_code: string }[] };
+      mp_create: {
+        Args: { color: string; minutes?: number | null; increment?: number };
+        Returns: { id: string; invite_code: string }[];
+      };
+      mp_claim_timeout: { Args: { game: string }; Returns: undefined };
       mp_join: { Args: { code: string }; Returns: string };
       mp_move: { Args: { game: string; expected_ply: number; uci: string }; Returns: number };
       mp_resign: { Args: { game: string }; Returns: undefined };

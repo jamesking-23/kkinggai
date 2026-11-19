@@ -38,7 +38,7 @@ vi.mock("../../../../lib/supabase/server", () => ({
   }),
 }));
 
-import { createGame, drawAction, joinGame, playMove, resignGame } from "./actions";
+import { claimTimeout, createGame, drawAction, joinGame, playMove, resignGame } from "./actions";
 
 const active = (moves: string[] = []): GameRow => ({
   status: "active",
@@ -136,9 +136,26 @@ describe("other game actions", () => {
   it("createGame uses the chosen colour and a valid colour for anything else", async () => {
     st.rpcResult = { data: [{ id: GID, invite_code: "x" }], error: null };
     await call(createGame, { color: "black" });
-    expect(st.rpcCalls[0]!.args).toEqual({ color: "black" });
+    expect(st.rpcCalls[0]!.args).toMatchObject({ color: "black" });
     await call(createGame, { color: "purple" });
     expect(["white", "black"]).toContain(st.rpcCalls[1]!.args.color);
+  });
+
+  it("createGame passes the time control and rejects an unknown one", async () => {
+    st.rpcResult = { data: [{ id: GID, invite_code: "x" }], error: null };
+    await call(createGame, { color: "white", control: "15+10" });
+    expect(st.rpcCalls[0]!.args).toEqual({ color: "white", minutes: 15, increment: 10 });
+    await call(createGame, { color: "white" });
+    expect(st.rpcCalls[1]!.args).toEqual({ color: "white", minutes: null, increment: 0 });
+    expect(await call(createGame, { color: "white", control: "1+99" })).toContain("time control");
+    expect(st.rpcCalls).toHaveLength(2);
+  });
+
+  it("claimTimeout validates the id and shows the database's refusal", async () => {
+    expect(await call(claimTimeout, { id: "bad" })).toContain("Invalid game");
+    st.rpcResult = { data: null, error: { message: "The clock has not run out yet" } };
+    expect(await call(claimTimeout, { id: GID })).toContain("The clock has not run out yet");
+    expect(st.rpcCalls.map((c) => c.fn)).toEqual(["mp_claim_timeout"]);
   });
 
   it("createGame shows the database's message, e.g. too many open games", async () => {

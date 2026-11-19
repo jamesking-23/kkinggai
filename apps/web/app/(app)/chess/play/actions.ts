@@ -4,7 +4,7 @@ import { randomInt } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { flash } from "../../../../lib/form";
-import { INVITE_CODE, isLegalNext, replayMoves, sideOf } from "../../../../lib/mp";
+import { INVITE_CODE, isLegalNext, replayMoves, sideOf, timeControl } from "../../../../lib/mp";
 import { createClient } from "../../../../lib/supabase/server";
 
 const PLAY = "/chess/play";
@@ -26,8 +26,14 @@ export async function createGame(formData: FormData) {
   const pick = String(formData.get("color") ?? "random");
   const color =
     pick === "white" || pick === "black" ? pick : randomInt(2) === 0 ? "white" : "black";
+  const tc = timeControl(String(formData.get("control") ?? "none"));
+  if (!tc) flash(PLAY, "error", "Choose a time control from the list");
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("mp_create", { color });
+  const { data, error } = await supabase.rpc("mp_create", {
+    color,
+    minutes: tc!.minutes,
+    increment: tc!.increment,
+  });
   if (error || !data?.[0])
     flash(PLAY, "error", error ? reason(error) : "Could not create the game");
   revalidatePath(PLAY);
@@ -126,4 +132,15 @@ export async function declineInvite(formData: FormData) {
   if (error) flash(PLAY, "error", reason(error));
   revalidatePath(PLAY);
   flash(PLAY, "message", "Invitation declined");
+}
+
+export async function claimTimeout(formData: FormData) {
+  const id = uuid.safeParse(formData.get("id"));
+  if (!id.success) flash(PLAY, "error", "Invalid game");
+  const path = `${PLAY}/${id.data}`;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("mp_claim_timeout", { game: id.data! });
+  if (error) flash(path, "error", reason(error));
+  revalidatePath(path);
+  redirect(path);
 }

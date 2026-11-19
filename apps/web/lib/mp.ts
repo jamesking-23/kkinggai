@@ -70,6 +70,7 @@ export type GameRow = {
   white_id: string | null;
   black_id: string | null;
   resigned_by: string | null;
+  timed_out_by?: string | null;
 };
 
 export type Summary = {
@@ -102,6 +103,15 @@ export function summarise(g: GameRow, rep: Replay): Summary {
     };
   }
   if (g.status === "draw") return { finished: true, result: "1/2-1/2", text: "Draw agreed" };
+  if (g.status === "timeout") {
+    const loser = colorOf(g, g.timed_out_by ?? null);
+    const result = loser === "w" ? "0-1" : "1-0";
+    return {
+      finished: true,
+      result,
+      text: `${loser === "w" ? "White" : "Black"} lost on time. ${loser === "w" ? "Black" : "White"} wins`,
+    };
+  }
   if (rep.over) {
     const { result, reason } = rep.over;
     const text =
@@ -132,3 +142,61 @@ export function movePairs(sans: string[]): string[] {
 }
 
 export const INVITE_CODE = /^[0-9a-f]{32}$/;
+
+/** Time controls offered when creating a game: label, minutes per side and seconds added per move. */
+export const TIME_CONTROLS = [
+  { id: "none", label: "No clock", minutes: null, increment: 0 },
+  { id: "3+2", label: "Blitz 3 min + 2 s", minutes: 3, increment: 2 },
+  { id: "5+0", label: "Blitz 5 min", minutes: 5, increment: 0 },
+  { id: "10+0", label: "Rapid 10 min", minutes: 10, increment: 0 },
+  { id: "15+10", label: "Rapid 15 min + 10 s", minutes: 15, increment: 10 },
+  { id: "30+0", label: "Classical 30 min", minutes: 30, increment: 0 },
+] as const;
+
+export function timeControl(id: string) {
+  return TIME_CONTROLS.find((t) => t.id === id) ?? null;
+}
+
+export type ClockGame = {
+  status: string;
+  moves: string[];
+  clock_seconds: number | null;
+  white_ms: number | null;
+  black_ms: number | null;
+  clock_started_at: string | null;
+};
+
+export type Clocks = {
+  whiteMs: number;
+  blackMs: number;
+  /** Whose clock is running (only once both sides have moved), or null. */
+  running: "w" | "b" | null;
+};
+
+/** Remaining time of both sides at `nowMs` (the server's time), or null for an untimed game. */
+export function clocksAt(g: ClockGame, nowMs: number): Clocks | null {
+  if (g.clock_seconds === null || g.white_ms === null || g.black_ms === null) return null;
+  const running =
+    g.status === "active" && g.moves.length >= 2 && g.clock_started_at
+      ? g.moves.length % 2 === 0
+        ? "w"
+        : "b"
+      : null;
+  const spent = running ? Math.max(0, nowMs - Date.parse(g.clock_started_at!)) : 0;
+  return {
+    whiteMs: Math.max(0, g.white_ms - (running === "w" ? spent : 0)),
+    blackMs: Math.max(0, g.black_ms - (running === "b" ? spent : 0)),
+    running,
+  };
+}
+
+/** 4:05, or 0:07.3 under ten seconds. */
+export function formatClock(ms: number): string {
+  const t = Math.max(0, ms);
+  if (t < 10_000) return `0:0${(Math.floor(t / 100) / 10).toFixed(1)}`;
+  const s = Math.floor(t / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = String(s % 60).padStart(2, "0");
+  return h ? `${h}:${String(m).padStart(2, "0")}:${sec}` : `${m}:${sec}`;
+}

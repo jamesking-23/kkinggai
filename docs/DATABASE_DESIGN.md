@@ -103,3 +103,5 @@ Migration `20261117000026_multiplayer_chess`: `mp_games` (participants select on
 Migration `20261117000027_remove_strava_add_mapmyrun`: drops `strava_connections` (it held no rows) and widens the `run_activities.source` check to manual/gpx/strava/samsung/mapmyrun. Existing 'strava' rows, if any, stay valid.
 
 Migration `20261118000028_mp_rematch`: `mp_games` gains `invited_id` and `rematch_of` (one non-cancelled rematch per game); the select policy also admits the invited user. New SECURITY DEFINER RPCs `mp_rematch`, `mp_accept`, `mp_decline` (authenticated only); `mp_resign` also clears the reservation when a waiting game is cancelled.
+
+Migration `20261119000029_mp_clocks`: `mp_games` gains `clock_seconds`, `clock_increment`, `white_ms`, `black_ms`, `clock_started_at`, `timed_out_by`; status adds `timeout`. `mp_create(color, minutes, increment)` replaces `mp_create(color)`; `mp_move` deducts time and records a loss instead of a late move; new `mp_claim_timeout`; `mp_rematch` copies the time control.
