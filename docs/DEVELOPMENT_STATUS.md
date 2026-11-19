@@ -1,13 +1,45 @@
 # Development Status
 
-## Current phase
+## Current status (2026-11-19)
 
-Phase 6 (module registry and Idea Inbox) — built and deployed; migration 4 applied. Not yet exercised by a
-signed-in user (sandbox cannot reach Supabase). Phase 5 gaps (edit forms, reminders UI, milestones, subtasks,
-planning views) are still open.
+Phases 0-19 each have a first slice written and deployed at https://kkingg-ai.vercel.app (CI and Vercel green on `main`).
+Phase 20 (testing and release) is under way. **No page has been exercised by a signed-in user**: the development sandbox
+cannot reach Supabase, so everything below is "written, built, unit-tested and (for the database) tested live with
+rolled-back SQL", not "seen working in a browser". Verification so far: lint, typecheck, unit tests (web 182, schemas 41,
+others 22), production build, `pnpm audit` clean, a signed-out route smoke test (41 routes), live RLS tests for every module.
 
-Phase 4 (app shell and design system) — code complete. Phase 3 auth and the signed-in shell have NOT been
-verified against live Supabase (the sandbox cannot reach it); please try them locally.
+| Phase | Area                                              | State                                                                                                                                                                                          |
+| ----- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0-2   | Audit, foundation, backend and RLS                | Done; live RLS tests pass                                                                                                                                                                      |
+| 3-4   | Auth, app shell, design system                    | Code done; sign-in never exercised against live Supabase                                                                                                                                       |
+| 5     | Tasks, goals, projects, events, habits, reminders | Built; gaps listed below                                                                                                                                                                       |
+| 6     | Module registry, Idea Inbox                       | Built                                                                                                                                                                                          |
+| 7     | Personal Vault                                    | Built                                                                                                                                                                                          |
+| 8     | AI core                                           | Built; **no AI key is set**, so no real AI call has ever been made                                                                                                                             |
+| 9     | Universal search                                  | Built (substring match only)                                                                                                                                                                   |
+| 10    | Academics, flashcards, career, research           | Built                                                                                                                                                                                          |
+| 11    | Sports: chess, running, sports hub                | Built. Strava removed (API no longer open); runs come from GPX/TCX file uploads                                                                                                                |
+| 12    | Business ventures and ledger                      | First slice (assumed reading, see below)                                                                                                                                                       |
+| 13    | Personal: journal, important dates                | First slice (assumed reading)                                                                                                                                                                  |
+| 14    | News feeds                                        | First slice (RSS/Atom reader, mocked fetch only)                                                                                                                                               |
+| 15    | Entertainment media log                           | First slice (assumed reading)                                                                                                                                                                  |
+| 16    | Notifications                                     | In-app only, hourly pg_cron job (not yet seen firing). No push, email, SMS or voice                                                                                                            |
+| 17    | Mobile (Expo)                                     | v0.1: sign in, notifications, tasks. Never run on a device; no APK built                                                                                                                       |
+| 18    | Desktop (Tauri)                                   | Windows shell around the website; installer built by CI, never installed                                                                                                                       |
+| 19    | Multiplayer chess                                 | Friend games: invite link, moves, resign, draw, rematch, clocks. Polling, no realtime; no ratings or spectators by decision (ratings need a trusted result; the database cannot see checkmate) |
+| 20    | Testing and release                               | Security review, release checklist, smoke test, audit done; signed-in smoke test needs the owner                                                                                               |
+
+Assumption for Phases 12-19: the exact wording of those phases was lost when the conversation was compacted, so each was built
+on a conservative reading. If the master prompt asks for more, treat these as the base to extend.
+
+Known gaps (Phase 5): task recurrence and attachments, edit forms for projects/goals/events, planning views, push/email reminders.
+Other open items are in the per-phase notes below.
+
+## Exact next action
+
+1. Owner: follow `RELEASE_CHECKLIST.md` (owner actions, then the signed-in smoke test) and report what breaks.
+2. Development: fix what the smoke test finds; realtime for multiplayer chess; delivery channels for notifications; more tests.
+   The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
 
 ## Completed
 
@@ -69,11 +101,6 @@ verified against live Supabase (the sandbox cannot reach it); please try them lo
 - Shell components (sidebar, menus) have no automated component tests yet; only logic is unit tested.
 - `apps/mobile`, `apps/desktop`; storage buckets; Vault storage buckets.
 - RLS tests are manual, not in CI. GitHub Actions not yet observed running.
-
-## Exact next action
-
-Owner tries sign-up/sign-in and the shell locally (`pnpm --filter @kkingg/web dev`) and reports problems.
-Next: future-sports architecture (Phase 11 close-out), then Phase 12 (business and ventures). Strava, live GPS and chess extras remain open. The owner has authorised applying migrations without asking; still run each RLS test and advisor check.
 
 ## Update: task detail, milestones, reminders (code written, not exercised against a live database)
 

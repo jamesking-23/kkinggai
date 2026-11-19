@@ -8,11 +8,17 @@ and `docs/DEVELOPMENT_STATUS.md` for current state.
 pnpm + Turborepo monorepo, TypeScript, Next.js (web), Expo (mobile), Tauri (desktop),
 Supabase (Postgres, Auth, Storage). Supabase project ref: `rlinlmnpzrlbprmcejdk` (eu-central-1).
 
+## Layout
+
+`apps/web` (Next.js), `apps/mobile` (Expo), `apps/desktop` (Tauri), `packages/*` (schemas, module registry, AI, design tokens),
+`backend/supabase` (migrations and RLS tests), `docs/` (status, architecture, security review, release checklist).
+
 ## Commands
 
 ```bash
 pnpm install
-pnpm lint && pnpm format:check && pnpm typecheck && pnpm test
+pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build
+pnpm audit
 ```
 
 Copy `.env.example` to `.env.local`. Never commit secrets.
