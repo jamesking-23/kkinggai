@@ -7,6 +7,7 @@ import { localDate } from "../../../lib/time";
 import type { FlashParams } from "../../../lib/form";
 import {
   Card,
+  StatTile,
   Empty,
   Flash,
   inputClass,
@@ -149,13 +150,17 @@ export default async function BusinessPage({
               </div>
               {v.description && <p className="mb-3 text-sm text-muted">{v.description}</p>}
 
-              <p className="mb-3 text-sm">
-                Income {formatMoney(t.income, v.currency)} · Expenses{" "}
-                {formatMoney(t.expense, v.currency)} ·{" "}
-                <span className="font-medium">Net {formatMoney(t.net, v.currency)}</span>
-              </p>
+              <div className="mb-4 grid gap-3 sm:grid-cols-3">
+                <StatTile label="Income" value={formatMoney(t.income, v.currency)} />
+                <StatTile label="Expenses" value={formatMoney(t.expense, v.currency)} />
+                <StatTile
+                  label="Net"
+                  value={formatMoney(t.net, v.currency)}
+                  tone={t.net < 0 ? "danger" : t.net > 0 ? "success" : "default"}
+                />
+              </div>
               {months.length > 0 && (
-                <ul className="mb-4 space-y-0.5 text-xs text-muted">
+                <ul className="mb-4 space-y-1 text-xs tabular-nums text-muted">
                   {months.map((m) => (
                     <li key={m.month}>
                       {m.month}: in {formatMoney(m.income, v.currency)}, out{" "}
