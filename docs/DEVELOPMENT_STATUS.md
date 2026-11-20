@@ -536,3 +536,8 @@ Other open items are in the per-phase notes below.
 - Academics: tiles for active courses, open assignments, due in 7 days, overdue. Career: tiles for applications, applied, interviewing, deadlines in 14 days. Both reuse `StatTile`; no new queries.
 - Sports overview left as is (it already shows adapter summaries).
 - Verified: lint, typecheck, tests, build, format:check all exit 0. Not verified visually in a signed-in browser.
+
+## Session update: AI provider key (2026-11-20)
+
+- `GEMINI_API_KEY` is now set in Vercel (production and preview, type sensitive, so the value cannot be read back). The existing `providerFromEnv` already prefers Gemini, so no code change was needed; the model defaults to `gemini-2.5-flash` (override with `GEMINI_MODEL`).
+- Takes effect on the next deployment. Not verified: no live AI call has been made (the sandbox cannot reach Google), and the key's format is unusual, so the first call from the signed-in app is the real test. The key was shared in chat; consider rotating it.
