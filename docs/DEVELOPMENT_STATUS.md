@@ -541,3 +541,8 @@ Other open items are in the per-phase notes below.
 
 - `GEMINI_API_KEY` is now set in Vercel (production and preview, type sensitive, so the value cannot be read back). The existing `providerFromEnv` already prefers Gemini, so no code change was needed; the model defaults to `gemini-2.5-flash` (override with `GEMINI_MODEL`).
 - Takes effect on the next deployment. Not verified: no live AI call has been made (the sandbox cannot reach Google), and the key's format is unusual, so the first call from the signed-in app is the real test. The key was shared in chat; consider rotating it.
+
+## Session update: assistant page redesign (2026-11-20)
+
+- Restyled `/assistant` after the owner's reference images (original CSS, no third-party branding): animated orb, large light headline, glass prompt box with Enter-to-send, suggestion chips that fill the box, chat bubbles, and a "Thinking…" state (twin glowing orbs plus shimmer text) shown while the server action runs via `useFormStatus`. Reduced-motion users get static visuals.
+- No behaviour change to `sendMessage`/limits. Verified: gate exit 0; the orb/glass/thinking CSS was rendered once on a standalone static page. Not verified: the real page signed in, or a live reply.

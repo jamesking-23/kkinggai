@@ -192,3 +192,157 @@ textarea:focus {
     transition: none;
   }
 }
+
+/* ---------- assistant: orb, glass composer, thinking state ---------- */
+.orb {
+  position: relative;
+  width: 11rem;
+  height: 11rem;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(190, 215, 255, 0.55), transparent 42%),
+    radial-gradient(circle at 60% 70%, rgba(124, 108, 240, 0.55), transparent 55%),
+    radial-gradient(circle at 50% 50%, #1b2c52, #0b1020 72%);
+  box-shadow:
+    0 0 80px -10px rgba(47, 123, 255, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.07) inset,
+    0 -18px 40px -10px rgba(190, 215, 255, 0.25) inset;
+  animation: orb-breathe 7s ease-in-out infinite;
+}
+.orb::before {
+  /* inner iris with fine dotted texture */
+  content: "";
+  position: absolute;
+  inset: 28%;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle, #05070d 0 22%, transparent 23%),
+    repeating-conic-gradient(from 0deg, rgba(150, 200, 255, 0.85) 0 2deg, transparent 2deg 6deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 18%, #000 19% 100%);
+  mask: radial-gradient(circle, transparent 0 18%, #000 19% 100%);
+  box-shadow: 0 0 24px rgba(120, 180, 255, 0.55);
+  animation: orb-spin 40s linear infinite;
+}
+.orb::after {
+  /* thin orbit ring */
+  content: "";
+  position: absolute;
+  inset: -22%;
+  border-radius: 9999px;
+  border: 1px solid rgba(190, 215, 255, 0.22);
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  animation: orb-spin 24s linear infinite reverse;
+}
+@keyframes orb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes orb-breathe {
+  50% {
+    transform: scale(1.04);
+    filter: brightness(1.12);
+  }
+}
+
+.glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 24px 60px -24px rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
+.glass:focus-within {
+  border-color: rgba(120, 160, 255, 0.45);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 0 0 4px rgba(47, 123, 255, 0.12),
+    0 24px 60px -24px rgba(0, 0, 0, 0.75);
+}
+.glass textarea {
+  outline: none;
+}
+.glass textarea:focus-visible {
+  outline: none;
+}
+
+.hero-title {
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  background: linear-gradient(180deg, #f4f6ff 0%, #9aa6c4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.chip {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.04);
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+.chip:hover {
+  background: rgba(255, 255, 255, 0.09);
+  transform: translateY(-1px);
+}
+
+.think-orbs {
+  position: relative;
+  width: 2.25rem;
+  height: 2.25rem;
+}
+.think-orbs i {
+  position: absolute;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fff,
+    rgba(200, 215, 255, 0.55) 55%,
+    transparent 75%
+  );
+  box-shadow: 0 0 18px rgba(170, 190, 255, 0.55);
+  animation: think-drift 2.4s ease-in-out infinite;
+}
+.think-orbs i:nth-child(1) {
+  left: 0;
+  top: 0.1rem;
+  opacity: 0.55;
+}
+.think-orbs i:nth-child(2) {
+  left: 0.7rem;
+  top: 0.6rem;
+  animation-delay: -1.2s;
+}
+@keyframes think-drift {
+  50% {
+    transform: translate(0.35rem, -0.25rem) scale(1.08);
+  }
+}
+.shimmer-text {
+  background: linear-gradient(90deg, #6c7389 0%, #f2f4ff 45%, #6c7389 90%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 2.2s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orb,
+  .orb::before,
+  .orb::after,
+  .think-orbs i,
+  .shimmer-text {
+    animation: none;
+  }
+}
