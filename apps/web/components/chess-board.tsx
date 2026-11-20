@@ -130,6 +130,7 @@ export function ChessBoard({
   return (
     <div className="grid items-start gap-6 xl:grid-cols-[auto_1fr]">
       <Board
+        animate={false}
         rows={ranks}
         square={sq}
         label={`Board after ${ply === 0 ? "the start" : `move ${ply}`}`}
