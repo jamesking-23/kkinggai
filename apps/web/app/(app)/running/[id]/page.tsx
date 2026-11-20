@@ -11,6 +11,7 @@ import {
   paceSecPerKm,
   routeToSvg,
 } from "../../../../lib/running";
+import { parseBuckets, zoneBreakdown } from "../../../../lib/hrzones";
 import type { FlashParams } from "../../../../lib/form";
 import {
   Card,
@@ -53,6 +54,9 @@ export default async function RunPage({
     .maybeSingle();
   if (!r) notFound();
 
+  const { data: profile } = await supabase.from("run_profiles").select("max_hr").maybeSingle();
+  const buckets = parseBuckets(r.hr_buckets);
+  const zones = buckets && profile?.max_hr ? zoneBreakdown(buckets, profile.max_hr) : null;
   const svg = routeToSvg(toRoute(r.route), 480, 320);
   const when = new Intl.DateTimeFormat("en", {
     dateStyle: "full",
@@ -85,6 +89,51 @@ export default async function RunPage({
           </Card>
         ))}
       </div>
+
+      {buckets && (
+        <Card title="Heart-rate zones" className="mb-6">
+          {zones ? (
+            <>
+              <ul className="space-y-2">
+                {zones.zones.map((z) => (
+                  <li key={z.id} className="text-sm">
+                    <div className="mb-1 flex justify-between gap-2">
+                      <span>{z.label}</span>
+                      <span className="tabular-nums text-muted">
+                        {formatDuration(Math.round(z.seconds))} · {Math.round(z.share * 100)}%
+                      </span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-raised">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${z.share * 100}%`, background: "var(--brand-gradient)" }}
+                      />
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted">{z.range}</p>
+                  </li>
+                ))}
+              </ul>
+              {zones.below > 0 && (
+                <p className="mt-3 text-xs text-muted">
+                  {formatDuration(Math.round(zones.below))} below zone 1.
+                </p>
+              )}
+              <p className="mt-3 text-xs text-muted">
+                Based on a maximum heart rate of {profile?.max_hr} bpm (change it on the Running
+                page). Heart rate is grouped in 5 bpm steps, so the split is accurate to about that.
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted">
+              This run has heart-rate data. Set your maximum heart rate on the{" "}
+              <a href="/running" className="text-primary">
+                Running page
+              </a>{" "}
+              to see time in each zone.
+            </p>
+          )}
+        </Card>
+      )}
 
       {svg && (
         <Card title="Route" className="mb-6">

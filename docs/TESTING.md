@@ -61,3 +61,5 @@ Unauthenticated smoke test (`pnpm smoke`, manual, not in CI): start the producti
 `rls_task_attachments.sql` (3 users plus anon): 19 results as expected, covering the table and the `task-files` storage policies. `app/(app)/tasks/[id]/attachments.test.ts` (9 tests, mocked database and storage) covers validation, insert-then-upload order and soft delete.
 
 `rls_chess_analyses.sql` (2 users plus anon): 13 results as expected. `app/(app)/chess/actions.test.ts` covers `saveAnalysis` with a mocked database.
+
+`rls_run_hr_zones.sql` (2 users plus anon): 12 results as expected, covering `run_profiles` and the `hr_buckets` constraints. `lib/hrzones.test.ts` (9 tests) covers the histogram and zone maths.

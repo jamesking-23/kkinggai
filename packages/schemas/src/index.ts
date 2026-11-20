@@ -511,6 +511,14 @@ export const chessPuzzleAttemptSchema = z.object({
   move: z.string().regex(/^([a-h][1-8][a-h][1-8][qrbn]?|reveal)$/),
 });
 
+export const runProfileSchema = z.object({
+  maxHr: z.coerce
+    .number({ error: "Enter your maximum heart rate" })
+    .int("Use a whole number")
+    .min(100, "Maximum heart rate must be between 100 and 230")
+    .max(230, "Maximum heart rate must be between 100 and 230"),
+});
+
 // ---------- running ----------
 export const RUN_KINDS = [
   "easy",

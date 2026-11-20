@@ -22,7 +22,7 @@ import {
   StatTile,
   subtleButton,
 } from "../../../components/ui";
-import { createRun, importGpx } from "./actions";
+import { createRun, importGpx, saveMaxHr } from "./actions";
 
 const SOURCE_LABELS: Record<string, string> = {
   gpx: "Imported",
@@ -45,6 +45,7 @@ export default async function RunningPage({
     .is("deleted_at", null)
     .order("started_at", { ascending: false })
     .limit(2000);
+  const { data: profile } = await supabase.from("run_profiles").select("max_hr").maybeSingle();
   const runs = data ?? [];
   const sum = summariseRuns(runs, new Date(), ctx.timezone);
   const maxWeek = Math.max(1, ...sum.weeks.map((w) => w.distanceM));
@@ -233,6 +234,29 @@ export default async function RunningPage({
               Add run
             </button>
           </form>
+        </Card>
+        <Card title="Heart-rate zones">
+          <form action={saveMaxHr} className="flex flex-wrap items-center gap-2">
+            <input
+              name="maxHr"
+              type="number"
+              inputMode="numeric"
+              min={100}
+              max={230}
+              required
+              defaultValue={profile?.max_hr ?? ""}
+              placeholder="Max heart rate (bpm)"
+              aria-label="Maximum heart rate"
+              className={`${inputClass} max-w-[14rem]`}
+            />
+            <button type="submit" className={subtleButton}>
+              Save
+            </button>
+          </form>
+          <p className="mt-2 text-xs text-muted">
+            Used to split imported runs that have heart-rate data into five zones. Use a value from
+            a hard test or race effort if you have one; a rough guess is 220 minus your age.
+          </p>
         </Card>
         <Card title="Import workouts">
           <form action={importGpx} className="space-y-2">

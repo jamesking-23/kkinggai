@@ -7,10 +7,13 @@ import {
   runEditSchema,
   runGpxSchema,
   runManualSchema,
+  runProfileSchema,
 } from "@kkingg/schemas";
 import { trackKey, trackStats } from "../../../lib/gpx";
 import { averageHr, parseTrackFile } from "../../../lib/trackfile";
+import { hrHistogram } from "../../../lib/hrzones";
 import { firstIssue, flash } from "../../../lib/form";
+import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
 
 const PATH = "/running";
@@ -94,6 +97,7 @@ export async function importGpx(formData: FormData) {
         elapsed_seconds: stats.elapsedSeconds,
         elevation_gain_m: stats.elevationGainM,
         avg_hr: averageHr(track.points),
+        hr_buckets: hrHistogram(track.points),
         route: stats.route,
       })
       .select("id")
@@ -154,4 +158,18 @@ export async function deleteRun(formData: FormData) {
   if (!data || data.length === 0) flash(PATH, "error", STALE);
   revalidatePath(PATH);
   flash(PATH, "message", "Run removed");
+}
+
+/** Saves the maximum heart rate used to work out heart-rate zones. */
+export async function saveMaxHr(formData: FormData) {
+  const parsed = runProfileSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) flash(PATH, "error", firstIssue(parsed.error));
+  const ctx = await getAppContext();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("run_profiles")
+    .upsert({ user_id: ctx.userId, max_hr: parsed.data.maxHr });
+  if (error) flash(PATH, "error", "Could not save your maximum heart rate");
+  revalidatePath(PATH);
+  flash(PATH, "message", "Maximum heart rate saved");
 }

@@ -9,7 +9,14 @@ vi.mock("next/navigation", () => ({
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
 type Row = Record<string, unknown>;
-const state = { existing: new Set<string>(), inserted: [] as Row[], failInsert: false };
+const state = {
+  existing: new Set<string>(),
+  inserted: [] as Row[],
+  upserts: [] as Row[],
+  failInsert: false,
+};
+
+vi.mock("../../../lib/session", () => ({ getAppContext: async () => ({ userId: "u-1" }) }));
 
 vi.mock("../../../lib/supabase/server", () => ({
   createClient: async () => ({
@@ -22,6 +29,10 @@ vi.mock("../../../lib/supabase/server", () => ({
           return q;
         },
         is: () => q,
+        upsert: async (row: Row) => {
+          state.upserts.push(row);
+          return { error: null };
+        },
         limit: async () => ({ data: key && state.existing.has(key) ? [{ id: "dup" }] : [] }),
         insert: (row: Row) => ({
           select: () => ({
@@ -38,7 +49,7 @@ vi.mock("../../../lib/supabase/server", () => ({
   }),
 }));
 
-import { importGpx } from "./actions";
+import { importGpx, saveMaxHr } from "./actions";
 
 function gpx(startMin: number, n = 30) {
   const pts = Array.from({ length: n }, (_, i) => {
@@ -63,6 +74,7 @@ async function run(fields: Record<string, string>, files: File[]) {
 beforeEach(() => {
   state.existing = new Set();
   state.inserted = [];
+  state.upserts = [];
   state.failInsert = false;
 });
 
@@ -140,5 +152,51 @@ describe("importGpx", () => {
       "REDIRECT:/running?error=",
     );
     expect(state.inserted).toHaveLength(0);
+  });
+});
+
+function tcx(startMin: number, hr: number | null, n = 40) {
+  const pts = Array.from({ length: n }, (_, i) => {
+    const t = new Date(Date.UTC(2026, 10, 2, 6, startMin, i * 5)).toISOString();
+    const h = hr === null ? "" : `<HeartRateBpm><Value>${hr}</Value></HeartRateBpm>`;
+    return `<Trackpoint><Time>${t}</Time><Position><LatitudeDegrees>${(0.3 + i * 0.00004).toFixed(6)}</LatitudeDegrees><LongitudeDegrees>32.5</LongitudeDegrees></Position><AltitudeMeters>1200</AltitudeMeters>${h}</Trackpoint>`;
+  });
+  return `<?xml version="1.0"?><TrainingCenterDatabase><Activities><Activity Sport="Running"><Id>x</Id><Lap><Track>${pts.join("")}</Track></Lap></Activity></Activities></TrainingCenterDatabase>`;
+}
+
+describe("importGpx heart-rate histogram", () => {
+  it("stores seconds per 5 bpm step for a file with heart rate", async () => {
+    await run({ origin: "strava", kind: "easy" }, [file("a.tcx", tcx(0, 143))]);
+    const b = state.inserted[0]!.hr_buckets as Record<string, number> | null;
+    expect(b).not.toBeNull();
+    expect(Object.keys(b!)).toEqual(["140"]);
+    expect(b!["140"]).toBeGreaterThan(150);
+  });
+  it("stores null when the file has no heart rate", async () => {
+    await run({ origin: "strava", kind: "easy" }, [file("b.gpx", gpx(5))]);
+    expect(state.inserted[0]!.hr_buckets).toBeNull();
+  });
+});
+
+describe("saveMaxHr", () => {
+  const call = async (v: string) => {
+    const fd = new FormData();
+    fd.set("maxHr", v);
+    try {
+      await saveMaxHr(fd);
+    } catch (e) {
+      return decodeURIComponent((e as Error).message);
+    }
+    return "no redirect";
+  };
+  it("saves a valid value for the signed-in user", async () => {
+    expect(await call("188")).toContain("Maximum heart rate saved");
+    expect(state.upserts).toEqual([{ user_id: "u-1", max_hr: 188 }]);
+  });
+  it("rejects out-of-range, fractional and empty values", async () => {
+    for (const v of ["99", "231", "150.5", "", "abc"]) {
+      expect(await call(v)).toContain("error=");
+    }
+    expect(state.upserts).toHaveLength(0);
   });
 });

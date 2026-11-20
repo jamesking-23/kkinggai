@@ -733,6 +733,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      run_profiles: {
+        Row: {
+          created_at: string;
+          max_hr: number | null;
+          revision: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          max_hr?: number | null;
+          revision?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          max_hr?: number | null;
+          revision?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       run_plan_sessions: {
         Row: {
           created_at: string;
@@ -838,6 +862,7 @@ export type Database = {
           effort: number | null;
           elapsed_seconds: number | null;
           elevation_gain_m: number | null;
+          hr_buckets: Json | null;
           external_id: string | null;
           id: string;
           kind: string;
@@ -859,6 +884,7 @@ export type Database = {
           effort?: number | null;
           elapsed_seconds?: number | null;
           elevation_gain_m?: number | null;
+          hr_buckets?: Json | null;
           external_id?: string | null;
           id?: string;
           kind?: string;
@@ -880,6 +906,7 @@ export type Database = {
           effort?: number | null;
           elapsed_seconds?: number | null;
           elevation_gain_m?: number | null;
+          hr_buckets?: Json | null;
           external_id?: string | null;
           id?: string;
           kind?: string;
