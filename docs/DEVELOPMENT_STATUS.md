@@ -560,3 +560,8 @@ Other open items are in the per-phase notes below.
 - Server actions `loadBoardPrefs` and `saveBoardPrefs` (in `app/(app)/chess/board-prefs-actions.ts`) validate with `sanitizePrefs`, refuse stale or far-future timestamps, and never touch other users' rows. Pure helpers in `lib/board-sync.ts`. 13 new tests (web 296 total, mocked database).
 - Live RLS check `tests/rls_user_settings.sql`: 4 of 4 as expected. Sync failures are silent and leave the local copy untouched.
 - Not verified: two real devices syncing in signed-in browsers.
+
+## Session update: premoves in live games (2026-11-21)
+
+- On the opponent's turn in a live game you can pick one of your pieces and a destination; the move is queued (shown under the board) and plays automatically when the opponent's move arrives, only if it is legal in the new position (promotions become queens). Any click cancels it; it is dropped if the game ends. One premove at a time. `resolvePremove` in `lib/puzzles.ts` (4 tests; web 300 total). The server still validates every move.
+- Not verified: two real players over realtime; the click flow was not run in a browser.

@@ -123,6 +123,7 @@ export default async function GamePage({
             fen={fen}
             side={side ?? "white"}
             canMove={active && myTurn}
+            premoveOk={active && !myTurn && side !== null}
             waiting={(active && !myTurn) || g.status === "waiting"}
             last={rep.ok ? rep.last : null}
           />

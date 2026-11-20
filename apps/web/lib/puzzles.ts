@@ -86,3 +86,8 @@ export function moveWith(
     return null;
   }
 }
+
+/** The UCI to play for a stored premove once the position arrives, or null if it is no longer legal. Promotes to a queen. */
+export function resolvePremove(fen: string, from: string, to: string): string | null {
+  return moveWith(fen, from, to, "q")?.uci ?? null;
+}

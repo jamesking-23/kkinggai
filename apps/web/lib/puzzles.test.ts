@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextSchedule, resolveClick, sanForUci } from "./puzzles";
+import { nextSchedule, resolveClick, resolvePremove, sanForUci } from "./puzzles";
 
 const NOW = new Date("2026-11-12T00:00:00Z");
 const START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -56,5 +56,22 @@ describe("promotion helpers", () => {
     expect(moveWith(PROMO, "a7", "a8")).toBeNull(); // a promotion needs a piece
     expect(moveWith(PROMO, "h2", "h3")?.uci).toBe("h2h3");
     expect(moveWith(PROMO, "a7", "b8", "q")).toBeNull();
+  });
+});
+
+describe("resolvePremove", () => {
+  const afterE4 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+  it("returns the move when it is legal in the new position", () => {
+    expect(resolvePremove(afterE4, "e7", "e5")).toBe("e7e5");
+  });
+  it("returns null when the premove is no longer legal", () => {
+    expect(resolvePremove(afterE4, "e7", "e4")).toBeNull();
+    expect(resolvePremove(afterE4, "d1", "d3")).toBeNull();
+  });
+  it("promotes to a queen", () => {
+    expect(resolvePremove("8/P6k/8/8/8/8/8/K7 w - - 0 1", "a7", "a8")).toBe("a7a8q");
+  });
+  it("returns null for junk input", () => {
+    expect(resolvePremove("not a fen", "a1", "a2")).toBeNull();
   });
 });
