@@ -96,3 +96,11 @@ describe("highlight", () => {
     expect(highlight("", ["x"])).toEqual([{ text: "", match: false }]);
   });
 });
+
+describe("attachment hits", () => {
+  it("are grouped as task files and follow the tasks module", () => {
+    const hit = { kind: "attachment", id: "1", title: "a.pdf", snippet: "Task", href: "/tasks/9" };
+    expect(groupHits([hit], new Set(["tasks"]))[0]?.label).toBe("Task files");
+    expect(groupHits([hit], new Set(["goals"]))).toHaveLength(0);
+  });
+});

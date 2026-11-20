@@ -565,3 +565,9 @@ Other open items are in the per-phase notes below.
 
 - On the opponent's turn in a live game you can pick one of your pieces and a destination; the move is queued (shown under the board) and plays automatically when the opponent's move arrives, only if it is legal in the new position (promotions become queens). Any click cancels it; it is dropped if the game ends. One premove at a time. `resolvePremove` in `lib/puzzles.ts` (4 tests; web 300 total). The server still validates every move.
 - Not verified: two real players over realtime; the click flow was not run in a browser.
+
+## Session update: attachments searchable; recurring copies do not inherit files (2026-11-21)
+
+- Migration `20261121000037_search_attachments` (applied): `search_workspace` also matches task attachment file names and returns a link to the task. SECURITY INVOKER, so RLS applies. Live test `tests/rls_search_attachments.sql`: 8 of 8 as expected (owner and viewer find files; outsider none; soft-deleted file or deleted task hidden; `%` literal; anon refused). Search page shows a "Task files" group when the Tasks module is on. Web tests 301.
+- Decision: attachments are NOT copied to the next copy of a recurring task. A file belongs to one occurrence, and the storage policy ties a file's path to its task, so sharing one file between tasks would need a policy change. Revisit only if wanted.
+- Not verified: the search page in a signed-in browser.

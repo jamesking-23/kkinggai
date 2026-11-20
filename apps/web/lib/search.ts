@@ -3,6 +3,7 @@ export type SearchHit = { kind: string; id: string; title: string; snippet: stri
 /** Display label and owning module for each kind returned by `search_workspace`. */
 export const SEARCH_KINDS: Record<string, { label: string; module: string }> = {
   task: { label: "Tasks", module: "tasks" },
+  attachment: { label: "Task files", module: "tasks" },
   project: { label: "Projects", module: "projects" },
   goal: { label: "Goals", module: "goals" },
   event: { label: "Events", module: "calendar" },
