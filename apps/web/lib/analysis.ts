@@ -116,3 +116,36 @@ export function summarise(moves: MoveAnalysis[]): { white: SideSummary; black: S
   };
   return { white: one("white"), black: one("black") };
 }
+
+export type SavedEval = {
+  white: number;
+  bestUci: string | null;
+  bestSan: string | null;
+  depth: number;
+};
+
+/**
+ * Reads a stored analysis back into evaluations. Returns null unless it holds exactly one well-formed
+ * evaluation for each of `positions` positions, so a stale or damaged save is ignored rather than shown.
+ */
+export function parseSavedEvals(raw: unknown, positions: number): SavedEval[] | null {
+  if (!Array.isArray(raw) || raw.length !== positions) return null;
+  const out: SavedEval[] = [];
+  for (const e of raw) {
+    if (!e || typeof e !== "object") return null;
+    const o = e as Record<string, unknown>;
+    const uci = (v: unknown) =>
+      v === null || (typeof v === "string" && /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(v));
+    if (typeof o.white !== "number" || !Number.isFinite(o.white)) return null;
+    if (!uci(o.bestUci)) return null;
+    if (o.bestSan !== null && typeof o.bestSan !== "string") return null;
+    if (typeof o.depth !== "number" || !Number.isFinite(o.depth)) return null;
+    out.push({
+      white: o.white,
+      bestUci: o.bestUci as string | null,
+      bestSan: (o.bestSan as string | null) ?? null,
+      depth: o.depth,
+    });
+  }
+  return out;
+}

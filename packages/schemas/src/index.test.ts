@@ -506,3 +506,24 @@ describe("task attachment limits", () => {
     expect(m.TASK_FILE_MIME_TYPES).toContain("application/pdf");
   });
 });
+
+describe("chessAnalysisSaveSchema", () => {
+  const good = {
+    gameId: "11111111-1111-4111-8111-111111111111",
+    depth: 14,
+    evals: [{ white: 20, bestUci: "e2e4", bestSan: "e4", depth: 14 }],
+  };
+  it("accepts a well-formed analysis", async () => {
+    const { chessAnalysisSaveSchema } = await import("./index");
+    expect(chessAnalysisSaveSchema.safeParse(good).success).toBe(true);
+  });
+  it("rejects bad shapes", async () => {
+    const { chessAnalysisSaveSchema } = await import("./index");
+    const bad = (patch: object) => chessAnalysisSaveSchema.safeParse({ ...good, ...patch }).success;
+    expect(bad({ evals: [] })).toBe(false);
+    expect(bad({ depth: 99 })).toBe(false);
+    expect(bad({ evals: [{ ...good.evals[0], bestUci: "zz" }] })).toBe(false);
+    expect(bad({ evals: [{ ...good.evals[0], white: 99999 }] })).toBe(false);
+    expect(bad({ gameId: "nope" })).toBe(false);
+  });
+});

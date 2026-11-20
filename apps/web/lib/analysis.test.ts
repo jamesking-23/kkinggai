@@ -83,3 +83,20 @@ describe("classification", () => {
     expect(summarise([]).white.averageLoss).toBeNull();
   });
 });
+
+describe("parseSavedEvals", () => {
+  const ok = { white: 12, bestUci: "e2e4", bestSan: "e4", depth: 14 };
+  it("accepts one good evaluation per position", async () => {
+    const { parseSavedEvals } = await import("./analysis");
+    expect(parseSavedEvals([ok, { ...ok, bestUci: null, bestSan: null }], 2)).toHaveLength(2);
+  });
+  it("rejects the wrong count, junk and bad moves", async () => {
+    const { parseSavedEvals } = await import("./analysis");
+    expect(parseSavedEvals([ok], 2)).toBeNull();
+    expect(parseSavedEvals("x", 1)).toBeNull();
+    expect(parseSavedEvals([null], 1)).toBeNull();
+    expect(parseSavedEvals([{ ...ok, white: "1" }], 1)).toBeNull();
+    expect(parseSavedEvals([{ ...ok, bestUci: "e9e4" }], 1)).toBeNull();
+    expect(parseSavedEvals([{ ...ok, depth: Number.NaN }], 1)).toBeNull();
+  });
+});

@@ -12,7 +12,7 @@ import {
   type MoveClass,
 } from "../lib/analysis";
 import { analyseGame, type PositionEval } from "../lib/engine";
-import { savePuzzles } from "../app/(app)/chess/actions";
+import { saveAnalysis, savePuzzles } from "../app/(app)/chess/actions";
 
 const DEPTHS = [10, 14, 18] as const;
 const CLASS_STYLE: Record<MoveClass, string> = {
@@ -31,6 +31,8 @@ export function ChessBoard({
   flip,
   gameId,
   canSavePuzzles,
+  savedEvals,
+  savedDepth,
 }: {
   fens: string[];
   sans: string[];
@@ -38,13 +40,18 @@ export function ChessBoard({
   flip: boolean;
   gameId: string;
   canSavePuzzles: boolean;
+  /** A stored analysis for this game, shown without running the engine again. */
+  savedEvals?: PositionEval[] | null;
+  savedDepth?: number | null;
 }) {
   const [ply, setPly] = useState(0);
   const [depth, setDepth] = useState<number>(14);
-  const [evals, setEvals] = useState<PositionEval[] | null>(null);
+  const [evals, setEvals] = useState<PositionEval[] | null>(savedEvals ?? null);
   const [running, setRunning] = useState<{ done: number; total: number } | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
-  const [saveNote, setSaveNote] = useState<string | null>(null);
+  const [saveNote, setSaveNote] = useState<string | null>(
+    savedEvals ? `Showing your saved analysis${savedDepth ? ` (depth ${savedDepth})` : ""}.` : null,
+  );
   const abort = useRef<AbortController | null>(null);
   const last = fens.length - 1;
   const go = (n: number) => setPly(Math.max(0, Math.min(last, n)));
@@ -100,6 +107,10 @@ export function ChessBoard({
         ctl.signal,
       );
       setEvals(out);
+      const res = await saveAnalysis({ gameId, depth, evals: out });
+      setSaveNote(
+        res.ok ? "Analysis saved. It will be here next time." : `Not saved: ${res.error}`,
+      );
     } catch (e) {
       if (!ctl.signal.aborted) setFailure(e instanceof Error ? e.message : "Analysis failed");
     } finally {

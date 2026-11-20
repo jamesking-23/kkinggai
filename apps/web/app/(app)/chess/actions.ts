@@ -5,6 +5,7 @@ import {
   CHESS_MAX_GAMES_PER_IMPORT,
   CHESS_MAX_PGN_CHARS,
   CHESS_PUZZLE_MIN_LOSS,
+  chessAnalysisSaveSchema,
   chessPuzzleAttemptSchema,
   chessPuzzleSaveSchema,
   chessImportSchema,
@@ -289,4 +290,37 @@ export async function recordPuzzleAttempt(formData: FormData) {
   revalidatePath(PATH);
   const san = sanForUci(p!.fen, p!.solution_uci) ?? p!.solution_uci;
   flash(TRAIN, "message", correct ? "Correct" : `Not quite. The engine's move was ${san}`);
+}
+
+/** Stores the engine's evaluation of a game (one per game, replaced on re-analysis). */
+export async function saveAnalysis(
+  input: unknown,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const parsed = chessAnalysisSaveSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
+  const { gameId, depth, evals } = parsed.data;
+  const supabase = await createClient();
+  const { data: game } = await supabase
+    .from("chess_games")
+    .select("pgn")
+    .eq("id", gameId)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (!game) return { ok: false, error: "Game not found" };
+  const played = replay(game.pgn);
+  if (!played) return { ok: false, error: "This game could not be replayed" };
+  if (played.fens.length !== evals.length)
+    return { ok: false, error: "The analysis does not match this game" };
+
+  const { data: have } = await supabase
+    .from("chess_analyses")
+    .select("id")
+    .eq("game_id", gameId)
+    .is("deleted_at", null)
+    .maybeSingle();
+  const { error } = have
+    ? await supabase.from("chess_analyses").update({ depth, evals }).eq("id", have.id)
+    : await supabase.from("chess_analyses").insert({ game_id: gameId, depth, evals });
+  if (error) return { ok: false, error: "Could not save the analysis" };
+  return { ok: true };
 }

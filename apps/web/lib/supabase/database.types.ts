@@ -400,6 +400,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      chess_analyses: {
+        Row: {
+          created_at: string;
+          deleted_at: string | null;
+          depth: number;
+          evals: Json;
+          game_id: string;
+          id: string;
+          revision: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          deleted_at?: string | null;
+          depth: number;
+          evals: Json;
+          game_id: string;
+          id?: string;
+          revision?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          deleted_at?: string | null;
+          depth?: number;
+          evals?: Json;
+          game_id?: string;
+          id?: string;
+          revision?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       chess_puzzles: {
         Row: {
           attempts: number;

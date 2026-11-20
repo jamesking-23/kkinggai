@@ -3,6 +3,7 @@ import { requireModule } from "../../../../lib/modules";
 import { getAppContext } from "../../../../lib/session";
 import { createClient } from "../../../../lib/supabase/server";
 import { outcomeFor, replay } from "../../../../lib/chess";
+import { parseSavedEvals } from "../../../../lib/analysis";
 import type { FlashParams } from "../../../../lib/form";
 import { ChessBoard } from "../../../../components/chess-board";
 import {
@@ -40,6 +41,13 @@ export default async function ChessGamePage({
   if (!g) notFound();
 
   const played = replay(g.pgn);
+  const { data: saved } = await supabase
+    .from("chess_analyses")
+    .select("depth, evals")
+    .eq("game_id", id)
+    .is("deleted_at", null)
+    .maybeSingle();
+  const savedEvals = played && saved ? parseSavedEvals(saved.evals, played.fens.length) : null;
   const o = outcomeFor(g);
   const facts = [
     g.event,
@@ -74,6 +82,8 @@ export default async function ChessGamePage({
             flip={g.user_color === "black"}
             gameId={g.id}
             canSavePuzzles={!!g.user_color}
+            savedEvals={savedEvals}
+            savedDepth={savedEvals ? (saved?.depth ?? null) : null}
           />
         </Card>
       ) : (

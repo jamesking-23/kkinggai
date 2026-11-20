@@ -487,6 +487,24 @@ export const chessPuzzleSaveSchema = z.object({
     .max(100),
 });
 
+export const CHESS_ANALYSIS_MAX_POSITIONS = 1001;
+const uciMove = z.string().regex(/^[a-h][1-8][a-h][1-8][qrbn]?$/);
+export const chessAnalysisSaveSchema = z.object({
+  gameId: z.string().uuid(),
+  depth: z.number().int().min(1).max(60),
+  evals: z
+    .array(
+      z.object({
+        white: z.number().int().min(-10000).max(10000),
+        bestUci: uciMove.nullable(),
+        bestSan: z.string().max(12).nullable(),
+        depth: z.number().int().min(0).max(60),
+      }),
+    )
+    .min(1)
+    .max(CHESS_ANALYSIS_MAX_POSITIONS),
+});
+
 export const chessPuzzleAttemptSchema = z.object({
   id: z.string().uuid(),
   revision: z.coerce.number().int().min(1),
