@@ -64,7 +64,7 @@ export default async function ChessPage({ searchParams }: { searchParams: Promis
         <StatTile label="As black" value={fmtRecord(stats.black)} />
       </div>
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-2">
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {(
           [
             ["/chess/play", "Play a friend", "Live games with clocks, invites and rematches.", "♞"],
@@ -75,6 +75,12 @@ export default async function ChessPage({ searchParams }: { searchParams: Promis
                 ? `${dueCount} puzzle${dueCount === 1 ? "" : "s"} due now.`
                 : "Nothing due right now.",
               "♜",
+            ],
+            [
+              "/chess/repertoire",
+              "Your repertoire",
+              "Drill the openings you actually play, from your own games.",
+              "♝",
             ],
           ] as const
         ).map(([href, title, text, glyph]) => (
