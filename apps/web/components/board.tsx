@@ -10,6 +10,8 @@ import {
   type ReactNode,
 } from "react";
 import { Settings2 } from "lucide-react";
+import { loadBoardPrefs, saveBoardPrefs } from "../app/(app)/chess/board-prefs-actions";
+import { PREFS_AT_KEY, decideSync } from "../lib/board-sync";
 import {
   BOARD_MAX,
   BOARD_MIN,
@@ -53,11 +55,56 @@ function subscribe(fn: () => void) {
     window.removeEventListener("storage", fn);
   };
 }
+// ---- sync across devices: last write wins through the user's settings row; failures leave the local copy alone ----
+let syncChecked = false;
+let saveTimer: ReturnType<typeof setTimeout> | undefined;
+function localAt(): number {
+  try {
+    return Number(localStorage.getItem(PREFS_AT_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+}
+function writeLocal(next: BoardPrefs, at: number) {
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify(next));
+    localStorage.setItem(PREFS_AT_KEY, String(at));
+  } catch {
+    cachedRaw = undefined;
+    cached = next;
+  }
+  listeners.forEach((l) => l());
+}
+async function syncOnce() {
+  if (syncChecked) return;
+  syncChecked = true;
+  try {
+    const remote = await loadBoardPrefs();
+    const action = decideSync(localAt(), remote?.at ?? 0);
+    if (action === "pull" && remote) writeLocal(remote.prefs, remote.at);
+    else if (action === "push") await saveBoardPrefs(snapshot(), localAt());
+  } catch {
+    syncChecked = false; // try again on the next mount
+  }
+}
+function scheduleSave(next: BoardPrefs, at: number) {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    saveBoardPrefs(next, at).catch(() => {});
+  }, 800);
+}
+
 export function useBoardPrefs(): [BoardPrefs, (patch: Partial<BoardPrefs>) => void] {
   const prefs = useSyncExternalStore(subscribe, snapshot, () => DEFAULT_PREFS);
+  useEffect(() => {
+    void syncOnce();
+  }, []);
   const update = useCallback((patch: Partial<BoardPrefs>) => {
     const next = sanitizePrefs({ ...snapshot(), ...patch });
+    const at = Date.now();
+    scheduleSave(next, at);
     try {
+      localStorage.setItem(PREFS_AT_KEY, String(at));
       localStorage.setItem(PREFS_KEY, JSON.stringify(next));
     } catch {
       // storage unavailable: the change lasts until reload

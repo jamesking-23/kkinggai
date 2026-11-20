@@ -553,3 +553,10 @@ Other open items are in the per-phase notes below.
 - App: `toggleTask` reopen now calls `reopen_task` and says when a copy was removed. 3 reopen tests added (web tests mock the database).
 - Live DB test `tests/rls_task_reopen.sql`: 15 of 15 lines as expected, including stale revision, viewer, outsider and anon refused. Security advisor: only the previously accepted warnings.
 - Not verified in a signed-in browser. Attachments are still not copied to recurring copies.
+
+## Session update: board preferences sync across devices (2026-11-21)
+
+- The board look (size, colours, pieces, coordinates, hints) still lives in localStorage for instant use, and now also syncs through `user_settings.settings.board` (`{prefs, at}`), last write wins by timestamp. On the first board mount per page load the browser pulls a newer server copy or pushes a newer local one; changes are saved 0.8 s after the last tweak. Other keys in `settings` are preserved. No migration: the existing `user_settings` row and its own-row RLS are used.
+- Server actions `loadBoardPrefs` and `saveBoardPrefs` (in `app/(app)/chess/board-prefs-actions.ts`) validate with `sanitizePrefs`, refuse stale or far-future timestamps, and never touch other users' rows. Pure helpers in `lib/board-sync.ts`. 13 new tests (web 296 total, mocked database).
+- Live RLS check `tests/rls_user_settings.sql`: 4 of 4 as expected. Sync failures are silent and leave the local copy untouched.
+- Not verified: two real devices syncing in signed-in browsers.
