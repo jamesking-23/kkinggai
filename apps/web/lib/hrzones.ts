@@ -1,4 +1,5 @@
 import type { TrackPoint } from "./gpx";
+import { localDate, weekStart } from "./running";
 
 /** Width of one heart-rate bucket in bpm. */
 export const BUCKET_BPM = 5;
@@ -86,4 +87,39 @@ export function zoneBreakdown(
           : `${Math.round(z.from * maxHr)}-${Math.round(z.to * maxHr) - 1} bpm`,
     })),
   };
+}
+
+export type WeekZones = { weekStart: string; seconds: number[]; below: number; total: number };
+
+/**
+ * Time in each zone per week (Monday start, in the user's time zone) for the last `weeks` weeks, oldest first.
+ * Runs without heart-rate data are ignored; weeks with none are all zeros.
+ */
+export function weeklyZones(
+  runs: readonly { started_at: string; hr_buckets: unknown }[],
+  maxHr: number,
+  now: Date,
+  timeZone: string,
+  weeks = 8,
+): WeekZones[] {
+  const cur = new Date(`${weekStart(localDate(now.toISOString(), timeZone))}T00:00:00Z`);
+  const out = new Map<string, WeekZones>();
+  const order: string[] = [];
+  for (let i = weeks - 1; i >= 0; i--) {
+    const d = new Date(cur);
+    d.setUTCDate(d.getUTCDate() - 7 * i);
+    const key = d.toISOString().slice(0, 10);
+    order.push(key);
+    out.set(key, { weekStart: key, seconds: ZONES.map(() => 0), below: 0, total: 0 });
+  }
+  for (const r of runs) {
+    const buckets = parseBuckets(r.hr_buckets);
+    const w = out.get(weekStart(localDate(r.started_at, timeZone)));
+    if (!buckets || !w) continue;
+    const z = zoneBreakdown(buckets, maxHr);
+    z.zones.forEach((zone, i) => (w.seconds[i] = w.seconds[i]! + zone.seconds));
+    w.below += z.below;
+    w.total += z.total;
+  }
+  return order.map((k) => out.get(k)!);
 }

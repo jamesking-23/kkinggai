@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hrHistogram, parseBuckets, zoneBreakdown } from "./hrzones";
+import { hrHistogram, parseBuckets, weeklyZones, zoneBreakdown } from "./hrzones";
 
 const pt = (t: number, hr: number | null) => ({ lat: 0, lon: 0, ele: null, t: t * 1000, hr });
 const steady = (n: number, hr: number, step = 5) =>
@@ -64,5 +64,44 @@ describe("zoneBreakdown", () => {
   });
   it("copes with no time", () => {
     expect(zoneBreakdown({}, 190).zones.every((z) => z.share === 0)).toBe(true);
+  });
+});
+
+describe("weeklyZones", () => {
+  const now = new Date("2026-11-20T09:00:00Z"); // Friday; week starts Monday 2026-11-16
+  const run = (started_at: string, buckets: unknown) => ({ started_at, hr_buckets: buckets });
+  it("adds runs into their week and zone, oldest week first", () => {
+    const w = weeklyZones(
+      [
+        run("2026-11-17T05:00:00Z", { "130": 600 }), // z2 at max 200
+        run("2026-11-18T05:00:00Z", { "130": 300, "190": 60 }), // z2 + z5
+        run("2026-11-09T05:00:00Z", { "150": 100 }), // previous week, z3
+      ],
+      200,
+      now,
+      "UTC",
+      3,
+    );
+    expect(w.map((x) => x.weekStart)).toEqual(["2026-11-02", "2026-11-09", "2026-11-16"]);
+    expect(w[2]!.seconds).toEqual([0, 900, 0, 0, 60]);
+    expect(w[2]!.total).toBe(960);
+    expect(w[1]!.seconds[2]).toBe(100);
+    expect(w[0]!.total).toBe(0);
+  });
+  it("ignores runs without data and runs outside the window", () => {
+    const w = weeklyZones(
+      [run("2026-11-17T05:00:00Z", null), run("2025-01-01T05:00:00Z", { "130": 50 })],
+      200,
+      now,
+      "UTC",
+      3,
+    );
+    expect(w.every((x) => x.total === 0)).toBe(true);
+  });
+  it("uses the time zone to place a late-night run", () => {
+    // 22:30 UTC Sunday 15th is Monday 16th 01:30 in Kampala (UTC+3): belongs to the week starting the 16th.
+    const r = [run("2026-11-15T22:30:00Z", { "130": 60 })];
+    expect(weeklyZones(r, 200, now, "Africa/Kampala", 1)[0]!.total).toBe(60);
+    expect(weeklyZones(r, 200, now, "UTC", 2)[0]!.total).toBe(60); // previous week in UTC
   });
 });

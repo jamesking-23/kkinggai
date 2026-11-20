@@ -22,7 +22,10 @@ import {
   StatTile,
   subtleButton,
 } from "../../../components/ui";
+import { weeklyZones, ZONES } from "../../../lib/hrzones";
 import { createRun, importGpx, saveMaxHr } from "./actions";
+
+const ZONE_COLORS = ["#4f7cff", "#2fb4c9", "#3cc47a", "#f0b429", "#ef5b5b"];
 
 const SOURCE_LABELS: Record<string, string> = {
   gpx: "Imported",
@@ -46,6 +49,20 @@ export default async function RunningPage({
     .order("started_at", { ascending: false })
     .limit(2000);
   const { data: profile } = await supabase.from("run_profiles").select("max_hr").maybeSingle();
+  const since = new Date(Date.now() - 70 * 86400_000).toISOString();
+  const { data: hrRuns } = profile?.max_hr
+    ? await supabase
+        .from("run_activities")
+        .select("started_at, hr_buckets")
+        .not("hr_buckets", "is", null)
+        .gte("started_at", since)
+        .is("deleted_at", null)
+        .limit(500)
+    : { data: [] };
+  const zoneWeeks = profile?.max_hr
+    ? weeklyZones(hrRuns ?? [], profile.max_hr, new Date(), ctx.timezone)
+    : [];
+  const zoneMax = Math.max(1, ...zoneWeeks.map((w) => w.total));
   const runs = data ?? [];
   const sum = summariseRuns(runs, new Date(), ctx.timezone);
   const maxWeek = Math.max(1, ...sum.weeks.map((w) => w.distanceM));
@@ -128,6 +145,57 @@ export default async function RunningPage({
             ) : (
               <p className="text-sm text-muted">Log a run of 5 km or more.</p>
             )}
+
+            {zoneWeeks.some((w) => w.total > 0) && (
+              <Card title="Time in heart-rate zones, by week" className="mb-6">
+                <ul className="space-y-2" aria-label="Time in each zone per week">
+                  {[...zoneWeeks].reverse().map((w) => (
+                    <li key={w.weekStart} className="flex items-center gap-3 text-xs">
+                      <span className="w-12 shrink-0 text-muted">{w.weekStart.slice(5)}</span>
+                      <span
+                        className="flex h-3 overflow-hidden rounded-full bg-raised"
+                        style={{ width: `${Math.max(2, (w.total / zoneMax) * 100)}%` }}
+                        title={ZONES.map(
+                          (z, i) => `${z.label}: ${formatDuration(Math.round(w.seconds[i]!))}`,
+                        ).join("\n")}
+                      >
+                        {w.seconds.map((sec, i) =>
+                          sec > 0 ? (
+                            <span
+                              key={i}
+                              style={{
+                                width: `${(sec / w.total) * 100}%`,
+                                background: ZONE_COLORS[i],
+                              }}
+                            />
+                          ) : null,
+                        )}
+                      </span>
+                      <span className="shrink-0 tabular-nums text-muted">
+                        {w.total > 0 ? formatDuration(Math.round(w.total)) : "–"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                  {ZONES.map((z, i) => (
+                    <span key={z.id} className="inline-flex items-center gap-1.5">
+                      <span
+                        aria-hidden
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ background: ZONE_COLORS[i] }}
+                      />
+                      {z.label}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-muted">
+                  Last 8 weeks, runs with heart-rate data only, using a maximum of {profile?.max_hr}{" "}
+                  bpm.
+                </p>
+              </Card>
+            )}
+
             <p className="mt-2 text-xs text-muted">
               Average pace over a whole run, not a split-based personal best.
             </p>
