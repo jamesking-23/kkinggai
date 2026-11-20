@@ -54,3 +54,35 @@ export function legalTargets(fen: string, from: string): Set<string> {
     return new Set();
   }
 }
+
+const PROMO_ORDER = ["q", "r", "b", "n"];
+
+/** Promotion pieces ("q", "r", "b", "n") a move from `from` to `to` can choose between; empty when it is not a promotion. */
+export function promotionChoices(fen: string, from: string, to: string): string[] {
+  try {
+    const found = new Chess(fen)
+      .moves({ verbose: true })
+      .filter((m) => m.from === from && m.to === to && m.promotion)
+      .map((m) => m.promotion as string);
+    return PROMO_ORDER.filter((p) => found.includes(p));
+  } catch {
+    return [];
+  }
+}
+
+/** The legal move from `from` to `to` with the chosen promotion piece (ignored when the move is not a promotion). */
+export function moveWith(
+  fen: string,
+  from: string,
+  to: string,
+  promotion?: string,
+): { uci: string; san: string } | null {
+  try {
+    const m = new Chess(fen)
+      .moves({ verbose: true })
+      .find((x) => x.from === from && x.to === to && (!x.promotion || x.promotion === promotion));
+    return m ? { uci: from + to + (m.promotion ?? ""), san: m.san } : null;
+  } catch {
+    return null;
+  }
+}

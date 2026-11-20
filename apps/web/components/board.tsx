@@ -587,3 +587,39 @@ function DragGhost({
     <img src={`/pieces/${set}/${code}.svg`} alt="" draggable={false} style={style} />
   );
 }
+
+/** A piece picture in the viewer's chosen piece set, for use outside the board (for example a promotion menu). */
+export function PieceIcon({ code, size = 44 }: { code: string; size?: number }) {
+  const [prefs] = useBoardPrefs();
+  const glyphs: Record<string, string> = {
+    wQ: "♛",
+    wR: "♜",
+    wB: "♝",
+    wN: "♞",
+    bQ: "♛",
+    bR: "♜",
+    bB: "♝",
+    bN: "♞",
+  };
+  return prefs.pieces === "glyphs" ? (
+    <span
+      aria-hidden
+      className="leading-none"
+      style={{
+        fontSize: size * 0.85,
+        color: code[0] === "w" ? "#fffdf6" : "#15120e",
+        textShadow: code[0] === "w" ? "0 0 2px #000" : "none",
+      }}
+    >
+      {glyphs[code] ?? ""}
+    </span>
+  ) : (
+    <img
+      src={`/pieces/${prefs.pieces}/${code}.svg`}
+      alt=""
+      width={size}
+      height={size}
+      draggable={false}
+    />
+  );
+}

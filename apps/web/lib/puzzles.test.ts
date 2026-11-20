@@ -36,3 +36,25 @@ describe("sanForUci / resolveClick", () => {
     expect(resolveClick(fen, "a7", "a8", "h2g3")?.uci).toBe("a7a8q");
   });
 });
+
+describe("promotion helpers", () => {
+  const PROMO = "8/P7/8/8/8/8/k6K/8 w - - 0 1";
+  it("lists the four promotion pieces, queen first", async () => {
+    const { promotionChoices } = await import("./puzzles");
+    expect(promotionChoices(PROMO, "a7", "a8")).toEqual(["q", "r", "b", "n"]);
+  });
+  it("lists nothing for an ordinary or illegal move", async () => {
+    const { promotionChoices } = await import("./puzzles");
+    expect(promotionChoices(PROMO, "h2", "h3")).toEqual([]);
+    expect(promotionChoices(PROMO, "a7", "a6")).toEqual([]);
+    expect(promotionChoices("nonsense", "a7", "a8")).toEqual([]);
+  });
+  it("builds the move with the chosen piece", async () => {
+    const { moveWith } = await import("./puzzles");
+    expect(moveWith(PROMO, "a7", "a8", "n")?.uci).toBe("a7a8n");
+    expect(moveWith(PROMO, "a7", "a8", "r")?.uci).toBe("a7a8r");
+    expect(moveWith(PROMO, "a7", "a8")).toBeNull(); // a promotion needs a piece
+    expect(moveWith(PROMO, "h2", "h3")?.uci).toBe("h2h3");
+    expect(moveWith(PROMO, "a7", "b8", "q")).toBeNull();
+  });
+});
