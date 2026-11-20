@@ -72,3 +72,31 @@ export function ProgressBar({ percent }: { percent: number }) {
     </div>
   );
 }
+
+/** A headline number with a label, optionally a link. `tone` tints the value. */
+export function StatTile(props: {
+  label: string;
+  value: ReactNode;
+  hint?: string;
+  href?: string;
+  tone?: "default" | "danger" | "success";
+}) {
+  const color =
+    props.tone === "danger" ? "text-danger" : props.tone === "success" ? "text-success" : "";
+  const body = (
+    <div className="surface h-full rounded-xl p-4">
+      <p className="text-xs uppercase tracking-wider text-muted">{props.label}</p>
+      <p className={`mt-1.5 text-3xl font-semibold tabular-nums tracking-tight ${color}`}>
+        {props.value}
+      </p>
+      {props.hint && <p className="mt-1 text-xs text-muted">{props.hint}</p>}
+    </div>
+  );
+  return props.href ? (
+    <a href={props.href} className="block transition hover:-translate-y-0.5">
+      {body}
+    </a>
+  ) : (
+    body
+  );
+}

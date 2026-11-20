@@ -5,6 +5,7 @@ import { computeStats, outcomeFor, winRate, type Record3 } from "../../../lib/ch
 import type { FlashParams } from "../../../lib/form";
 import {
   Card,
+  StatTile,
   Empty,
   Flash,
   inputClass,
@@ -53,30 +54,48 @@ export default async function ChessPage({ searchParams }: { searchParams: Promis
       <PageHeader title="Chess" subtitle="Your game history, imported from PGN." />
       <Flash error={error} message={message} />
 
-      <div className="mb-6 grid gap-4 md:grid-cols-3">
-        <Card title="Overall">
-          <p className="text-sm">{fmtRecord(stats.overall)}</p>
-          <p className="mt-1 text-xs text-muted">
-            {stats.counted} of {stats.total} games counted
-          </p>
-        </Card>
-        <Card title="As white">
-          <p className="text-sm">{fmtRecord(stats.white)}</p>
-        </Card>
-        <Card title="As black">
-          <p className="text-sm">{fmtRecord(stats.black)}</p>
-        </Card>
+      <div className="mb-4 grid gap-3 sm:grid-cols-3">
+        <StatTile
+          label="Overall"
+          value={fmtRecord(stats.overall)}
+          hint={`${stats.counted} of ${stats.total} games counted`}
+        />
+        <StatTile label="As white" value={fmtRecord(stats.white)} />
+        <StatTile label="As black" value={fmtRecord(stats.black)} />
       </div>
 
-      <p className="mb-6 text-sm">
-        <a href="/chess/train" className="text-primary">
-          Train on your mistakes{dueCount ? ` (${dueCount} due)` : ""}
-        </a>
-        {" · "}
-        <a href="/chess/play" className="text-primary">
-          Play a friend
-        </a>
-      </p>
+      <div className="mb-6 grid gap-3 sm:grid-cols-2">
+        {(
+          [
+            ["/chess/play", "Play a friend", "Live games with clocks, invites and rematches.", "♞"],
+            [
+              "/chess/train",
+              "Train on your mistakes",
+              dueCount
+                ? `${dueCount} puzzle${dueCount === 1 ? "" : "s"} due now.`
+                : "Nothing due right now.",
+              "♜",
+            ],
+          ] as const
+        ).map(([href, title, text, glyph]) => (
+          <a
+            key={href}
+            href={href}
+            className="surface group flex items-center gap-4 rounded-xl p-4"
+          >
+            <span
+              aria-hidden
+              className="brand-mark flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-3xl text-white transition group-hover:scale-105"
+            >
+              {glyph}
+            </span>
+            <span>
+              <span className="block font-semibold">{title}</span>
+              <span className="block text-sm text-muted">{text}</span>
+            </span>
+          </a>
+        ))}
+      </div>
 
       {(profile?.lichess_username || profile?.chesscom_username) && (
         <div className="mb-6 flex flex-wrap items-center gap-2 text-sm">

@@ -474,3 +474,9 @@ Other open items are in the per-phase notes below.
 - Verified: 17 new unit tests (preference validation, themes, piece files all present); lint, typecheck, build and format pass. I rendered the board in a headless browser on a temporary page (removed afterwards) and looked at the screenshots: pieces, highlights, hints, theme and piece-set switching all drew correctly.
 - Not verified: the signed-in pages with the new styling (no signed-in session); touch devices; the board at the largest sizes on a real phone; contrast of every theme against the highlight colours.
 - Not done: board and piece preferences are not synced across devices; no piece animation or drag-and-drop (click-to-move only); the premium pass did not redo individual page layouts (dashboard only got the greeting), so the denser pages (running, business, sports) still look plain inside the new cards.
+
+## Session update: page layouts (2026-11-20)
+
+- Written: new `StatTile` in `components/ui.tsx`. Dashboard now opens with four headline tiles (open tasks, overdue, today's events, projects with goal count) and quick-action buttons; the separate Projects card was dropped. Running now shows week / month / all-time distance as tiles and the weekly distance as a vertical bar chart. The chess home shows record tiles and two action cards (Play a friend, Train on your mistakes).
+- Verified: lint, typecheck, 237 tests, build and format pass. CI for `e4638c1` passed.
+- Not verified: none of these pages was viewed in a browser (they need a signed-in session), so spacing and wrapping are untested. Business, sports, academics, career and the other module pages still use only the shared card styling.

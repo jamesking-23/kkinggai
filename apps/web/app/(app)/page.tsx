@@ -2,7 +2,7 @@ import { getAppContext } from "../../lib/session";
 import { createClient } from "../../lib/supabase/server";
 import { goalProgress, isOverdue } from "../../lib/productivity";
 import { addDays, localDate, zonedTimeToUtc } from "../../lib/time";
-import { Card, Empty, ProgressBar, subtleButton } from "../../components/ui";
+import { Card, Empty, ProgressBar, StatTile, subtleButton } from "../../components/ui";
 import { dismissReminder } from "./reminder-actions";
 
 type Task = { id: string; title: string; status: string; due_at: string | null };
@@ -84,6 +84,44 @@ export default async function DashboardPage() {
         Welcome, <span className="brand-text">{ctx.displayName}</span>
       </h1>
       <p className="mt-1 text-sm text-muted">Workspace: {ctx.current.name}</p>
+
+      <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile label="Open tasks" value={open.length} href="/tasks" hint="View the plan" />
+        <StatTile
+          label="Overdue"
+          value={overdue.length}
+          href="/tasks?view=plan"
+          tone={overdue.length ? "danger" : "success"}
+          hint={overdue.length ? "Needs attention" : "All caught up"}
+        />
+        <StatTile
+          label="Today"
+          value={todayEvents.length}
+          href="/calendar"
+          hint="Events scheduled"
+        />
+        <StatTile
+          label="Projects"
+          value={projects.count ?? 0}
+          href="/projects"
+          hint={`${activeGoals.length} active goal${activeGoals.length === 1 ? "" : "s"}`}
+        />
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {(
+          [
+            ["New task", "/tasks"],
+            ["Schedule event", "/calendar"],
+            ["Play chess", "/chess/play"],
+            ["Log a run", "/running"],
+          ] as const
+        ).map(([label, href]) => (
+          <a key={href} href={href} className={subtleButton}>
+            {label}
+          </a>
+        ))}
+      </div>
 
       {isEmpty && (
         <Card className="mt-6" title="Get started">
@@ -199,13 +237,6 @@ export default async function DashboardPage() {
           ) : (
             <Empty>No active goals.</Empty>
           )}
-        </Card>
-
-        <Card title="Projects">
-          <p className="text-sm">{projects.count ?? 0} active project(s)</p>
-          <a href="/projects" className="mt-3 inline-block text-xs text-primary">
-            All projects
-          </a>
         </Card>
       </div>
     </div>

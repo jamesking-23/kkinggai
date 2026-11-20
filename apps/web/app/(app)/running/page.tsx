@@ -10,7 +10,6 @@ import {
   localDate,
   paceSecPerKm,
   summariseRuns,
-  type Totals,
 } from "../../../lib/running";
 import type { FlashParams } from "../../../lib/form";
 import {
@@ -20,6 +19,7 @@ import {
   inputClass,
   PageHeader,
   primaryButton,
+  StatTile,
   subtleButton,
 } from "../../../components/ui";
 import { createRun, importGpx } from "./actions";
@@ -29,11 +29,6 @@ const SOURCE_LABELS: Record<string, string> = {
   strava: "Strava",
   mapmyrun: "MapMyRun",
 };
-
-const total = (t: Totals) =>
-  t.runs
-    ? `${formatKm(t.distanceM)} · ${t.runs} run${t.runs === 1 ? "" : "s"} · ${formatDuration(t.movingSeconds)}`
-    : "No runs";
 
 export default async function RunningPage({
   searchParams,
@@ -69,30 +64,48 @@ export default async function RunningPage({
         </a>
       </p>
 
-      <div className="mb-6 grid gap-4 md:grid-cols-3">
-        <Card title="This week">
-          <p className="text-sm">{total(sum.week)}</p>
-        </Card>
-        <Card title="This month">
-          <p className="text-sm">{total(sum.month)}</p>
-        </Card>
-        <Card title="All time">
-          <p className="text-sm">{total(sum.all)}</p>
-        </Card>
+      <div className="mb-6 grid gap-3 sm:grid-cols-3">
+        {(
+          [
+            ["This week", sum.week],
+            ["This month", sum.month],
+            ["All time", sum.all],
+          ] as const
+        ).map(([label, t]) => (
+          <StatTile
+            key={label}
+            label={label}
+            value={t.runs ? formatKm(t.distanceM) : "–"}
+            hint={
+              t.runs
+                ? `${t.runs} run${t.runs === 1 ? "" : "s"} · ${formatDuration(t.movingSeconds)}`
+                : "No runs"
+            }
+          />
+        ))}
       </div>
 
       {sum.all.runs > 0 && (
         <div className="mb-6 grid gap-4 md:grid-cols-2">
           <Card title="Weekly distance">
-            <ul className="space-y-1 text-xs">
+            <ul className="flex h-36 items-end gap-1.5" aria-label="Distance per week">
               {sum.weeks.map((w) => (
-                <li key={w.weekStart} className="flex items-center gap-2">
-                  <span className="w-20 shrink-0 text-muted">{w.weekStart.slice(5)}</span>
+                <li
+                  key={w.weekStart}
+                  className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1"
+                  title={`${w.weekStart}: ${w.runs ? formatKm(w.distanceM) : "no runs"}`}
+                >
+                  <span className="text-[10px] text-muted">
+                    {w.runs ? (w.distanceM / 1000).toFixed(0) : ""}
+                  </span>
                   <span
-                    className="h-2 rounded-sm bg-primary"
-                    style={{ width: `${(w.distanceM / maxWeek) * 60}%` }}
+                    className="w-full rounded-t-md"
+                    style={{
+                      height: `${Math.max(w.runs ? 4 : 1, (w.distanceM / maxWeek) * 100)}%`,
+                      background: w.runs ? "var(--brand-gradient)" : "var(--color-border)",
+                    }}
                   />
-                  <span className="text-muted">{w.runs ? formatKm(w.distanceM) : "–"}</span>
+                  <span className="text-[10px] text-muted">{w.weekStart.slice(5)}</span>
                 </li>
               ))}
             </ul>
