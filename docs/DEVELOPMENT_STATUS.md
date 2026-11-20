@@ -530,3 +530,9 @@ Other open items are in the per-phase notes below.
 - Added `/chess/repertoire`: builds an opening repertoire from the user's own games (first 8 moves, positions reached in at least 2 games), lists moves with counts and score per colour, and a drill that shows a position and asks for the usual move.
 - Pure logic in `lib/repertoire.ts` (replay-based) and client-safe formatters in `lib/repertoire-format.ts` (a first build failed because the client component imported a module using `node:crypto`; fixed by the split). 10 unit tests.
 - Verified: lint, typecheck, tests, build and format:check all exit 0. Not verified: the page and drill in a signed-in browser, or against real game data.
+
+## Session update: Academics and Career stat tiles (2026-11-20)
+
+- Academics: tiles for active courses, open assignments, due in 7 days, overdue. Career: tiles for applications, applied, interviewing, deadlines in 14 days. Both reuse `StatTile`; no new queries.
+- Sports overview left as is (it already shows adapter summaries).
+- Verified: lint, typecheck, tests, build, format:check all exit 0. Not verified visually in a signed-in browser.

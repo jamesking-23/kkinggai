@@ -12,6 +12,7 @@ import {
   inputClass,
   PageHeader,
   primaryButton,
+  StatTile,
   subtleButton,
 } from "../../../components/ui";
 import {
@@ -58,6 +59,19 @@ export default async function CareerPage({ searchParams }: { searchParams: Promi
     <div className="mx-auto max-w-4xl">
       <PageHeader title="Career" subtitle="Private to you. Not shared with any workspace member." />
       <Flash error={error} message={message} />
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <StatTile label="Applications" value={appList.length} />
+        <StatTile label="Applied" value={appList.filter((a) => a.status === "applied").length} />
+        <StatTile
+          label="Interviewing"
+          value={appList.filter((a) => a.status === "interviewing").length}
+        />
+        <StatTile
+          label="Deadlines in 14 days"
+          value={soon.length}
+          tone={soon.length ? "danger" : "default"}
+        />
+      </div>
       <p className="mb-6 text-sm">
         <a href="/career/profile" className="text-primary">
           Profile and CV entries

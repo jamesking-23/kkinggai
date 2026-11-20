@@ -10,6 +10,7 @@ import {
   inputClass,
   PageHeader,
   primaryButton,
+  StatTile,
   subtleButton,
 } from "../../../components/ui";
 import {
@@ -61,6 +62,13 @@ export default async function AcademicsPage({
   );
   const fmt = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: ctx.timezone });
   const now = Date.now();
+  const open = (assignments ?? []).filter((a) => a.status === "todo" || a.status === "in_progress");
+  const overdue = open.filter((a) => a.due_at && new Date(a.due_at).getTime() < now).length;
+  const dueSoon = open.filter((a) => {
+    const t = a.due_at ? new Date(a.due_at).getTime() : null;
+    return t !== null && t >= now && t < now + 7 * 86_400_000;
+  }).length;
+  const activeCourses = courseList.filter((c) => c.status === "active").length;
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -71,6 +79,13 @@ export default async function AcademicsPage({
         </a>
       </p>
       <Flash error={error} message={message} />
+
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <StatTile label="Active courses" value={activeCourses} />
+        <StatTile label="Open assignments" value={open.length} />
+        <StatTile label="Due in 7 days" value={dueSoon} />
+        <StatTile label="Overdue" value={overdue} tone={overdue ? "danger" : "default"} />
+      </div>
 
       <Card title="Add a course" className="mb-6">
         <form action={createCourse} className="grid gap-3 sm:grid-cols-6">
