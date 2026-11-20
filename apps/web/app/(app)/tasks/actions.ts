@@ -80,22 +80,25 @@ export async function toggleTask(formData: FormData) {
     );
   }
 
-  const { data, error } = await supabase
-    .from("tasks")
-    .update({ status: "todo", completed_at: null })
-    .eq("id", id)
-    .eq("revision", revision)
-    .select("id");
-  if (error) flash(PATH, "error", "Could not update the task");
-  if (!data || data.length === 0) {
+  const { data: removed, error } = await supabase.rpc("reopen_task", {
+    task_id: id,
+    expected_revision: revision,
+  });
+  if (error) {
     flash(
       PATH,
       "error",
-      "This task was changed elsewhere. The list has been refreshed — try again.",
+      error.message.includes("changed elsewhere")
+        ? "This task was changed elsewhere. The list has been refreshed — try again."
+        : "Could not update the task",
     );
   }
   revalidatePath(PATH);
-  flash(PATH, "message", "Task reopened");
+  flash(
+    PATH,
+    "message",
+    removed ? "Task reopened. The copy that was scheduled has been removed" : "Task reopened",
+  );
 }
 
 /** Soft delete: sets a deletion marker so the record can still be synced and recovered. */

@@ -13,7 +13,7 @@ vi.mock("../../../lib/session", () => ({
 const st = {
   task: null as { recurrence_rule: string | null; due_at: string | null } | null,
   rpc: [] as { fn: string; args: Record<string, unknown> }[],
-  rpcResult: { data: null as string | null, error: null as { message: string } | null },
+  rpcResult: { data: null as string | boolean | null, error: null as { message: string } | null },
   inserted: [] as Record<string, unknown>[],
   updates: [] as Record<string, unknown>[],
   updateRows: [{ id: "x" }] as { id: string }[],
@@ -116,11 +116,23 @@ describe("toggleTask", () => {
       "Could not update the task",
     );
   });
-  it("reopening updates the task directly and does not call complete_task", async () => {
+  it("reopening calls reopen_task, not complete_task", async () => {
     expect(await run(toggleTask, { id: "t1", revision: "2", done: "0" })).toContain(
       "Task reopened",
     );
-    expect(st.rpc).toHaveLength(0);
-    expect(st.updates[0]).toEqual({ status: "todo", completed_at: null });
+    expect(st.rpc).toEqual([{ fn: "reopen_task", args: { task_id: "t1", expected_revision: 2 } }]);
+  });
+  it("says when reopening removed the scheduled copy", async () => {
+    st.rpcResult = { data: true, error: null };
+    expect(await run(toggleTask, { id: "t1", revision: "2", done: "0" })).toContain("removed");
+  });
+  it("reports a conflict when reopening a stale task", async () => {
+    st.rpcResult = {
+      data: null,
+      error: { message: "This task was changed elsewhere. Reload and try again." },
+    };
+    expect(await run(toggleTask, { id: "t1", revision: "2", done: "0" })).toContain(
+      "changed elsewhere",
+    );
   });
 });

@@ -546,3 +546,10 @@ Other open items are in the per-phase notes below.
 
 - Restyled `/assistant` after the owner's reference images (original CSS, no third-party branding): animated orb, large light headline, glass prompt box with Enter-to-send, suggestion chips that fill the box, chat bubbles, and a "Thinking…" state (twin glowing orbs plus shimmer text) shown while the server action runs via `useFormStatus`. Reduced-motion users get static visuals.
 - No behaviour change to `sendMessage`/limits. Verified: gate exit 0; the orb/glass/thinking CSS was rendered once on a standalone static page. Not verified: the real page signed in, or a live reply.
+
+## Session update: recurring-task reopen and carry-over (2026-11-21)
+
+- Migration `20261121000036_recurrence_reopen_copy` (applied): `tasks.spawned_task_id`; `complete_task` now also copies open subtasks and pending task reminders (shifted by the due-date offset) to the next copy; new `reopen_task` RPC reopens the task and soft-deletes the spawned copy (plus its subtasks, and dismisses its reminders) only if that copy is still untouched (todo). A started copy is kept.
+- App: `toggleTask` reopen now calls `reopen_task` and says when a copy was removed. 3 reopen tests added (web tests mock the database).
+- Live DB test `tests/rls_task_reopen.sql`: 15 of 15 lines as expected, including stale revision, viewer, outsider and anon refused. Security advisor: only the previously accepted warnings.
+- Not verified in a signed-in browser. Attachments are still not copied to recurring copies.

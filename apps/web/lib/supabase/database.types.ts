@@ -2053,6 +2053,7 @@ export type Database = {
           due_at: string | null;
           id: string;
           parent_task_id: string | null;
+          spawned_task_id: string | null;
           priority: number;
           project_id: string | null;
           recurrence_rule: string | null;
@@ -2072,6 +2073,7 @@ export type Database = {
           due_at?: string | null;
           id?: string;
           parent_task_id?: string | null;
+          spawned_task_id?: string | null;
           priority?: number;
           project_id?: string | null;
           recurrence_rule?: string | null;
@@ -2091,6 +2093,7 @@ export type Database = {
           due_at?: string | null;
           id?: string;
           parent_task_id?: string | null;
+          spawned_task_id?: string | null;
           priority?: number;
           project_id?: string | null;
           recurrence_rule?: string | null;
@@ -2273,6 +2276,10 @@ export type Database = {
       complete_task: {
         Args: { task_id: string; expected_revision: number; next_due?: string | null };
         Returns: string | null;
+      };
+      reopen_task: {
+        Args: { task_id: string; expected_revision: number };
+        Returns: boolean;
       };
       mp_join: { Args: { code: string }; Returns: string };
       mp_move: { Args: { game: string; expected_ply: number; uci: string }; Returns: number };
