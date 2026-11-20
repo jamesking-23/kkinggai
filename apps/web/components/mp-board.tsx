@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { fenToBoard } from "../lib/board";
 import { legalTargets, resolveClick } from "../lib/puzzles";
+import { pollIntervalMs } from "../lib/mp";
+import { createClient } from "../lib/supabase/client";
 import { Board } from "./board";
 import { playMove } from "../app/(app)/chess/play/actions";
 
@@ -11,7 +13,7 @@ const FILES = "abcdefgh";
 
 /**
  * A playable board. Click a piece, then its destination (promotions become queens). The server checks the move again.
- * While the game is open and it is the opponent's turn the page refreshes every few seconds to pick up their move.
+ * While the game is open the page listens for changes to it (Supabase realtime) and refreshes when one arrives, with a slow poll as a backup.
  */
 export function MpBoard({
   gameId,
@@ -33,13 +35,35 @@ export function MpBoard({
   const [from, setFrom] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
+  // Realtime: refresh as soon as the game row changes. Polling stays as a safety net.
+  const [channel, setChannel] = useState<"subscribed" | "connecting" | "failed">("connecting");
+  useEffect(() => {
+    if (!waiting) return;
+    const supabase = createClient();
+    const ch = supabase
+      .channel(`mp-game-${gameId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "mp_games", filter: `id=eq.${gameId}` },
+        () => router.refresh(),
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") setChannel("subscribed");
+        else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED")
+          setChannel("failed");
+      });
+    return () => {
+      void supabase.removeChannel(ch);
+    };
+  }, [waiting, gameId, router]);
+
   useEffect(() => {
     if (!waiting) return;
     const t = setInterval(() => {
       if (document.visibilityState === "visible") router.refresh();
-    }, 3000);
+    }, pollIntervalMs(channel));
     return () => clearInterval(t);
-  }, [waiting, router]);
+  }, [waiting, channel, router]);
 
   // A new position (after a move or a refresh) clears any half-made selection.
   useEffect(() => setFrom(null), [fen]);

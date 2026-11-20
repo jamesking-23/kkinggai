@@ -192,3 +192,12 @@ describe("clocks", () => {
     expect(s).toEqual({ finished: true, result: "1-0", text: "Black lost on time. White wins" });
   });
 });
+
+describe("pollIntervalMs", () => {
+  it("polls slowly while realtime works and quickly otherwise", async () => {
+    const { pollIntervalMs } = await import("./mp");
+    expect(pollIntervalMs("subscribed")).toBe(30000);
+    expect(pollIntervalMs("connecting")).toBe(3000);
+    expect(pollIntervalMs("failed")).toBe(3000);
+  });
+});

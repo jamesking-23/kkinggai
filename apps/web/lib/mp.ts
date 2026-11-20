@@ -200,3 +200,12 @@ export function formatClock(ms: number): string {
   const sec = String(s % 60).padStart(2, "0");
   return h ? `${h}:${String(m).padStart(2, "0")}:${sec}` : `${m}:${sec}`;
 }
+
+/**
+ * How often the page should poll for changes. While the realtime channel is subscribed it only
+ * checks occasionally, as a safety net for a missed message; without it, polling is the only way
+ * the page learns about a move.
+ */
+export function pollIntervalMs(channel: "subscribed" | "connecting" | "failed"): number {
+  return channel === "subscribed" ? 30000 : 3000;
+}

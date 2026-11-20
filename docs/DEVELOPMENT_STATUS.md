@@ -481,3 +481,9 @@ Other open items are in the per-phase notes below.
 - Verified: lint, typecheck, 237 tests, build and format pass. CI for `e4638c1` passed.
 - Not verified: none of these pages was viewed in a browser (they need a signed-in session), so spacing and wrapping are untested. Business, sports, academics, career and the other module pages still use only the shared card styling.
 - Business: each venture shows Income, Expenses and Net as tiles (Net turns red or green). Sports cards were left as they are (they already use the new card surface). Same limit as above: not viewed in a browser. Academics and career were not redone.
+
+## Session update: realtime chess (2026-11-20)
+
+- Written: migration `20261120000032_mp_games_realtime` (applied) adds `mp_games` to the `supabase_realtime` publication; confirmed it is the only table in it. The game page (`MpBoard`) subscribes to changes of its own game row with the browser client (`lib/supabase/client.ts`, publishable key only) and refreshes on any change. The 3 s poll stays as a fallback: it drops to every 30 s while the channel reports SUBSCRIBED and returns to 3 s if the channel errors, times out or closes (`pollIntervalMs`). Realtime applies the table's select policy, so players only receive their own games; writes still go only through the SECURITY DEFINER functions.
+- Verified: publication membership by query; lint, typecheck, tests, build and format pass; one unit test for the poll interval.
+- Not verified: a real two-browser game receiving a move over the websocket. The sandbox cannot reach Supabase realtime, so the subscription code has never connected. If it fails in use, the page behaves exactly as before (3 s polling). Opponent clocks and the lobby/invite list still rely on page loads, not realtime.
