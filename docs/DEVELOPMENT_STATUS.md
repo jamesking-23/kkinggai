@@ -511,3 +511,9 @@ Other open items are in the per-phase notes below.
 - Written: migration `20261120000034_fk_covering_indexes` (applied) adds a covering index for each of the 52 foreign keys the performance advisor flagged (lint 0001), built from `pg_constraint` so column order matches each constraint. Index names are long and repeat the table name (cosmetic).
 - Verified: the advisor re-run shows no "unindexed foreign keys" finding. It now lists the new indexes under "unused index" (INFO), which is expected for indexes nothing has queried yet; it also still lists 14 older ones. Nothing was dropped.
 - Not done: no measurement of query speed (the tables are tiny); unused indexes were not pruned. Re-check the "unused index" list after real use and drop the ones that stay unused.
+
+## Session update: multi-word search (2026-11-20)
+
+- Written: search now splits the query into words (or "quoted phrases"), searches each, and keeps only items that match every word, so words can sit in different fields and in any order; matches are highlighted in titles and snippets. No database change: it calls the existing `search_workspace` once per word (up to 4 words), asking for 20 hits per kind when there are several words. `lib/search.ts`: `splitTerms`, `intersectHits`, `highlight`.
+- Verified: 10 new unit tests (term splitting, quotes, caps, intersection, highlighting with regex characters); lint, typecheck, 253 tests, build and format pass.
+- Not verified: the page signed in. Limits: each word still matches as a plain substring (no stemming, typo tolerance or ranking by relevance; results are newest-first within each kind); because each word's list is capped at 20 per kind, an item matching all words can be missed if it is older than 20 other items matching one word. Real Postgres full-text search (a ranked, indexed rewrite of the 19-branch function) was judged not worth the risk at this data size and is still open.
