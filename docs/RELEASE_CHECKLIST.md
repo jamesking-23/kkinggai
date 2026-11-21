@@ -10,7 +10,7 @@ Mark each item only when it has actually been done. "Written" is not "tested".
 
 ## Owner actions (cannot be done from the development sandbox)
 
-- [ ] Set `GEMINI_API_KEY` or `OPENROUTER_API_KEY` in Vercel (the assistant and coach have never made a real AI call)
+- [x] `GEMINI_API_KEY` is set in Vercel (done 2026-11-20, sensitive variable). Still open: make one real AI call from the signed-in assistant to confirm the key works; the key was pasted in chat, so consider rotating it
 - [ ] Strava: the API connection was removed. In Strava settings, revoke the app and regenerate or delete the client secret you pasted earlier, and remove `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET` from Vercel
 - [ ] Revoke the GitHub token pasted earlier
 - [ ] Supabase Auth: Site URL and redirect URLs; consider disabling public sign-up; enable leaked-password protection
