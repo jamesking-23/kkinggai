@@ -576,3 +576,8 @@ Other open items are in the per-phase notes below.
 
 - The Expo app's Tasks tab can now add a task (to the user's first workspace, as on the web) and complete one through the existing `complete_task` RPC with the revision check; stale revisions show a refresh message. Repeating tasks show "Repeats" and cannot be completed on the phone (their next due date is computed on the web). All access is the signed-in user's own session under RLS; no new secrets.
 - Verified: lint, typecheck, build, format pass; mobile tests 7 (3 new for `cleanTitle`). NOT verified: the screen has never run on a device or emulator; the add and complete calls were not exercised against the live database from the app.
+
+## Session update: desktop tray (2026-11-21)
+
+- The Tauri shell now creates a system tray icon with "Show KKINGG AI" and "Quit"; a left click on the icon shows the window, and closing the window hides it to the tray. If the platform cannot create the tray, the window keeps its normal close behaviour so the app can still be quit. No new window permissions were added (the capability file is unchanged).
+- Verified: `cargo check` and `cargo test` (2 navigation tests) pass on Linux, and `cargo fmt` applied. NOT verified: the tray on Windows (the installer was built earlier but never installed, and this change has not been built into one), and the tray behaviour itself has no automated test. Auto-update is still not implemented: it needs a signing key and an update server, which are owner decisions.
