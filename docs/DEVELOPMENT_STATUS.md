@@ -585,3 +585,7 @@ Other open items are in the per-phase notes below.
 ## Session update: Habits and Goals stat tiles (2026-11-21)
 
 - Habits: tiles for habit count, done today (turns green when all are done) and best daily streak. Goals: active, achieved and past-deadline counts. Both reuse `StatTile` and data the pages already load; no new queries. Not verified visually in a signed-in browser.
+
+## Session update: Tasks stat tiles (2026-11-21)
+
+- Tasks page: Open, Overdue and Done this week tiles. They come from three head-only count queries over top-level tasks in the current workspace (RLS applies), so they stay correct whichever view or filter is selected. Not verified in a signed-in browser.

@@ -12,6 +12,7 @@ import {
   inputClass,
   PageHeader,
   primaryButton,
+  StatTile,
   subtleButton,
 } from "../../../components/ui";
 import type { FlashParams } from "../../../lib/form";
@@ -52,14 +53,27 @@ export default async function TasksPage({
     .limit(200);
   if (!showDone) query = query.in("status", ["todo", "in_progress"]);
 
-  const [{ data: tasks }, { data: projects }] = await Promise.all([
-    query,
+  const nowIso = new Date().toISOString();
+  const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const open = () =>
     supabase
-      .from("projects")
-      .select("id, name")
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
       .eq("workspace_id", ctx.current.id)
-      .eq("status", "active"),
-  ]);
+      .is("deleted_at", null)
+      .is("parent_task_id", null);
+  const [{ data: tasks }, { data: projects }, openCount, overdueCount, doneWeek] =
+    await Promise.all([
+      query,
+      supabase
+        .from("projects")
+        .select("id, name")
+        .eq("workspace_id", ctx.current.id)
+        .eq("status", "active"),
+      open().in("status", ["todo", "in_progress"]),
+      open().in("status", ["todo", "in_progress"]).lt("due_at", nowIso),
+      open().eq("status", "done").gte("completed_at", weekAgo),
+    ]);
   const projectName = new Map(
     (projects ?? []).map((p: { id: string; name: string }) => [p.id, p.name]),
   );
@@ -129,6 +143,20 @@ export default async function TasksPage({
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Tasks" subtitle={`Workspace: ${ctx.current.name}`} />
       <Flash error={error} message={message} />
+
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        <StatTile label="Open" value={openCount.count ?? 0} />
+        <StatTile
+          label="Overdue"
+          value={overdueCount.count ?? 0}
+          tone={(overdueCount.count ?? 0) > 0 ? "danger" : "default"}
+        />
+        <StatTile
+          label="Done this week"
+          value={doneWeek.count ?? 0}
+          tone={(doneWeek.count ?? 0) > 0 ? "success" : "default"}
+        />
+      </div>
 
       <Card className="mb-6">
         <form action={createTask} className="grid gap-3 sm:grid-cols-6">
