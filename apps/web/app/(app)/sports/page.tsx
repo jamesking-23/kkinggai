@@ -38,7 +38,11 @@ export default async function SportsPage() {
       {cards.length ? (
         <div className="grid gap-4 md:grid-cols-2">
           {cards.map(({ m, lines, failed }) => (
-            <a key={m.id} href={m.nav.href} className="block">
+            <a
+              key={m.id}
+              href={m.nav.href}
+              className="group block transition hover:-translate-y-0.5"
+            >
               <Card title={m.name}>
                 <p className="text-sm text-muted">{m.description}</p>
                 {failed ? (
@@ -52,6 +56,9 @@ export default async function SportsPage() {
                 ) : (
                   <p className="mt-2 text-xs text-muted">Nothing logged yet.</p>
                 )}
+                <p className="mt-3 text-xs text-primary opacity-70 transition group-hover:opacity-100">
+                  Open {m.name} →
+                </p>
               </Card>
             </a>
           ))}

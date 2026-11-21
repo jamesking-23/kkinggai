@@ -589,3 +589,7 @@ Other open items are in the per-phase notes below.
 ## Session update: Tasks stat tiles (2026-11-21)
 
 - Tasks page: Open, Overdue and Done this week tiles. They come from three head-only count queries over top-level tasks in the current workspace (RLS applies), so they stay correct whichever view or filter is selected. Not verified in a signed-in browser.
+
+## Session update: Calendar tiles and Sports card polish (2026-11-21)
+
+- Calendar: tiles for events in the shown month, tasks due that month and the busiest day, computed from the data the page already loads. Sports: cards lift on hover and end with an "Open <module>" link. Not verified in a signed-in browser.

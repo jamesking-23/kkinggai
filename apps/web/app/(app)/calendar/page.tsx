@@ -16,6 +16,7 @@ import {
   inputClass,
   PageHeader,
   primaryButton,
+  StatTile,
   subtleButton,
 } from "../../../components/ui";
 import type { FlashParams } from "../../../lib/form";
@@ -96,6 +97,23 @@ export default async function CalendarPage({
         subtitle={`Times shown in ${ctx.timezone}. Open tasks appear on their due date.`}
       />
       <Flash error={sp.error} message={sp.message} />
+
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        <StatTile label={`Events in ${monthLabel.split(" ")[0]}`} value={monthEvents.length} />
+        <StatTile label="Tasks due this month" value={(tasks ?? []).length} />
+        <StatTile
+          label="Busiest day"
+          value={
+            Math.max(
+              0,
+              ...[...eventsByDay.entries()]
+                .filter(([d]) => d.startsWith(month))
+                .map(([, v]) => v.length),
+            ) || "–"
+          }
+          hint="events in one day"
+        />
+      </div>
 
       <Card className="mb-6">
         <form action={createEvent} className="grid gap-3 sm:grid-cols-6">
