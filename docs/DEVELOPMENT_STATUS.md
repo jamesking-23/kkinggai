@@ -598,3 +598,7 @@ Other open items are in the per-phase notes below.
 
 - Added `(app)/error.tsx` (friendly failure page with Try again and Dashboard; shows only the error digest, never the message), `(app)/loading.tsx` (shimmer skeleton while a page's data loads) and a styled root `not-found.tsx`. Before this a failing page fell back to the framework default. The build lists the new `/_not-found` route.
 - Not verified: the error page was not triggered, and the skeleton and 404 were not viewed in a browser.
+
+## Session update: notifications job observed running (2026-11-21)
+
+- Checked `cron.job_run_details` for `generate-notifications`: 97 runs from 2026-11-17 06:07 to 2026-11-21 06:07 UTC, every one `succeeded`, no errors. This closes the earlier "not observed firing" gap. It does not show that any notification was generated for a real user (that depends on real data such as upcoming important dates), so seeing one in the inbox remains part of the smoke test.

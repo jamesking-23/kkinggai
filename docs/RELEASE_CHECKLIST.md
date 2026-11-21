@@ -26,7 +26,7 @@ Mark each item only when it has actually been done. "Written" is not "tested".
 - [ ] Add a news feed (a real RSS URL) and refresh it
 - [ ] Import a PGN, and GPX/TCX files exported from Strava and MapMyRun (several at once)
 - [ ] Two accounts: create a chess game, join by link, play a few moves, resign
-- [ ] Confirm the notifications job fires (hourly) and an item appears
+- [x] The hourly notifications job fires: 97 runs between 2026-11-17 and 2026-11-21, all `succeeded` (checked in `cron.job_run_details`). Still open: confirm a real notification appears in your own inbox
 - [ ] Mobile app: sign in on a device or emulator
 - [ ] Desktop app: launch, confirm it loads the site
 
