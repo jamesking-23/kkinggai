@@ -109,3 +109,10 @@ Migration `20261119000029_mp_clocks`: `mp_games` gains `clock_seconds`, `clock_i
 Migration `20261119000030_task_recurrence`: check constraint limiting `tasks.recurrence_rule` to five fixed rules; `complete_task(task_id, expected_revision, next_due)` (SECURITY INVOKER) completes a task, records the completion and creates the next copy atomically.
 
 Migration `20261119000031_task_attachments`: private bucket `task-files` and `task_attachments` (workspace-shared; select for members, insert/update for writers, no delete policy). Paths are `<workspace id>/<task id>/<uuid>-<name>`, enforced by a check constraint and by `storage.objects` select/insert policies (no update or delete policy on the bucket, so files are kept when an attachment is removed).
+
+## Web push tables and functions (migration 038)
+
+- `push_subscriptions`: one row per browser, owner can read and delete their own rows only; rows are created only through `register_push_subscription` (SECURITY DEFINER, signed-in users only, validated, 5 devices per user).
+- `push_batches`: internal bookkeeping for the dispatcher. RLS is on with no policies and all API roles are revoked, so nobody can read or write it through the API. The advisor reports this as INFO (`rls_enabled_no_policy`); it is intended.
+- `push_dispatch()` and `push_apply_results()` are not executable by API roles; only pg_cron (the database owner) runs them. `register_push_subscription` appears in the advisor's "signed-in users can execute SECURITY DEFINER function" warning; this is intended and accepted like the `mp_*` functions.
+- The shared secret and target URL live in Supabase Vault, never in migrations.
