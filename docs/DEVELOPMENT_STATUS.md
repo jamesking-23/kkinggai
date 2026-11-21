@@ -593,3 +593,8 @@ Other open items are in the per-phase notes below.
 ## Session update: Calendar tiles and Sports card polish (2026-11-21)
 
 - Calendar: tiles for events in the shown month, tasks due that month and the busiest day, computed from the data the page already loads. Sports: cards lift on hover and end with an "Open <module>" link. Not verified in a signed-in browser.
+
+## Session update: error, loading and not-found pages (2026-11-21)
+
+- Added `(app)/error.tsx` (friendly failure page with Try again and Dashboard; shows only the error digest, never the message), `(app)/loading.tsx` (shimmer skeleton while a page's data loads) and a styled root `not-found.tsx`. Before this a failing page fell back to the framework default. The build lists the new `/_not-found` route.
+- Not verified: the error page was not triggered, and the skeleton and 404 were not viewed in a browser.
