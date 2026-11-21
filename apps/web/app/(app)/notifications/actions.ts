@@ -1,8 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { notificationReadSchema } from "@kkingg/schemas";
 import { firstIssue, flash } from "../../../lib/form";
+import { isValidSubscription, sendPush, vapidConfigured } from "../../../lib/push";
+import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
 
 const PATH = "/notifications";
@@ -30,4 +33,81 @@ export async function markAllRead() {
   if (error) flash(PATH, "error", "Could not update the notifications");
   revalidatePath(PATH);
   flash(PATH, "message", "All marked as read");
+}
+
+// ---- web push ----
+
+type PushResult = { ok: boolean; message: string };
+
+/** Saves this browser's push subscription for the signed-in user. */
+export async function savePushSubscription(input: {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+}): Promise<PushResult> {
+  await getAppContext();
+  const sub = {
+    endpoint: String(input?.endpoint ?? ""),
+    p256dh: String(input?.p256dh ?? ""),
+    auth: String(input?.auth ?? ""),
+  };
+  if (!isValidSubscription(sub))
+    return { ok: false, message: "This browser's push service is not supported." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("register_push_subscription", {
+    p_endpoint: sub.endpoint,
+    p_p256dh: sub.p256dh,
+    p_auth: sub.auth,
+    p_user_agent: (await headers()).get("user-agent") ?? undefined,
+  });
+  if (error) return { ok: false, message: "Could not save the subscription. Try again." };
+  return { ok: true, message: "Push notifications are on for this browser." };
+}
+
+/** Removes this browser's subscription. */
+export async function removePushSubscription(endpoint: string): Promise<PushResult> {
+  const ctx = await getAppContext();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("push_subscriptions")
+    .delete()
+    .eq("user_id", ctx.userId)
+    .eq("endpoint", String(endpoint ?? ""));
+  return error
+    ? { ok: false, message: "Could not turn push off. Try again." }
+    : { ok: true, message: "Push notifications are off for this browser." };
+}
+
+/** Sends a test push to every device the user has registered, pruning any the push service says are gone. */
+export async function sendTestPush(): Promise<PushResult> {
+  const ctx = await getAppContext();
+  if (!vapidConfigured())
+    return { ok: false, message: "Push is not configured on the server yet." };
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("push_subscriptions")
+    .select("id, endpoint, p256dh, auth")
+    .eq("user_id", ctx.userId)
+    .limit(5);
+  const subs = data ?? [];
+  if (subs.length === 0)
+    return { ok: false, message: "No device is registered. Turn push on first." };
+  let delivered = 0;
+  for (const s of subs) {
+    const status = await sendPush(s, {
+      title: "KKINGG AI test",
+      body: "Push notifications work on this device.",
+      url: "/notifications",
+      tag: "test",
+    });
+    if (status >= 200 && status < 300) delivered++;
+    else if (status === 404 || status === 410)
+      await supabase.from("push_subscriptions").delete().eq("id", s.id);
+  }
+  return delivered > 0
+    ? { ok: true, message: `Sent to ${delivered} of ${subs.length} device(s).` }
+    : {
+        ok: false,
+        message: "The push service did not accept the test. Turn push off and on again.",
+      };
 }

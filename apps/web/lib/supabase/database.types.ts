@@ -1338,6 +1338,7 @@ export type Database = {
           id: string;
           kind: string;
           link: string | null;
+          pushed_at: string | null;
           read_at: string | null;
           title: string;
           user_id: string;
@@ -1349,6 +1350,7 @@ export type Database = {
           id?: string;
           kind: string;
           link?: string | null;
+          pushed_at?: string | null;
           read_at?: string | null;
           title: string;
           user_id: string;
@@ -1356,6 +1358,22 @@ export type Database = {
         Update: {
           read_at?: string | null;
         };
+        Relationships: [];
+      };
+      push_subscriptions: {
+        Row: {
+          auth: string;
+          created_at: string;
+          endpoint: string;
+          failure_count: number;
+          id: string;
+          last_success_at: string | null;
+          p256dh: string;
+          user_agent: string | null;
+          user_id: string;
+        };
+        Insert: never;
+        Update: never;
         Relationships: [];
       };
       mp_games: {
@@ -2276,6 +2294,10 @@ export type Database = {
       complete_task: {
         Args: { task_id: string; expected_revision: number; next_due?: string | null };
         Returns: string | null;
+      };
+      register_push_subscription: {
+        Args: { p_endpoint: string; p_p256dh: string; p_auth: string; p_user_agent?: string };
+        Returns: string;
       };
       reopen_task: {
         Args: { task_id: string; expected_revision: number };

@@ -3,6 +3,7 @@ import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
 import type { FlashParams } from "../../../lib/form";
 import { Card, Empty, Flash, PageHeader, subtleButton } from "../../../components/ui";
+import { PushSettings } from "../../../components/push-settings";
 import { markAllRead, markRead } from "./actions";
 
 type Search = FlashParams & { view?: string };
@@ -34,9 +35,12 @@ export default async function NotificationsPage({
     <div className="mx-auto max-w-3xl">
       <PageHeader
         title="Notifications"
-        subtitle="Created automatically about once an hour for upcoming dates, wishlist deadlines, venture tasks, due puzzles and reminders. In-app only."
+        subtitle="Created automatically about once an hour for upcoming dates, wishlist deadlines, venture tasks, due puzzles and reminders. Optionally also delivered as push on devices you turn it on for."
       />
       <Flash error={error} message={message} />
+      <Card title="Push notifications" className="mb-6">
+        <PushSettings publicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null} />
+      </Card>
       <Card>
         <p className="mb-3 flex items-center gap-4 text-sm">
           <a

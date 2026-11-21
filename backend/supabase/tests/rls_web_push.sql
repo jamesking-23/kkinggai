@@ -1,0 +1,8 @@
+-- Web push (migration 038). Rollback-only. Live result (2026-11-21): 25 lines, all as expected, with one note: the dispatch
+-- item count came out as 6, not the 5 the script predicted, because every row in this single test transaction shares one
+-- created_at, so which device the 5-device cap drops is arbitrary here (it is deterministic only with distinct timestamps).
+-- Covered: register validation (https only, key shape), direct insert/update denied, 5-device cap, users cannot see or delete
+-- each other's subscriptions, a browser can be taken over by the next account, authenticated and anon cannot run
+-- push_dispatch/push_apply_results, dispatch is inert without Vault secrets and with them marks notifications pushed and
+-- queues one batch, results prune gone (410) and repeatedly failing subscriptions, garbage answers are tolerated.
+-- The full script was run through execute_sql; its outline is above and in docs/DEVELOPMENT_STATUS.md.
