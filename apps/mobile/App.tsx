@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { configured } from "./src/config";
-import { dueLabel, isSafeLink, timeAgo } from "./src/format";
+import { cleanTitle, dueLabel, isSafeLink, timeAgo } from "./src/format";
 import { supabase } from "./src/supabase";
 
 const C = {
@@ -273,14 +273,21 @@ function Notifications() {
   );
 }
 
-type TaskRow = { id: string; title: string; status: string; due_at: string | null };
+type TaskRow = {
+  id: string;
+  title: string;
+  status: string;
+  due_at: string | null;
+  revision: number;
+  recurrence_rule: string | null;
+};
 
 function Tasks() {
   const load = useCallback(
     async () =>
       await supabase
         .from("tasks")
-        .select("id, title, status, due_at")
+        .select("id, title, status, due_at, revision, recurrence_rule")
         .is("deleted_at", null)
         .in("status", ["todo", "in_progress"])
         .order("due_at", { ascending: true, nullsFirst: false })
@@ -289,6 +296,54 @@ function Tasks() {
     [],
   );
   const { items, error, loading, refreshing, reload } = useLoader<TaskRow>(load);
+  const [title, setTitle] = useState("");
+  const [working, setWorking] = useState<string | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+
+  async function add() {
+    const clean = cleanTitle(title);
+    if (!clean || working) return;
+    setWorking("add");
+    setProblem(null);
+    // New tasks go to the user's first (personal) workspace, the same default the website uses.
+    const { data: ws, error: wsErr } = await supabase
+      .from("workspaces")
+      .select("id")
+      .order("created_at")
+      .limit(1)
+      .maybeSingle();
+    if (wsErr || !ws) {
+      setProblem("Could not find your workspace.");
+      setWorking(null);
+      return;
+    }
+    const { error: insErr } = await supabase
+      .from("tasks")
+      .insert({ workspace_id: ws.id, title: clean });
+    setWorking(null);
+    if (insErr) return setProblem("Could not add the task. Check your connection and try again.");
+    setTitle("");
+    reload();
+  }
+
+  async function complete(t: TaskRow) {
+    if (working) return;
+    setWorking(t.id);
+    setProblem(null);
+    const { error: rpcErr } = await supabase.rpc("complete_task", {
+      task_id: t.id,
+      expected_revision: t.revision,
+    });
+    setWorking(null);
+    if (rpcErr) {
+      setProblem(
+        rpcErr.message.includes("changed elsewhere")
+          ? "That task was changed elsewhere. The list has been refreshed."
+          : "Could not complete the task.",
+      );
+    }
+    reload();
+  }
 
   if (loading)
     return (
@@ -301,26 +356,70 @@ function Tasks() {
       data={items}
       keyExtractor={(t) => t.id}
       contentContainerStyle={styles.list}
+      keyboardShouldPersistTaps="handled"
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={reload} />}
       ListHeaderComponent={
         <View>
           <Text style={styles.title}>Open tasks</Text>
+          <View style={{ flexDirection: "row", gap: 8, marginBottom: 8 }}>
+            <TextInput
+              style={[styles.input, { flex: 1, marginBottom: 0 }]}
+              placeholder="Add a task"
+              placeholderTextColor={C.muted}
+              value={title}
+              onChangeText={setTitle}
+              maxLength={300}
+              returnKeyType="done"
+              onSubmitEditing={add}
+            />
+            <Pressable
+              style={[
+                styles.button,
+                { paddingHorizontal: 16 },
+                (!cleanTitle(title) || !!working) && styles.disabled,
+              ]}
+              disabled={!cleanTitle(title) || !!working}
+              onPress={add}
+              accessibilityLabel="Add task"
+            >
+              <Text style={styles.buttonText}>Add</Text>
+            </Pressable>
+          </View>
           <Text style={[styles.small, { marginBottom: 8 }]}>
-            Read-only for now. Edit tasks on the website.
+            Tap the circle to complete a task. Edit details and repeating tasks on the website.
           </Text>
-          {error && <Text style={styles.error}>{error}</Text>}
+          {(error || problem) && <Text style={styles.error}>{problem ?? error}</Text>}
         </View>
       }
       ListEmptyComponent={!error ? <Text style={styles.muted}>No open tasks.</Text> : undefined}
       renderItem={({ item }) => {
         const due = dueLabel(item.due_at);
+        const repeats = !!item.recurrence_rule;
         return (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={[styles.small, due === "Overdue" && { color: C.danger }]}>
-              {item.status === "in_progress" ? "In progress" : "To do"}
-              {due ? `  ·  ${due}` : ""}
-            </Text>
+          <View style={[styles.card, { flexDirection: "row", alignItems: "center", gap: 12 }]}>
+            <Pressable
+              onPress={() => complete(item)}
+              disabled={repeats || !!working}
+              accessibilityLabel={
+                repeats ? "Repeating task: complete on the website" : `Complete ${item.title}`
+              }
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 14,
+                borderWidth: 2,
+                borderColor: repeats ? C.border : C.primary,
+                opacity: working === item.id ? 0.4 : 1,
+              }}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={[styles.small, due === "Overdue" && { color: C.danger }]}>
+                {item.status === "in_progress" ? "In progress" : "To do"}
+                {due ? `  ·  ${due}` : ""}
+                {repeats ? "  ·  Repeats" : ""}
+              </Text>
+            </View>
           </View>
         );
       }}

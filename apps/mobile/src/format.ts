@@ -25,3 +25,11 @@ export function dueLabel(iso: string | null, now: Date = new Date()): string {
 
 /** Notification links are web paths; only plain paths are ever shown. */
 export const isSafeLink = (l: string | null): l is string => !!l && /^\/[A-Za-z0-9/_-]*$/.test(l);
+
+export const TASK_TITLE_MAX = 300;
+
+/** A task title ready to save: trimmed, whitespace collapsed, at most 300 characters; null when empty. */
+export function cleanTitle(raw: string): string | null {
+  const t = raw.replace(/\s+/g, " ").trim().slice(0, TASK_TITLE_MAX).trim();
+  return t.length > 0 ? t : null;
+}

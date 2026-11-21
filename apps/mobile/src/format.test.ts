@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dueLabel, isSafeLink, timeAgo } from "./format";
+import { cleanTitle, dueLabel, isSafeLink, timeAgo } from "./format";
 
 const now = new Date("2026-11-17T12:00:00Z");
 
@@ -34,5 +34,18 @@ describe("isSafeLink", () => {
     expect(isSafeLink("//evil.example")).toBe(false);
     expect(isSafeLink("javascript:alert(1)")).toBe(false);
     expect(isSafeLink(null)).toBe(false);
+  });
+});
+
+describe("cleanTitle", () => {
+  it("trims and collapses whitespace", () => {
+    expect(cleanTitle("  buy   milk \n now ")).toBe("buy milk now");
+  });
+  it("returns null for empty or blank input", () => {
+    expect(cleanTitle("")).toBeNull();
+    expect(cleanTitle("   \n\t ")).toBeNull();
+  });
+  it("caps the length at 300", () => {
+    expect(cleanTitle("x".repeat(500))).toHaveLength(300);
   });
 });
