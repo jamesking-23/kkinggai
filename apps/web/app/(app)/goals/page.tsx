@@ -10,6 +10,7 @@ import {
   PageHeader,
   primaryButton,
   ProgressBar,
+  StatTile,
   subtleButton,
 } from "../../../components/ui";
 import type { FlashParams } from "../../../lib/form";
@@ -55,11 +56,31 @@ export default async function GoalsPage({ searchParams }: { searchParams: Promis
         .order("created_at")
     : { data: [] };
   const milestones = ms ?? [];
+  const activeGoals = goals.filter((g) => g.status === "active");
+  const achievedGoals = goals.filter((g) => g.status === "achieved").length;
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const pastDeadline = activeGoals.filter(
+    (g) => g.deadline && g.deadline.slice(0, 10) < todayIso,
+  ).length;
 
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Goals" subtitle="Set a measurable target and track real progress." />
       <Flash error={error} message={message} />
+
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        <StatTile label="Active" value={activeGoals.length} />
+        <StatTile
+          label="Achieved"
+          value={achievedGoals}
+          tone={achievedGoals ? "success" : "default"}
+        />
+        <StatTile
+          label="Past deadline"
+          value={pastDeadline}
+          tone={pastDeadline ? "danger" : "default"}
+        />
+      </div>
 
       <Card className="mb-6">
         <form action={createGoal} className="grid gap-3 sm:grid-cols-6">

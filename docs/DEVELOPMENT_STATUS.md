@@ -581,3 +581,7 @@ Other open items are in the per-phase notes below.
 
 - The Tauri shell now creates a system tray icon with "Show KKINGG AI" and "Quit"; a left click on the icon shows the window, and closing the window hides it to the tray. If the platform cannot create the tray, the window keeps its normal close behaviour so the app can still be quit. No new window permissions were added (the capability file is unchanged).
 - Verified: `cargo check` and `cargo test` (2 navigation tests) pass on Linux, and `cargo fmt` applied. NOT verified: the tray on Windows (the installer was built earlier but never installed, and this change has not been built into one), and the tray behaviour itself has no automated test. Auto-update is still not implemented: it needs a signing key and an update server, which are owner decisions.
+
+## Session update: Habits and Goals stat tiles (2026-11-21)
+
+- Habits: tiles for habit count, done today (turns green when all are done) and best daily streak. Goals: active, achieved and past-deadline counts. Both reuse `StatTile` and data the pages already load; no new queries. Not verified visually in a signed-in browser.

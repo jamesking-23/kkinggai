@@ -10,6 +10,7 @@ import {
   inputClass,
   PageHeader,
   primaryButton,
+  StatTile,
   subtleButton,
 } from "../../../components/ui";
 import type { FlashParams } from "../../../lib/form";
@@ -44,10 +45,29 @@ export default async function HabitsPage({ searchParams }: { searchParams: Promi
   }
   const weekStart = addDays(today, -((new Date(`${today}T00:00:00Z`).getUTCDay() + 6) % 7));
 
+  const list = (habits ?? []) as Habit[];
+  const doneCount = list.filter((h) => (byHabit.get(h.id) ?? []).includes(today)).length;
+  const bestStreak = Math.max(
+    0,
+    ...list
+      .filter((h) => h.cadence === "daily")
+      .map((h) => dailyStreak(byHabit.get(h.id) ?? [], today)),
+  );
+
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Habits" subtitle="Habits are private to you, even in shared workspaces." />
       <Flash error={error} message={message} />
+
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        <StatTile label="Habits" value={list.length} />
+        <StatTile
+          label="Done today"
+          value={`${doneCount}/${list.length}`}
+          tone={list.length > 0 && doneCount === list.length ? "success" : "default"}
+        />
+        <StatTile label="Best daily streak" value={bestStreak} hint="days" />
+      </div>
 
       <Card className="mb-6">
         <form action={createHabit} className="grid gap-3 sm:grid-cols-6">
