@@ -628,3 +628,10 @@ Other open items are in the per-phase notes below.
 - Needs two repository variables (not secrets, both are public values): `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`. The workflow stops with a clear message if either is missing.
 - Signing: the files are signed with the debug key. The APK can be sideloaded; the AAB cannot be uploaded to Google Play until a real upload keystore is set up.
 - NOT verified: the workflow has never run (this sandbox's proxy blocks the Actions variables API, so I could not set the variables or start a run), and no APK has been installed on a device. The YAML was written but not executed.
+
+## Session update: push quiet hours (2026-11-21)
+
+- Migration `20261121000039_push_quiet_hours` applied (`push_in_quiet()` and an updated `push_dispatch()`). Quiet window is stored in `user_settings.settings.push_quiet` and evaluated in the user's account timezone. A notification that arrives during the window stays unpushed and is pushed after it ends if still under a day old. Bad data or an unknown timezone means "not quiet", so push is never lost to a typo.
+- UI: the Notifications page has a "Quiet hours" form under the push card.
+- Verified live (rollback tests, `tests/rls_push_quiet.sql`): 13 window cases and an end-to-end hold and release through `push_dispatch()`. Web unit tests added for the helpers and actions (mocked database).
+- NOT verified: the form in a browser, and a real push arriving after quiet hours. Your account timezone must be set correctly in the app (it defaults to UTC), otherwise the window is measured in UTC.

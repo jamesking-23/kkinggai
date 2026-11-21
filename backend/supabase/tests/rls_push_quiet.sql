@@ -1,0 +1,6 @@
+-- Push quiet hours (migration 039). Rollback-only, run via execute_sql. Live result 2026-11-21:
+--  push_in_quiet: 13 cases as expected (overnight window incl. boundaries 22:00 quiet / 07:00 not quiet, same-day window,
+--  no block, from = to, bad format, bad timezone, nulls all "not quiet"; Africa/Kampala evaluated as UTC+3).
+--  push_dispatch end to end: a user inside their quiet window keeps pushed_at null; after clearing the window the next run pushes it.
+-- Notes: notifications.kind must be one of date/application/venture_task/puzzles/reminder, dedupe_key is required,
+-- push_subscriptions needs p256dh/auth of realistic length (87/22 chars used). Full scripts were run inline.

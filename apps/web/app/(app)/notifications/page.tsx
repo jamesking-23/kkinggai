@@ -4,7 +4,8 @@ import { createClient } from "../../../lib/supabase/server";
 import type { FlashParams } from "../../../lib/form";
 import { Card, Empty, Flash, PageHeader, subtleButton } from "../../../components/ui";
 import { PushSettings } from "../../../components/push-settings";
-import { markAllRead, markRead } from "./actions";
+import { QuietHoursForm } from "../../../components/quiet-hours-form";
+import { loadQuietHours, markAllRead, markRead } from "./actions";
 
 type Search = FlashParams & { view?: string };
 
@@ -40,6 +41,7 @@ export default async function NotificationsPage({
       <Flash error={error} message={message} />
       <Card title="Push notifications" className="mb-6">
         <PushSettings publicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null} />
+        <QuietHoursForm initial={await loadQuietHours()} timezone={ctx.timezone} />
       </Card>
       <Card>
         <p className="mb-3 flex items-center gap-4 text-sm">
