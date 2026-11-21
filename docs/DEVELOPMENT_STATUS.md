@@ -602,3 +602,7 @@ Other open items are in the per-phase notes below.
 ## Session update: notifications job observed running (2026-11-21)
 
 - Checked `cron.job_run_details` for `generate-notifications`: 97 runs from 2026-11-17 06:07 to 2026-11-21 06:07 UTC, every one `succeeded`, no errors. This closes the earlier "not observed firing" gap. It does not show that any notification was generated for a real user (that depends on real data such as upcoming important dates), so seeing one in the inbox remains part of the smoke test.
+
+## Session update: web push, migration written but NOT confirmed applied (2026-11-21)
+
+- Written: `backend/supabase/migrations/20261121000038_web_push.sql` (push subscriptions, `register_push_subscription`, `push_dispatch` via pg_net and Vault, five-minute cron). The apply step timed out while the Supabase connection waited for an answer to a question, so it is unknown whether any part of this migration exists in the live database. Do not treat web push as operational. Next step: inspect the live database, then apply what is missing. Nothing else in web push (server route, service worker, UI) is built yet.
