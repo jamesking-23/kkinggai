@@ -35,3 +35,6 @@ Mark each item only when it has actually been done. "Written" is not "tested".
 - [ ] Run `pnpm audit` again
 - [ ] Update `DEVELOPMENT_STATUS.md` with what was actually observed
 - [ ] Tag `v0.1.0` only after the smoke test above passes
+
+- [ ] Android build: add repository variables `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (Settings > Secrets and variables > Actions > Variables), run "Mobile (Android)", download the artifact `kkingg-ai-android`, and install the APK on a phone.
+- [ ] Google Play: create an upload keystore and wire it into the workflow before submitting the AAB.

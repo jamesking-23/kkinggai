@@ -620,3 +620,11 @@ Other open items are in the per-phase notes below.
 ## Session update: performance advisor after web push (2026-11-21)
 
 - Performance advisor: only INFO "unused index" findings, 62 of them (none are errors or warnings). Expected at this stage: the app has had no real traffic, and about half are the foreign-key covering indexes added on purpose in migration 034. Pruning is deliberately postponed until there is real usage to judge by; dropping them now could slow deletes and joins later. The new `push_subscriptions_user_idx` and `notifications_unpushed_idx` are not in the list yet.
+
+## Session update: Android build on GitHub Actions
+
+- Added `.github/workflows/mobile-android.yml`. It runs the mobile tests, `expo prebuild`, then Gradle `assembleRelease bundleRelease`, and uploads the APK and AAB as the artifact `kkingg-ai-android`. It needs no Expo account or token.
+- Trigger: Actions tab > "Mobile (Android)" > Run workflow, or push a tag `mobile-v*`.
+- Needs two repository variables (not secrets, both are public values): `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`. The workflow stops with a clear message if either is missing.
+- Signing: the files are signed with the debug key. The APK can be sideloaded; the AAB cannot be uploaded to Google Play until a real upload keystore is set up.
+- NOT verified: the workflow has never run (this sandbox's proxy blocks the Actions variables API, so I could not set the variables or start a run), and no APK has been installed on a device. The YAML was written but not executed.

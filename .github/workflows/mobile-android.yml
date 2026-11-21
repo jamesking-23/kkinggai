@@ -1,0 +1,51 @@
+name: Mobile (Android)
+# Builds the Expo app into an installable APK and a Play-Store AAB on a GitHub runner, with no Expo account.
+# It runs `expo prebuild` and Gradle directly. Run it from the Actions tab (workflow_dispatch) or push a tag named mobile-v*.
+# Needs two repository VARIABLES (Settings > Secrets and variables > Actions > Variables), both public by design:
+#   SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY. Never put a service-role key here.
+# The files are signed with the debug key unless you add your own keystore, so the APK is for sideloading and the AAB is NOT yet uploadable to Play.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["mobile-v*"]
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Check the build variables are set
+        run: |
+          test -n "$EXPO_PUBLIC_SUPABASE_URL" || { echo "Repository variable SUPABASE_URL is not set"; exit 1; }
+          test -n "$EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || { echo "Repository variable SUPABASE_PUBLISHABLE_KEY is not set"; exit 1; }
+      - name: Mobile tests
+        run: pnpm --filter @kkingg/mobile test
+      - name: Generate the native Android project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --no-install
+      - name: Build APK and AAB
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleRelease bundleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kkingg-ai-android
+          path: |
+            apps/mobile/android/app/build/outputs/apk/release/*.apk
+            apps/mobile/android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
