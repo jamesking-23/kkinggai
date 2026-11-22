@@ -44,10 +44,12 @@ export function pickLatest(releases: unknown): AppRelease | null {
 /** Fetches the release list (cached five minutes) and returns the newest build, or null when none or GitHub is unreachable. */
 export async function fetchLatestRelease(): Promise<AppRelease | null> {
   try {
-    const res = await fetch(RELEASES_API, {
+    // `next` is Next.js's caching option; typed explicitly so typecheck does not depend on generated Next types.
+    const init: RequestInit & { next?: { revalidate: number } } = {
       headers: { Accept: "application/vnd.github+json" },
       next: { revalidate: 300 },
-    });
+    };
+    const res = await fetch(RELEASES_API, init);
     if (!res.ok) return null;
     return pickLatest(await res.json());
   } catch {
