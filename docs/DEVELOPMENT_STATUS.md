@@ -656,3 +656,9 @@ Other open items are in the per-phase notes below.
 - Safety: only APK links under this repository's release downloads are ever opened; drafts and prereleases are ignored.
 - Limits: (1) the APK you already installed has no update button, so it needs one last manual install of the next build; after that updates work in place. (2) In-place install only works if every build is signed with the same key; the workflow uses the standard Expo debug key, which should be the same each time, but that is NOT yet verified (needs two builds installed one over the other). A real upload keystore would remove that doubt. (3) A development build (no number) never reports itself out of date.
 - Verified: 7 new unit tests for the pure logic (tag parsing, picking the newest, link allow-list, decisions). NOT verified: the workflow change has not run, the button has never run on a phone, and no release exists yet.
+
+## Session update: signing key checked across builds (2026-11-22)
+
+- The Android workflow now prints the APK signing certificate. Builds 5 and 6 (two separate runs) show the identical SHA-256 `fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c`, so the debug key is stable between builds. This supports in-place updates, but it is still the public Expo debug key: fine for sideloading, not for Google Play, and anyone could build an APK that carries the same signature. A private upload keystore is still the real fix before any wider release.
+- Releases `android-3`, `android-5` and `android-6` now exist. Run 4 failed only because I pushed a workflow with invalid YAML (a colon in a step name); I fixed it in the next commit. Lesson: check `format:check` exit code before committing workflow files.
+- NOT verified: installing build 6 over build 5 on a phone, and the update button itself.
