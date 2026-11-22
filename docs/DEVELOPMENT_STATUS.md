@@ -642,3 +642,9 @@ Other open items are in the per-phase notes below.
 - UI: "What to push" checkboxes on the Notifications page.
 - Verified live (rollback tests, `tests/rls_push_kinds.sql`): 9 checks including hold and release through `push_dispatch()`. Web unit tests added (mocked database).
 - NOT verified: the form in a browser or a real push.
+
+## Session update: health check (2026-11-22)
+
+- Vercel: the newest production deployment (`8bcfd8e`, per-kind push) is READY; runtime errors: none in the selected range (this may only mean little or no signed-in use).
+- Supabase security advisor after migrations 039 and 040: no new findings. The new helper functions are not callable by app users. The same accepted items remain (13 signed-in SECURITY DEFINER warnings, `push_batches` RLS-without-policy INFO, leaked-password protection off).
+- CI green on `8bcfd8e`; Mobile (Android) workflow last ran green on `a5c91c0` (before the push preference work, which does not touch the mobile app).
