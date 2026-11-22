@@ -6,6 +6,7 @@ import {
   AppState,
   FlatList,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   RefreshControl,
@@ -15,9 +16,10 @@ import {
   View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { configured } from "./src/config";
+import { BUILD_NUMBER, configured } from "./src/config";
 import { cleanTitle, dueLabel, isSafeLink, timeAgo } from "./src/format";
 import { supabase } from "./src/supabase";
+import { currentBuild, decide, pickLatest, RELEASES_API, type UpdateState } from "./src/update";
 
 const C = {
   bg: "#faf8f4",
@@ -444,6 +446,68 @@ function Account({ session }: { session: Session }) {
       >
         <Text style={styles.buttonText}>Sign out</Text>
       </Pressable>
+      <Updates />
+    </View>
+  );
+}
+
+/** Settings: check for a newer build and open its download. Android asks the user to confirm the install; it updates in place. */
+function Updates() {
+  const [busy, setBusy] = useState(false);
+  const [state, setState] = useState<UpdateState | null>(null);
+  const [failed, setFailed] = useState(false);
+  const build = currentBuild(BUILD_NUMBER);
+
+  async function check() {
+    setBusy(true);
+    setFailed(false);
+    try {
+      const res = await fetch(RELEASES_API, { headers: { Accept: "application/vnd.github+json" } });
+      if (!res.ok) throw new Error(String(res.status));
+      setState(decide(build, pickLatest(await res.json())));
+    } catch {
+      setFailed(true);
+      setState(null);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <View style={{ marginTop: 32 }}>
+      <Text style={styles.title}>App updates</Text>
+      <Text style={styles.muted}>
+        {build > 0 ? `This is build ${build}.` : "This is a development build."}
+      </Text>
+      <Pressable
+        style={[styles.button, { marginTop: 12 }, busy && styles.disabled]}
+        disabled={busy}
+        onPress={check}
+      >
+        <Text style={styles.buttonText}>{busy ? "Checking…" : "Check for updates"}</Text>
+      </Pressable>
+      {failed && <Text style={[styles.error, { marginTop: 8 }]}>Could not check. Try again.</Text>}
+      {state?.kind === "current" && (
+        <Text style={[styles.muted, { marginTop: 8 }]}>You are up to date.</Text>
+      )}
+      {state?.kind === "unknown" && (
+        <Text style={[styles.muted, { marginTop: 8 }]}>No published build was found.</Text>
+      )}
+      {state?.kind === "available" && (
+        <View style={{ marginTop: 8 }}>
+          <Text style={styles.muted}>Build {state.release.build} is available.</Text>
+          <Pressable
+            style={[styles.button, { marginTop: 8 }]}
+            onPress={() => Linking.openURL(state.release.url)}
+          >
+            <Text style={styles.buttonText}>Download and install</Text>
+          </Pressable>
+          <Text style={styles.small}>
+            Your phone will download the file and ask you to confirm. It installs over this app and
+            keeps your data.
+          </Text>
+        </View>
+      )}
     </View>
   );
 }

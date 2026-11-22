@@ -648,3 +648,11 @@ Other open items are in the per-phase notes below.
 - Vercel: the newest production deployment (`8bcfd8e`, per-kind push) is READY; runtime errors: none in the selected range (this may only mean little or no signed-in use).
 - Supabase security advisor after migrations 039 and 040: no new findings. The new helper functions are not callable by app users. The same accepted items remain (13 signed-in SECURITY DEFINER warnings, `push_batches` RLS-without-policy INFO, leaked-password protection off).
 - CI green on `8bcfd8e`; Mobile (Android) workflow last ran green on `a5c91c0` (before the push preference work, which does not touch the mobile app).
+
+## Session update: in-app "Check for updates" on Android (2026-11-22)
+
+- The Account tab has an "App updates" section. "Check for updates" reads this public repository's GitHub Releases, finds the newest `android-<n>` release and, if it is newer than the build number baked into the app, shows "Download and install". That opens the APK download; Android asks the user to confirm and installs over the old app, keeping data. A silent install is not possible on Android for a sideloaded app.
+- The Android workflow now sets the build number (GitHub run number) as `versionCode` and `EXPO_PUBLIC_BUILD_NUMBER`, and publishes each successful build from `main` as a GitHub Release with `kkingg-ai.apk` attached (built-in token, no extra secret).
+- Safety: only APK links under this repository's release downloads are ever opened; drafts and prereleases are ignored.
+- Limits: (1) the APK you already installed has no update button, so it needs one last manual install of the next build; after that updates work in place. (2) In-place install only works if every build is signed with the same key; the workflow uses the standard Expo debug key, which should be the same each time, but that is NOT yet verified (needs two builds installed one over the other). A real upload keystore would remove that doubt. (3) A development build (no number) never reports itself out of date.
+- Verified: 7 new unit tests for the pure logic (tag parsing, picking the newest, link allow-list, decisions). NOT verified: the workflow change has not run, the button has never run on a phone, and no release exists yet.

@@ -9,11 +9,15 @@ on:
   push:
     tags: ["mobile-v*"]
 
+permissions:
+  contents: write # to publish the build as a GitHub Release (uses the built-in token, no secret)
+
 jobs:
   android:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
+      EXPO_PUBLIC_BUILD_NUMBER: ${{ github.run_number }}
       EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
     steps:
@@ -35,6 +39,10 @@ jobs:
           test -n "$EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || { echo "Repository variable SUPABASE_PUBLISHABLE_KEY is not set"; exit 1; }
       - name: Mobile tests
         run: pnpm --filter @kkingg/mobile test
+      - name: Stamp the build number into the app
+        working-directory: apps/mobile
+        run: |
+          jq '.expo.android.versionCode = (env.EXPO_PUBLIC_BUILD_NUMBER | tonumber)' app.json > app.tmp && mv app.tmp app.json
       - name: Generate the native Android project
         working-directory: apps/mobile
         run: npx expo prebuild --platform android --no-install
@@ -48,3 +56,12 @@ jobs:
             apps/mobile/android/app/build/outputs/apk/release/*.apk
             apps/mobile/android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
+      - name: Publish the APK as a GitHub Release (what the in-app "Check for updates" reads)
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/mobile-v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp apps/mobile/android/app/build/outputs/apk/release/app-release.apk kkingg-ai.apk
+          gh release create "android-${{ github.run_number }}" kkingg-ai.apk \
+            --title "Android build ${{ github.run_number }}" \
+            --notes "Built from ${{ github.sha }}. Debug-signed, for sideloading." --target "${{ github.sha }}"
