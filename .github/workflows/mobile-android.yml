@@ -49,7 +49,7 @@ jobs:
       - name: Build APK and AAB
         working-directory: apps/mobile/android
         run: ./gradlew assembleRelease bundleRelease --no-daemon
-      - name: Print the signing certificate (compare across builds: in-place updates need the same value every time)
+      - name: Print the signing certificate (must be identical across builds for in-place updates)
         run: |
           APKSIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
           "$APKSIGNER" verify --print-certs apps/mobile/android/app/build/outputs/apk/release/app-release.apk | grep -i "SHA-256"
