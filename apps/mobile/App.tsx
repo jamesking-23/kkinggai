@@ -23,6 +23,7 @@ import type {
   WebViewNavigation,
 } from "react-native-webview/lib/WebViewTypes";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { CalendarScreen } from "./src/CalendarScreen";
 import { Dashboard } from "./src/Dashboard";
 import { C } from "./src/theme";
 import { BUILD_NUMBER, configured } from "./src/config";
@@ -166,6 +167,7 @@ const TAB_LABEL: Record<Tab, string> = {
 function Home({ session }: { session: Session }) {
   const [tab, setTab] = useState<Tab>("home");
   const [webUrl, setWebUrl] = useState(SITE_URL);
+  const [screen, setScreen] = useState<"calendar" | null>(null);
   const web = useRef<WebView>(null);
   const canGoBack = useRef(false);
 
@@ -176,6 +178,10 @@ function Home({ session }: { session: Session }) {
         web.current?.goBack();
         return true;
       }
+      if (tab === "home" && screen) {
+        setScreen(null);
+        return true;
+      }
       if (tab !== "home") {
         setTab("home");
         return true;
@@ -183,7 +189,7 @@ function Home({ session }: { session: Session }) {
       return false;
     });
     return () => sub.remove();
-  }, [tab]);
+  }, [tab, screen]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -212,10 +218,21 @@ function Home({ session }: { session: Session }) {
             )}
           />
         </View>
-        {tab === "home" && (
+        {tab === "home" && screen === "calendar" && (
+          <CalendarScreen
+            onBack={() => setScreen(null)}
+            onOpenWeb={() => {
+              setWebUrl(`${SITE_URL}/calendar`);
+              setScreen(null);
+              setTab("web");
+            }}
+          />
+        )}
+        {tab === "home" && !screen && (
           <Dashboard
             onTab={setTab}
             onOpen={(path) => {
+              if (path === "/calendar") return setScreen("calendar");
               setWebUrl(`${SITE_URL}${path}`);
               setTab("web");
             }}

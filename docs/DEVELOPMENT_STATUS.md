@@ -678,3 +678,10 @@ Other open items are in the per-phase notes below.
 - Native Home tab (default): greeting, live counts of open tasks and unread notifications, the next three due tasks, and a searchable grid of all 19 website modules. A module opens its page in the Website tab until it gets a native screen. Tabs are now Home, Tasks, Notifications, Website, Account. Android back returns to Home.
 - Tests: web `lib/app-release.test.ts` (6) and mobile updater, link-rule and module tests (17 mobile tests in total). NOT verified on a phone: the download and install flow, the progress display, the Home screen counts. (The `/api/app/latest` route was checked live after deploy: HTTP 200, `{"build":7,...}`, no sign-in needed).
 - Next native screens, in order of expected use: Calendar, Habits, Goals, then Chess and the rest.
+
+## Session update: native Calendar screen (2026-11-23)
+
+- Home > Calendar now opens a native agenda: the next 31 days of events and tasks that are due, grouped by day (Today, Tomorrow, then dates) in the account's own timezone, with pull to refresh. Events show start and end time and location; tasks show their due time. "Add / edit" opens the website's calendar in the Website tab, since creating and editing events is not built natively yet. Android back returns to Home.
+- Logic is in `apps/mobile/src/agenda.ts` (day and time conversion, labels, sorting, dropping past days) with 5 tests, including a late-night event that falls on the next local day in Kampala; the screen is `CalendarScreen.tsx`.
+- Verified: typecheck and 22 mobile tests. NOT verified on a phone: the screen, the Intl timezone support in the phone's JavaScript engine (Hermes), and the queries against real events. Overdue tasks are not listed (agenda starts today).
+- Next native screens: Habits, Goals, then Chess.
