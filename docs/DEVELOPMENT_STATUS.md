@@ -692,3 +692,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/habits.ts` (6 tests), `HabitsScreen.tsx`, and a shared `ScreenHeader.tsx` now also used by Calendar. Mobile tests: 28.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, the live queries, the row-level security for habit logs from the phone (the web uses the same tables and policies), and tick on/off against real data.
 - Next native screens: Goals, then Chess.
+
+## Session update: native Goals screen (2026-11-23)
+
+- Home > Goals opens a native screen: active and achieved counts, each goal with a progress bar, "12 of 50 km" text and a deadline label (Overdue, Due today, Due in N days), milestones that can be ticked on or off, "Update progress" (type the current value) and "Mark achieved". Active goals sort by soonest deadline. Updates check the goal's revision like the website, so a change made elsewhere is refused and the list refreshes. Creating and editing goals stays on the website ("Add / edit").
+- Files: `src/goals.ts` (5 tests), `GoalsScreen.tsx`. Mobile tests: 33.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, the queries and the update, milestone and status writes under row-level security (the web uses the same tables and policies).
+- Next native screens: Chess, then Academics and Career.
