@@ -24,6 +24,7 @@ import type {
 } from "react-native-webview/lib/WebViewTypes";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { CalendarScreen } from "./src/CalendarScreen";
+import { HabitsScreen } from "./src/HabitsScreen";
 import { Dashboard } from "./src/Dashboard";
 import { C } from "./src/theme";
 import { BUILD_NUMBER, configured } from "./src/config";
@@ -167,7 +168,7 @@ const TAB_LABEL: Record<Tab, string> = {
 function Home({ session }: { session: Session }) {
   const [tab, setTab] = useState<Tab>("home");
   const [webUrl, setWebUrl] = useState(SITE_URL);
-  const [screen, setScreen] = useState<"calendar" | null>(null);
+  const [screen, setScreen] = useState<"calendar" | "habits" | null>(null);
   const web = useRef<WebView>(null);
   const canGoBack = useRef(false);
 
@@ -228,11 +229,22 @@ function Home({ session }: { session: Session }) {
             }}
           />
         )}
+        {tab === "home" && screen === "habits" && (
+          <HabitsScreen
+            onBack={() => setScreen(null)}
+            onOpenWeb={() => {
+              setWebUrl(`${SITE_URL}/habits`);
+              setScreen(null);
+              setTab("web");
+            }}
+          />
+        )}
         {tab === "home" && !screen && (
           <Dashboard
             onTab={setTab}
             onOpen={(path) => {
               if (path === "/calendar") return setScreen("calendar");
+              if (path === "/habits") return setScreen("habits");
               setWebUrl(`${SITE_URL}${path}`);
               setTab("web");
             }}

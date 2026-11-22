@@ -17,6 +17,7 @@ import {
   type AgendaEvent,
   type AgendaTask,
 } from "./agenda";
+import { ScreenHeader } from "./ScreenHeader";
 import { supabase } from "./supabase";
 import { C } from "./theme";
 
@@ -72,15 +73,11 @@ export function CalendarScreen({
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={s.header}>
-        <Pressable onPress={onBack} hitSlop={12}>
-          <Text style={s.back}>‹ Home</Text>
-        </Pressable>
-        <Text style={s.title}>Calendar</Text>
-        <Pressable onPress={onOpenWeb} hitSlop={12}>
-          <Text style={s.back}>Add / edit</Text>
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title="Calendar"
+        onBack={onBack}
+        action={{ label: "Add / edit", onPress: onOpenWeb }}
+      />
       <ScrollView
         contentContainerStyle={s.page}
         refreshControl={
@@ -127,17 +124,6 @@ export function CalendarScreen({
 }
 
 const s = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
-  },
-  back: { color: C.primary, fontWeight: "600", fontSize: 14 },
-  title: { fontSize: 18, fontWeight: "700", color: C.text },
   page: { padding: 16, paddingBottom: 32 },
   muted: { color: C.muted, fontSize: 13 },
   error: { color: C.danger, marginTop: 12 },

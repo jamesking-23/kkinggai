@@ -685,3 +685,10 @@ Other open items are in the per-phase notes below.
 - Logic is in `apps/mobile/src/agenda.ts` (day and time conversion, labels, sorting, dropping past days) with 5 tests, including a late-night event that falls on the next local day in Kampala; the screen is `CalendarScreen.tsx`.
 - Verified: typecheck and 22 mobile tests. NOT verified on a phone: the screen, the Intl timezone support in the phone's JavaScript engine (Hermes), and the queries against real events. Overdue tasks are not listed (agenda starts today).
 - Next native screens: Habits, Goals, then Chess.
+
+## Session update: native Habits screen (2026-11-23)
+
+- Home > Habits opens a native screen: tap a habit to tick today on or off, each row shows the daily streak and this week's progress (against 7 for daily habits, against the target for weekly ones), tiles show "done today" and the best daily streak, and a daily habit can be added. Weekly targets and archiving stay on the website ("More" opens it). Rules mirror the web (`dailyStreak` stays alive until yesterday is missed; weeks start Monday). Logging for a day that is already logged elsewhere is treated as done.
+- Files: `src/habits.ts` (6 tests), `HabitsScreen.tsx`, and a shared `ScreenHeader.tsx` now also used by Calendar. Mobile tests: 28.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, the live queries, the row-level security for habit logs from the phone (the web uses the same tables and policies), and tick on/off against real data.
+- Next native screens: Goals, then Chess.
