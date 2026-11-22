@@ -14,7 +14,7 @@ Mark each item only when it has actually been done. "Written" is not "tested".
 - [ ] Strava: the API connection was removed. In Strava settings, revoke the app and regenerate or delete the client secret you pasted earlier, and remove `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET` from Vercel
 - [ ] Revoke the GitHub token pasted earlier
 - [ ] Supabase Auth: Site URL and redirect URLs; consider disabling public sign-up; enable leaked-password protection
-- [ ] Create an Expo account and token for an Android APK (`eas build --profile preview`)
+- [x] No Expo account is needed: the APK is built on GitHub (`.github/workflows/mobile-android.yml`). Only EAS-based builds or Expo push would need one.
 - [ ] Download the Windows installer from the Desktop workflow run's artifact and install it
 
 ## Manual smoke test, signed in (never done yet)
@@ -36,5 +36,6 @@ Mark each item only when it has actually been done. "Written" is not "tested".
 - [ ] Update `DEVELOPMENT_STATUS.md` with what was actually observed
 - [ ] Tag `v0.1.0` only after the smoke test above passes
 
-- [ ] Android build: add repository variables `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (Settings > Secrets and variables > Actions > Variables), run "Mobile (Android)", download the artifact `kkingg-ai-android`, and install the APK on a phone.
+- [x] Android build: variables `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` set, workflow ran green (builds 5 and 6).
+- [ ] Install the APK from the latest GitHub Release (https://github.com/jamesking-23/kkinggai/releases) on a phone, sign in, then publish a newer build and test Account > Check for updates installs over it without uninstalling.
 - [ ] Google Play: create an upload keystore and wire it into the workflow before submitting the AAB.
