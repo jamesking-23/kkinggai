@@ -1,11 +1,13 @@
 import { StatusBar } from "expo-status-bar";
 import type { Session } from "@supabase/supabase-js";
-import { useCallback, useEffect, useState } from "react";
+import type { ComponentType, Ref } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   AppState,
   FlatList,
   KeyboardAvoidingView,
+  BackHandler,
   Linking,
   Platform,
   Pressable,
@@ -15,10 +17,16 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { WebView, type WebViewProps } from "react-native-webview";
+import type {
+  ShouldStartLoadRequest,
+  WebViewNavigation,
+} from "react-native-webview/lib/WebViewTypes";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { BUILD_NUMBER, configured } from "./src/config";
 import { cleanTitle, dueLabel, isSafeLink, timeAgo } from "./src/format";
 import { supabase } from "./src/supabase";
+import { isInternal, isOpenable, SITE_URL } from "./src/web";
 import { currentBuild, decide, pickLatest, RELEASES_API, type UpdateState } from "./src/update";
 
 const C = {
@@ -31,7 +39,10 @@ const C = {
   danger: "#b91c1c",
 };
 
-type Tab = "notifications" | "tasks" | "account";
+// react-native-webview 14 types its class component for React 18; this restores the props and ref typing under React 19.
+const SiteView = WebView as unknown as ComponentType<WebViewProps & { ref?: Ref<WebView> }>;
+
+type Tab = "web" | "notifications" | "tasks" | "account";
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -143,21 +154,69 @@ function SignIn() {
   );
 }
 
+const TAB_LABEL: Record<Tab, string> = {
+  web: "Website",
+  notifications: "Notifications",
+  tasks: "Tasks",
+  account: "Account",
+};
+
 function Home({ session }: { session: Session }) {
-  const [tab, setTab] = useState<Tab>("notifications");
+  const [tab, setTab] = useState<Tab>("web");
+  const web = useRef<WebView>(null);
+  const canGoBack = useRef(false);
+
+  // Android back button: go back inside the website first.
+  useEffect(() => {
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (tab === "web" && canGoBack.current) {
+        web.current?.goBack();
+        return true;
+      }
+      if (tab !== "web") {
+        setTab("web");
+        return true;
+      }
+      return false;
+    });
+    return () => sub.remove();
+  }, [tab]);
+
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
+        {/* The website stays mounted so you keep your place when switching tabs. */}
+        <View style={{ flex: 1, display: tab === "web" ? "flex" : "none" }}>
+          <SiteView
+            ref={web}
+            source={{ uri: SITE_URL }}
+            style={{ flex: 1, backgroundColor: C.bg }}
+            onNavigationStateChange={(n: WebViewNavigation) => {
+              canGoBack.current = n.canGoBack;
+            }}
+            onShouldStartLoadWithRequest={(req: ShouldStartLoadRequest) => {
+              if (isInternal(req.url)) return true;
+              if (isOpenable(req.url)) Linking.openURL(req.url);
+              return false;
+            }}
+            setSupportMultipleWindows={false}
+            allowsBackForwardNavigationGestures
+            startInLoadingState
+            renderLoading={() => (
+              <View style={[styles.centered, { alignItems: "center" }]}>
+                <ActivityIndicator color={C.primary} />
+              </View>
+            )}
+          />
+        </View>
         {tab === "notifications" && <Notifications />}
         {tab === "tasks" && <Tasks />}
         {tab === "account" && <Account session={session} />}
       </View>
       <View style={styles.tabs}>
-        {(["notifications", "tasks", "account"] as const).map((t) => (
+        {(["web", "notifications", "tasks", "account"] as const).map((t) => (
           <Pressable key={t} style={styles.tab} onPress={() => setTab(t)}>
-            <Text style={[styles.tabText, tab === t && styles.tabActive]}>
-              {t === "notifications" ? "Notifications" : t === "tasks" ? "Tasks" : "Account"}
-            </Text>
+            <Text style={[styles.tabText, tab === t && styles.tabActive]}>{TAB_LABEL[t]}</Text>
           </Pressable>
         ))}
       </View>
@@ -388,7 +447,7 @@ function Tasks() {
             </Pressable>
           </View>
           <Text style={[styles.small, { marginBottom: 8 }]}>
-            Tap the circle to complete a task. Edit details and repeating tasks on the website.
+            Tap the circle to complete a task. Edit details and repeating tasks in the Website tab.
           </Text>
           {(error || problem) && <Text style={styles.error}>{problem ?? error}</Text>}
         </View>
