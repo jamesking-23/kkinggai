@@ -1,0 +1,4 @@
+-- Per-kind push preferences (migration 040). Rollback-only, run via execute_sql. Live result 2026-11-22: 9 lines as expected.
+-- push_kind_enabled: absent/null/non-array settings allow everything; listed kind allowed; unlisted kind and empty array refuse.
+-- End to end through push_dispatch(): an allowed kind is pushed, a muted kind keeps pushed_at null, and after clearing the setting the next run pushes it.
+-- Same fixtures as rls_push_quiet.sql (kind in date/application/venture_task/puzzles/reminder, dedupe_key required, p256dh 87 / auth 22 chars).

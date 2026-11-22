@@ -635,3 +635,10 @@ Other open items are in the per-phase notes below.
 - UI: the Notifications page has a "Quiet hours" form under the push card.
 - Verified live (rollback tests, `tests/rls_push_quiet.sql`): 13 window cases and an end-to-end hold and release through `push_dispatch()`. Web unit tests added for the helpers and actions (mocked database).
 - NOT verified: the form in a browser, and a real push arriving after quiet hours. Your account timezone must be set correctly in the app (it defaults to UTC), otherwise the window is measured in UTC.
+
+## Session update: per-kind push preferences (2026-11-22)
+
+- Migration `20261122000040_push_kinds` applied (`push_kind_enabled()` plus `push_dispatch()` updated again). `user_settings.settings.push_kinds` lists the kinds that may be pushed; absent means all. A muted kind is never marked pushed and ages out of the one-day window, so unmuting can push up to a day of recent ones. The inbox always shows everything.
+- UI: "What to push" checkboxes on the Notifications page.
+- Verified live (rollback tests, `tests/rls_push_kinds.sql`): 9 checks including hold and release through `push_dispatch()`. Web unit tests added (mocked database).
+- NOT verified: the form in a browser or a real push.

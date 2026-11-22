@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { notificationReadSchema } from "@kkingg/schemas";
 import { firstIssue, flash } from "../../../lib/form";
+import { extractKinds, sanitizeKinds, withKinds, type PushKind } from "../../../lib/push-kinds";
 import { extractQuiet, isValidTime, withQuiet } from "../../../lib/quiet-hours";
 import type { Json } from "../../../lib/supabase/database.types";
 import { isValidSubscription, sendPush, vapidConfigured } from "../../../lib/push";
@@ -153,5 +154,40 @@ export async function saveQuietHours(
     message: input
       ? `Push is held back from ${input.from} to ${input.to} (${ctx.timezone}).`
       : "Quiet hours are off.",
+  };
+}
+
+/** Kinds the signed-in user allows to push. All of them until the user changes it. */
+export async function loadPushKinds(): Promise<PushKind[]> {
+  const ctx = await getAppContext();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("user_settings")
+    .select("settings")
+    .eq("user_id", ctx.userId)
+    .maybeSingle();
+  return extractKinds(data?.settings);
+}
+
+/** Saves which kinds may be pushed, keeping every other setting. Notifications still appear in the inbox either way. */
+export async function savePushKinds(kinds: string[]): Promise<PushResult> {
+  const clean = sanitizeKinds(kinds);
+  const ctx = await getAppContext();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("user_settings")
+    .select("settings")
+    .eq("user_id", ctx.userId)
+    .maybeSingle();
+  const { data: updated, error } = await supabase
+    .from("user_settings")
+    .update({ settings: withKinds(data?.settings, clean) as Json })
+    .eq("user_id", ctx.userId)
+    .select("user_id");
+  if (error || !updated || updated.length === 0)
+    return { ok: false, message: "Could not save. Try again." };
+  return {
+    ok: true,
+    message: clean.length === 0 ? "Nothing will be pushed." : "Saved.",
   };
 }

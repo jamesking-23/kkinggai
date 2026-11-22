@@ -70,3 +70,28 @@ describe("quiet hours actions", () => {
     expect((await saveQuietHours({ from: "22:00", to: "07:00" })).ok).toBe(false);
   });
 });
+
+import { loadPushKinds, savePushKinds } from "./actions";
+
+describe("push kinds actions", () => {
+  it("loads all kinds by default and the saved subset after", async () => {
+    expect(await loadPushKinds()).toHaveLength(5);
+    st.settings = { push_kinds: ["date"] };
+    expect(await loadPushKinds()).toEqual(["date"]);
+  });
+  it("saves a subset, ignoring unknown kinds, and keeps other settings", async () => {
+    const r = await savePushKinds(["reminder", "bogus"]);
+    expect(r).toEqual({ ok: true, message: "Saved." });
+    expect(st.updates[0]).toEqual({ settings: { board: { at: 1 }, push_kinds: ["reminder"] } });
+  });
+  it("says so when nothing will be pushed, and removes the key when all are on", async () => {
+    expect((await savePushKinds([])).message).toBe("Nothing will be pushed.");
+    st.settings = { push_kinds: ["date"] };
+    await savePushKinds(["date", "application", "venture_task", "puzzles", "reminder"]);
+    expect(st.updates[1]).toEqual({ settings: {} });
+  });
+  it("reports a failed update", async () => {
+    st.error = { message: "x" };
+    expect((await savePushKinds(["date"])).ok).toBe(false);
+  });
+});
