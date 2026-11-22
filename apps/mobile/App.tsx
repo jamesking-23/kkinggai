@@ -23,26 +23,27 @@ import type {
   WebViewNavigation,
 } from "react-native-webview/lib/WebViewTypes";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { Dashboard } from "./src/Dashboard";
+import { C } from "./src/theme";
 import { BUILD_NUMBER, configured } from "./src/config";
 import { cleanTitle, dueLabel, isSafeLink, timeAgo } from "./src/format";
 import { supabase } from "./src/supabase";
 import { isInternal, isOpenable, SITE_URL } from "./src/web";
-import { currentBuild, decide, pickLatest, RELEASES_API, type UpdateState } from "./src/update";
-
-const C = {
-  bg: "#faf8f4",
-  card: "#ffffff",
-  text: "#1c1917",
-  muted: "#78716c",
-  primary: "#8a6d1f",
-  border: "#e7e2d8",
-  danger: "#b91c1c",
-};
+import {
+  currentBuild,
+  decide,
+  DOWNLOAD_URL,
+  LATEST_URL,
+  parseLatest,
+  percent,
+  sizeLabel,
+  type UpdateState,
+} from "./src/update";
 
 // react-native-webview 14 types its class component for React 18; this restores the props and ref typing under React 19.
 const SiteView = WebView as unknown as ComponentType<WebViewProps & { ref?: Ref<WebView> }>;
 
-type Tab = "web" | "notifications" | "tasks" | "account";
+type Tab = "home" | "web" | "notifications" | "tasks" | "account";
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -155,6 +156,7 @@ function SignIn() {
 }
 
 const TAB_LABEL: Record<Tab, string> = {
+  home: "Home",
   web: "Website",
   notifications: "Notifications",
   tasks: "Tasks",
@@ -162,7 +164,8 @@ const TAB_LABEL: Record<Tab, string> = {
 };
 
 function Home({ session }: { session: Session }) {
-  const [tab, setTab] = useState<Tab>("web");
+  const [tab, setTab] = useState<Tab>("home");
+  const [webUrl, setWebUrl] = useState(SITE_URL);
   const web = useRef<WebView>(null);
   const canGoBack = useRef(false);
 
@@ -173,8 +176,8 @@ function Home({ session }: { session: Session }) {
         web.current?.goBack();
         return true;
       }
-      if (tab !== "web") {
-        setTab("web");
+      if (tab !== "home") {
+        setTab("home");
         return true;
       }
       return false;
@@ -189,7 +192,7 @@ function Home({ session }: { session: Session }) {
         <View style={{ flex: 1, display: tab === "web" ? "flex" : "none" }}>
           <SiteView
             ref={web}
-            source={{ uri: SITE_URL }}
+            source={{ uri: webUrl }}
             style={{ flex: 1, backgroundColor: C.bg }}
             onNavigationStateChange={(n: WebViewNavigation) => {
               canGoBack.current = n.canGoBack;
@@ -209,12 +212,21 @@ function Home({ session }: { session: Session }) {
             )}
           />
         </View>
+        {tab === "home" && (
+          <Dashboard
+            onTab={setTab}
+            onOpen={(path) => {
+              setWebUrl(`${SITE_URL}${path}`);
+              setTab("web");
+            }}
+          />
+        )}
         {tab === "notifications" && <Notifications />}
         {tab === "tasks" && <Tasks />}
         {tab === "account" && <Account session={session} />}
       </View>
       <View style={styles.tabs}>
-        {(["web", "notifications", "tasks", "account"] as const).map((t) => (
+        {(["home", "tasks", "notifications", "web", "account"] as const).map((t) => (
           <Pressable key={t} style={styles.tab} onPress={() => setTab(t)}>
             <Text style={[styles.tabText, tab === t && styles.tabActive]}>{TAB_LABEL[t]}</Text>
           </Pressable>
@@ -510,61 +522,96 @@ function Account({ session }: { session: Session }) {
   );
 }
 
-/** Settings: check for a newer build and open its download. Android asks the user to confirm the install; it updates in place. */
+/** Settings: check for a newer build, download it inside the app and hand it to Android's installer (one confirmation tap; data is kept). */
 function Updates() {
-  const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState<"idle" | "checking" | "downloading" | "ready">("idle");
   const [state, setState] = useState<UpdateState | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const build = currentBuild(BUILD_NUMBER);
 
   async function check() {
-    setBusy(true);
-    setFailed(false);
+    setPhase("checking");
+    setError(null);
     try {
-      const res = await fetch(RELEASES_API, { headers: { Accept: "application/vnd.github+json" } });
-      if (!res.ok) throw new Error(String(res.status));
-      setState(decide(build, pickLatest(await res.json())));
+      const res = await fetch(LATEST_URL);
+      if (!res.ok) throw new Error("check");
+      setState(decide(build, parseLatest(await res.json())));
     } catch {
-      setFailed(true);
       setState(null);
+      setError("Could not check for updates. Try again.");
     } finally {
-      setBusy(false);
+      setPhase("idle");
     }
   }
 
+  async function install() {
+    try {
+      const FS = await import("expo-file-system/legacy");
+      const Launcher = await import("expo-intent-launcher");
+      const target = `${FS.cacheDirectory}kkingg-update.apk`;
+      await FS.deleteAsync(target, { idempotent: true });
+      setPhase("downloading");
+      setProgress(0);
+      setError(null);
+      const task = FS.createDownloadResumable(DOWNLOAD_URL, target, {}, (p) =>
+        setProgress(percent(p.totalBytesWritten, p.totalBytesExpectedToWrite)),
+      );
+      const done = await task.downloadAsync();
+      if (!done || done.status !== 200) throw new Error("download");
+      setPhase("ready");
+      await Launcher.startActivityAsync("android.intent.action.VIEW", {
+        data: await FS.getContentUriAsync(target),
+        flags: 1,
+        type: "application/vnd.android.package-archive",
+      });
+    } catch {
+      setError("The update could not be installed. Check your connection and try again.");
+      setPhase("idle");
+    }
+  }
+
+  const busy = phase === "checking" || phase === "downloading";
   return (
     <View style={{ marginTop: 32 }}>
       <Text style={styles.title}>App updates</Text>
-      <Text style={styles.muted}>
-        {build > 0 ? `This is build ${build}.` : "This is a development build."}
-      </Text>
+      <Text style={styles.muted}>{build > 0 ? `Version build ${build}` : "Development build"}</Text>
       <Pressable
         style={[styles.button, { marginTop: 12 }, busy && styles.disabled]}
         disabled={busy}
         onPress={check}
       >
-        <Text style={styles.buttonText}>{busy ? "Checking…" : "Check for updates"}</Text>
+        <Text style={styles.buttonText}>
+          {phase === "checking" ? "Checking…" : "Check for updates"}
+        </Text>
       </Pressable>
-      {failed && <Text style={[styles.error, { marginTop: 8 }]}>Could not check. Try again.</Text>}
+      {error && <Text style={[styles.error, { marginTop: 8 }]}>{error}</Text>}
       {state?.kind === "current" && (
         <Text style={[styles.muted, { marginTop: 8 }]}>You are up to date.</Text>
       )}
       {state?.kind === "unknown" && (
-        <Text style={[styles.muted, { marginTop: 8 }]}>No published build was found.</Text>
+        <Text style={[styles.muted, { marginTop: 8 }]}>No update is available right now.</Text>
       )}
       {state?.kind === "available" && (
         <View style={{ marginTop: 8 }}>
-          <Text style={styles.muted}>Build {state.release.build} is available.</Text>
-          <Pressable
-            style={[styles.button, { marginTop: 8 }]}
-            onPress={() => Linking.openURL(state.release.url)}
-          >
-            <Text style={styles.buttonText}>Download and install</Text>
-          </Pressable>
-          <Text style={styles.small}>
-            Your phone will download the file and ask you to confirm. It installs over this app and
-            keeps your data.
+          <Text style={styles.muted}>
+            A new version is available{sizeLabel(state.size) ? ` (${sizeLabel(state.size)})` : ""}.
           </Text>
+          <Pressable
+            style={[styles.button, { marginTop: 8 }, busy && styles.disabled]}
+            disabled={busy}
+            onPress={install}
+          >
+            <Text style={styles.buttonText}>
+              {phase === "downloading" ? `Downloading… ${progress}%` : "Update now"}
+            </Text>
+          </Pressable>
+          {phase === "ready" && (
+            <Text style={styles.small}>
+              Confirm on the next screen to finish. If Android asks, allow this app to install
+              updates. Your data is kept.
+            </Text>
+          )}
         </View>
       )}
     </View>
