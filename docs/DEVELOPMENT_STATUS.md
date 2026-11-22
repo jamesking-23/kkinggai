@@ -699,3 +699,11 @@ Other open items are in the per-phase notes below.
 - Files: `src/goals.ts` (5 tests), `GoalsScreen.tsx`. Mobile tests: 33.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, the queries and the update, milestone and status writes under row-level security (the web uses the same tables and policies).
 - Next native screens: Chess, then Academics and Career.
+
+## Session update: native Career screen (2026-11-23)
+
+- Chess is the biggest module (a touch board with drag and premove, puzzles, repertoire drills, live play with realtime), so it was not started in one step; it will be built in stages. Career went first because it is the most useful to the owner right now.
+- Home > Career opens a native job-application tracker: status chips with counts (All, Wishlist, Applied, Interviewing, Offer, Rejected, Withdrawn), a highlighted box of deadlines in the next 14 days (open applications only), search by company or role, tap an application to move it to another stage, and "Add application" (company and role, saved to the wishlist). Moving to Applied stamps today's date when none is recorded, and a move is refused if the application was changed elsewhere (revision check), as on the website. Interview prep, CV, portfolio, notes and the full add form stay on the website ("More").
+- Files: `src/career.ts` (6 tests), `CareerScreen.tsx`. The status list is repeated from `packages/schemas` because the app does not depend on that package; keep them in sync. Mobile tests: 39.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, the queries and writes under row-level security (same tables and policies as the web).
+- Next native screens: Academics, Business, then Chess in stages.

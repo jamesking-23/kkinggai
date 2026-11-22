@@ -26,6 +26,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { CalendarScreen } from "./src/CalendarScreen";
 import { GoalsScreen } from "./src/GoalsScreen";
 import { HabitsScreen } from "./src/HabitsScreen";
+import { CareerScreen } from "./src/CareerScreen";
 import { Dashboard } from "./src/Dashboard";
 import { C } from "./src/theme";
 import { BUILD_NUMBER, configured } from "./src/config";
@@ -169,7 +170,7 @@ const TAB_LABEL: Record<Tab, string> = {
 function Home({ session }: { session: Session }) {
   const [tab, setTab] = useState<Tab>("home");
   const [webUrl, setWebUrl] = useState(SITE_URL);
-  const [screen, setScreen] = useState<"calendar" | "habits" | "goals" | null>(null);
+  const [screen, setScreen] = useState<"calendar" | "habits" | "goals" | "career" | null>(null);
   const web = useRef<WebView>(null);
   const canGoBack = useRef(false);
 
@@ -250,6 +251,16 @@ function Home({ session }: { session: Session }) {
             }}
           />
         )}
+        {tab === "home" && screen === "career" && (
+          <CareerScreen
+            onBack={() => setScreen(null)}
+            onOpenWeb={() => {
+              setWebUrl(`${SITE_URL}/career`);
+              setScreen(null);
+              setTab("web");
+            }}
+          />
+        )}
         {tab === "home" && !screen && (
           <Dashboard
             onTab={setTab}
@@ -257,6 +268,7 @@ function Home({ session }: { session: Session }) {
               if (path === "/calendar") return setScreen("calendar");
               if (path === "/habits") return setScreen("habits");
               if (path === "/goals") return setScreen("goals");
+              if (path === "/career") return setScreen("career");
               setWebUrl(`${SITE_URL}${path}`);
               setTab("web");
             }}
