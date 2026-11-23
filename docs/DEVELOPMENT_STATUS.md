@@ -763,3 +763,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/projects.ts` (5 tests), `ProjectsScreen.tsx`. Statuses are repeated from the website; keep them in sync. Mobile tests: 82.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, and the project insert and status update under row-level security (same table and policies as the web).
 - Next: News, Entertainment, Personal, Vault, Search, Settings, Assistant.
+
+## Session update: native Personal screen (2026-11-24)
+
+- Home > Personal opens a native screen with two tabs. Journal: write today's entry (one per day, as on the website) with an optional mood and comma-separated tags, and read the 30 most recent entries (tap to expand). If today already has an entry, the phone says so, and a database clash reads "remove it on the website to rewrite it". Important dates: birthdays, anniversaries, deadlines and others, ordered by how soon they next occur, with "Today / Tomorrow / In N days" and "turning N" for birthdays with a year. A 29 February date is observed on 28 February in non-leap years. Add a date with title, kind, month, day and an optional year, validated like the website (a day that does not exist is rejected). Deleting and older entries stay on the website ("More").
+- Files: `src/personal.ts` (6 tests), `PersonalScreen.tsx`. Kinds and moods are repeated from the website; keep them in sync. Mobile tests: 88.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, and the journal and date inserts under row-level security (same tables and policies as the web). "Today" uses your account timezone.
+- Next: News, Entertainment, Vault, Search, Settings, Assistant.
