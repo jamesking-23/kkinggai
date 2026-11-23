@@ -756,3 +756,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/flashcards.ts` (4 tests, covering the schedule maths), `FlashcardsScreen.tsx`. The scheduling maths is repeated from `apps/web/lib/spaced-repetition.ts`; keep them in sync. Mobile tests: 77.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, and the card update, review insert and card/deck inserts under row-level security (same tables and policies as the web). Up to 500 cards load, like the web page.
 - Next: Projects, then the remaining modules.
+
+## Session update: native Projects screen (2026-11-23)
+
+- Home > Projects opens a native screen: your non-archived projects (active first, then paused, completed; nearest due date first) with status, open-task count and due date. Tap a project to see its description and up to 20 open tasks (read-only) and move it between Active, Paused, Completed and Archived with a revision check ("refreshed; try again" if it changed elsewhere). "New project" takes a name, optional description and an optional due date typed as YYYY-MM-DD (validated like the website, no date picker yet). Editing details, task management and the archived list stay on the website ("More").
+- Files: `src/projects.ts` (5 tests), `ProjectsScreen.tsx`. Statuses are repeated from the website; keep them in sync. Mobile tests: 82.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, and the project insert and status update under row-level security (same table and policies as the web).
+- Next: News, Entertainment, Personal, Vault, Search, Settings, Assistant.
