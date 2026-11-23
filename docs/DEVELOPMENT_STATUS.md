@@ -728,3 +728,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/chessPuzzles.ts` (7 tests; adds the `chess.js` dependency, the same version as the web), `ChessScreen.tsx`. Mobile tests: 55.
 - Verified: typecheck and tests. NOT verified on a phone: touch accuracy and board size on real screens, glyph rendering and contrast, and that `chess.js` bundles and runs on the phone (the Android build bundles the JavaScript, so a bundling failure would fail the build; running it is untested).
 - Next stages for chess: games list with a replay viewer, then live play (realtime), then repertoire drills. Piece image sets and board themes come last.
+
+## Session update: native chess games and replay viewer (2026-11-23)
+
+- Home > Chess now has two tabs. Puzzles (as before, now using a shared `BoardView`) and Games: the 200 most recent games with your result (Win, Loss, Draw, Unfinished), opponent, date, opening, time control and move count; filter by All, Wins, Draws, Losses; search by opponent or opening. Tap a game to step through it with first, previous, next and last buttons, the last move highlighted, the move list (tap a move to jump to it), and the board oriented to your colour. If a game's moves cannot be read, it says so and points to the website. Importing, analysis, notes, repertoire drills, board settings and live play stay on the website ("Full chess").
+- Files: `src/chessGames.ts` (7 tests), `BoardView.tsx`, `ChessGames.tsx`, `ChessScreen.tsx` reorganised. Mobile tests: 62.
+- Verified: typecheck and tests (including replaying a real PGN with chess.js). NOT verified on a phone: touch targets, board size, and the viewer against real stored games. The website's engine evaluations are not shown on the phone yet.
+- Next for chess: live play (realtime, clocks, premove), then repertoire drills; piece image sets and board themes last.
