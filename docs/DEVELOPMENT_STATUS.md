@@ -714,3 +714,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/academics.ts` (4 tests), `AcademicsScreen.tsx`. Statuses are repeated from `packages/schemas`; keep them in sync. Mobile tests: 43.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, the queries and status writes under row-level security (same tables and policies as the web).
 - Next: Business, then Chess in stages.
+
+## Session update: native Business screen (2026-11-23)
+
+- Home > Business opens a native screen: each venture with its stage, income, expenses and net (net green or red) and the last three months, plus "Add income or expense" (income or expense, amount, optional category, dated today in the account timezone). Amounts follow the website's rules (more than 0, at most two decimals, commas allowed) and money is summed in whole cents. Money is formatted by hand (`formatMoney`) so it does not depend on the phone's Intl support. Creating ventures, venture tasks, contacts and removing entries stay on the website ("More").
+- Files: `src/business.ts` (5 tests), `BusinessScreen.tsx`. The screen list in `App.tsx` is now a single `Screen` type. Stages are repeated from `packages/schemas`; keep them in sync. Mobile tests: 48.
+- Verified: typecheck and tests. NOT verified on a phone: the screen and writing an entry under row-level security (same table and policies as the web). Entries are loaded up to 2000, like the web page; older entries are not totalled.
+- Next: Chess in stages.

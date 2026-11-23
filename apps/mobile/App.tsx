@@ -24,6 +24,7 @@ import type {
 } from "react-native-webview/lib/WebViewTypes";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { AcademicsScreen } from "./src/AcademicsScreen";
+import { BusinessScreen } from "./src/BusinessScreen";
 import { CalendarScreen } from "./src/CalendarScreen";
 import { GoalsScreen } from "./src/GoalsScreen";
 import { HabitsScreen } from "./src/HabitsScreen";
@@ -48,6 +49,7 @@ import {
 // react-native-webview 14 types its class component for React 18; this restores the props and ref typing under React 19.
 const SiteView = WebView as unknown as ComponentType<WebViewProps & { ref?: Ref<WebView> }>;
 
+type Screen = "calendar" | "habits" | "goals" | "career" | "academics" | "business" | null;
 type Tab = "home" | "web" | "notifications" | "tasks" | "account";
 
 export default function App() {
@@ -171,9 +173,7 @@ const TAB_LABEL: Record<Tab, string> = {
 function Home({ session }: { session: Session }) {
   const [tab, setTab] = useState<Tab>("home");
   const [webUrl, setWebUrl] = useState(SITE_URL);
-  const [screen, setScreen] = useState<
-    "calendar" | "habits" | "goals" | "career" | "academics" | null
-  >(null);
+  const [screen, setScreen] = useState<Screen>(null);
   const web = useRef<WebView>(null);
   const canGoBack = useRef(false);
 
@@ -274,6 +274,16 @@ function Home({ session }: { session: Session }) {
             }}
           />
         )}
+        {tab === "home" && screen === "business" && (
+          <BusinessScreen
+            onBack={() => setScreen(null)}
+            onOpenWeb={() => {
+              setWebUrl(`${SITE_URL}/business`);
+              setScreen(null);
+              setTab("web");
+            }}
+          />
+        )}
         {tab === "home" && !screen && (
           <Dashboard
             onTab={setTab}
@@ -283,6 +293,7 @@ function Home({ session }: { session: Session }) {
               if (path === "/goals") return setScreen("goals");
               if (path === "/career") return setScreen("career");
               if (path === "/academics") return setScreen("academics");
+              if (path === "/business") return setScreen("business");
               setWebUrl(`${SITE_URL}${path}`);
               setTab("web");
             }}
