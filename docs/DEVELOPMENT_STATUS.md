@@ -742,3 +742,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/ideas.ts` (5 tests), `IdeasScreen.tsx`. Statuses and priorities are repeated from `packages/schemas`; keep them in sync. Mobile tests: 67.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, and inserting/updating under row-level security (same table and policies as the web).
 - Next: Running, Sports, Projects, Flashcards and the remaining modules.
+
+## Session update: native Running screen (2026-11-23)
+
+- Home > Running opens a native screen: totals for this week, this month and all time (runs, distance, time), an 8-week distance chart (weeks start Monday, account timezone), the 30 most recent runs with date, kind, time and average pace, and "Add a run" (name, kind, distance in km, hours/minutes/seconds, dated today). Entries follow the website's rules (distance 0.01–1000 km, time more than zero, minutes and seconds up to 59) and are stored as manual runs at noon UTC like the web. GPX/TCX import, routes, heart-rate zones, training plan, the coach and editing or deleting runs stay on the website ("More").
+- Files: `src/running.ts` (6 tests), `RunningScreen.tsx`. Run kinds are repeated from `packages/schemas`; keep them in sync. Mobile tests: 73.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, and inserting a run under row-level security (same table and policies as the web). Runs load up to 2000, like the web page.
+- Next: Sports, Projects, Flashcards and the remaining modules.
