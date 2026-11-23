@@ -721,3 +721,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/business.ts` (5 tests), `BusinessScreen.tsx`. The screen list in `App.tsx` is now a single `Screen` type. Stages are repeated from `packages/schemas`; keep them in sync. Mobile tests: 48.
 - Verified: typecheck and tests. NOT verified on a phone: the screen and writing an entry under row-level security (same table and policies as the web). Entries are loaded up to 2000, like the web page; older entries are not totalled.
 - Next: Chess in stages.
+
+## Session update: native Chess puzzle trainer (2026-11-23)
+
+- First stage of native chess. Home > Chess opens a puzzle trainer for the puzzles made from the owner's own mistakes: counts of due and saved puzzles, a touch board (tap a piece, then a square; legal targets are marked; the board flips when Black is to move), the answer checked against the engine move stored with the puzzle (promotion taken from the solution, else queen), "Show answer" (counts as a miss), and "Record and continue", which schedules the next review with the website's Leitner boxes and a revision check. Pieces are drawn with solid Unicode glyphs coloured white or black (no image piece sets yet). Games, analysis, repertoire drills, board preferences and live play stay on the website ("Full chess").
+- Files: `src/chessPuzzles.ts` (7 tests; adds the `chess.js` dependency, the same version as the web), `ChessScreen.tsx`. Mobile tests: 55.
+- Verified: typecheck and tests. NOT verified on a phone: touch accuracy and board size on real screens, glyph rendering and contrast, and that `chess.js` bundles and runs on the phone (the Android build bundles the JavaScript, so a bundling failure would fail the build; running it is untested).
+- Next stages for chess: games list with a replay viewer, then live play (realtime), then repertoire drills. Piece image sets and board themes come last.

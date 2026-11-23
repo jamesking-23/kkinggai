@@ -29,6 +29,7 @@ import { CalendarScreen } from "./src/CalendarScreen";
 import { GoalsScreen } from "./src/GoalsScreen";
 import { HabitsScreen } from "./src/HabitsScreen";
 import { CareerScreen } from "./src/CareerScreen";
+import { ChessScreen } from "./src/ChessScreen";
 import { Dashboard } from "./src/Dashboard";
 import { C } from "./src/theme";
 import { BUILD_NUMBER, configured } from "./src/config";
@@ -49,7 +50,8 @@ import {
 // react-native-webview 14 types its class component for React 18; this restores the props and ref typing under React 19.
 const SiteView = WebView as unknown as ComponentType<WebViewProps & { ref?: Ref<WebView> }>;
 
-type Screen = "calendar" | "habits" | "goals" | "career" | "academics" | "business" | null;
+type Screen =
+  "calendar" | "habits" | "goals" | "career" | "academics" | "business" | "chess" | null;
 type Tab = "home" | "web" | "notifications" | "tasks" | "account";
 
 export default function App() {
@@ -284,6 +286,16 @@ function Home({ session }: { session: Session }) {
             }}
           />
         )}
+        {tab === "home" && screen === "chess" && (
+          <ChessScreen
+            onBack={() => setScreen(null)}
+            onOpenWeb={() => {
+              setWebUrl(`${SITE_URL}/chess`);
+              setScreen(null);
+              setTab("web");
+            }}
+          />
+        )}
         {tab === "home" && !screen && (
           <Dashboard
             onTab={setTab}
@@ -294,6 +306,7 @@ function Home({ session }: { session: Session }) {
               if (path === "/career") return setScreen("career");
               if (path === "/academics") return setScreen("academics");
               if (path === "/business") return setScreen("business");
+              if (path === "/chess") return setScreen("chess");
               setWebUrl(`${SITE_URL}${path}`);
               setTab("web");
             }}
