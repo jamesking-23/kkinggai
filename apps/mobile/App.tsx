@@ -28,6 +28,7 @@ import { BusinessScreen } from "./src/BusinessScreen";
 import { CalendarScreen } from "./src/CalendarScreen";
 import { GoalsScreen } from "./src/GoalsScreen";
 import { HabitsScreen } from "./src/HabitsScreen";
+import { IdeasScreen } from "./src/IdeasScreen";
 import { CareerScreen } from "./src/CareerScreen";
 import { ChessScreen } from "./src/ChessScreen";
 import { Dashboard } from "./src/Dashboard";
@@ -51,7 +52,7 @@ import {
 const SiteView = WebView as unknown as ComponentType<WebViewProps & { ref?: Ref<WebView> }>;
 
 type Screen =
-  "calendar" | "habits" | "goals" | "career" | "academics" | "business" | "chess" | null;
+  "calendar" | "habits" | "goals" | "career" | "academics" | "business" | "chess" | "ideas" | null;
 type Tab = "home" | "web" | "notifications" | "tasks" | "account";
 
 export default function App() {
@@ -296,6 +297,16 @@ function Home({ session }: { session: Session }) {
             }}
           />
         )}
+        {tab === "home" && screen === "ideas" && (
+          <IdeasScreen
+            onBack={() => setScreen(null)}
+            onOpenWeb={() => {
+              setWebUrl(`${SITE_URL}/ideas`);
+              setScreen(null);
+              setTab("web");
+            }}
+          />
+        )}
         {tab === "home" && !screen && (
           <Dashboard
             onTab={setTab}
@@ -307,6 +318,7 @@ function Home({ session }: { session: Session }) {
               if (path === "/academics") return setScreen("academics");
               if (path === "/business") return setScreen("business");
               if (path === "/chess") return setScreen("chess");
+              if (path === "/ideas") return setScreen("ideas");
               setWebUrl(`${SITE_URL}${path}`);
               setTab("web");
             }}

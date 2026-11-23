@@ -735,3 +735,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/chessGames.ts` (7 tests), `BoardView.tsx`, `ChessGames.tsx`, `ChessScreen.tsx` reorganised. Mobile tests: 62.
 - Verified: typecheck and tests (including replaying a real PGN with chess.js). NOT verified on a phone: touch targets, board size, and the viewer against real stored games. The website's engine evaluations are not shown on the phone yet.
 - Next for chess: live play (realtime, clocks, premove), then repertoire drills; piece image sets and board themes last.
+
+## Session update: native Ideas screen (2026-11-23)
+
+- Home > Ideas opens a native screen: capture an idea in seconds (title, optional note, priority), status chips with counts, search, and tap an idea to expand it and move it between statuses (revision-checked; if it changed elsewhere it says "refreshed; try again"). Editing details, categories and deleting stay on the website.
+- Files: `src/ideas.ts` (5 tests), `IdeasScreen.tsx`. Statuses and priorities are repeated from `packages/schemas`; keep them in sync. Mobile tests: 67.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, and inserting/updating under row-level security (same table and policies as the web).
+- Next: Running, Sports, Projects, Flashcards and the remaining modules.
