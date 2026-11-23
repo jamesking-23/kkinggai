@@ -707,3 +707,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/career.ts` (6 tests), `CareerScreen.tsx`. The status list is repeated from `packages/schemas` because the app does not depend on that package; keep them in sync. Mobile tests: 39.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, the queries and writes under row-level security (same tables and policies as the web).
 - Next native screens: Academics, Business, then Chess in stages.
+
+## Session update: native Academics screen (2026-11-23)
+
+- Home > Academics opens a native screen: four tiles (active courses, open assignments, due in 7 days, overdue, using the website's counting rules), assignments sorted by urgency (open soonest first, undated last, then submitted, then graded) with course name and a due time in the account timezone ("Overdue · Sun 22 Nov 12:00", "Today 14:00", "Tomorrow 09:00"), tap an assignment to move it between To do, In progress and Submitted (revision-checked like the web), and a list of active courses. Grading (needs a score), adding courses and assignments, study notes and the research library stay on the website ("More").
+- Files: `src/academics.ts` (4 tests), `AcademicsScreen.tsx`. Statuses are repeated from `packages/schemas`; keep them in sync. Mobile tests: 43.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, the queries and status writes under row-level security (same tables and policies as the web).
+- Next: Business, then Chess in stages.

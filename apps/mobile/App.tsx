@@ -23,6 +23,7 @@ import type {
   WebViewNavigation,
 } from "react-native-webview/lib/WebViewTypes";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { AcademicsScreen } from "./src/AcademicsScreen";
 import { CalendarScreen } from "./src/CalendarScreen";
 import { GoalsScreen } from "./src/GoalsScreen";
 import { HabitsScreen } from "./src/HabitsScreen";
@@ -170,7 +171,9 @@ const TAB_LABEL: Record<Tab, string> = {
 function Home({ session }: { session: Session }) {
   const [tab, setTab] = useState<Tab>("home");
   const [webUrl, setWebUrl] = useState(SITE_URL);
-  const [screen, setScreen] = useState<"calendar" | "habits" | "goals" | "career" | null>(null);
+  const [screen, setScreen] = useState<
+    "calendar" | "habits" | "goals" | "career" | "academics" | null
+  >(null);
   const web = useRef<WebView>(null);
   const canGoBack = useRef(false);
 
@@ -261,6 +264,16 @@ function Home({ session }: { session: Session }) {
             }}
           />
         )}
+        {tab === "home" && screen === "academics" && (
+          <AcademicsScreen
+            onBack={() => setScreen(null)}
+            onOpenWeb={() => {
+              setWebUrl(`${SITE_URL}/academics`);
+              setScreen(null);
+              setTab("web");
+            }}
+          />
+        )}
         {tab === "home" && !screen && (
           <Dashboard
             onTab={setTab}
@@ -269,6 +282,7 @@ function Home({ session }: { session: Session }) {
               if (path === "/habits") return setScreen("habits");
               if (path === "/goals") return setScreen("goals");
               if (path === "/career") return setScreen("career");
+              if (path === "/academics") return setScreen("academics");
               setWebUrl(`${SITE_URL}${path}`);
               setTab("web");
             }}
