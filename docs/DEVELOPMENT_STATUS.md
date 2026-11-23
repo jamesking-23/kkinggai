@@ -749,3 +749,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/running.ts` (6 tests), `RunningScreen.tsx`. Run kinds are repeated from `packages/schemas`; keep them in sync. Mobile tests: 73.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, and inserting a run under row-level security (same table and policies as the web). Runs load up to 2000, like the web page.
 - Next: Sports, Projects, Flashcards and the remaining modules.
+
+## Session update: native Flashcards screen (2026-11-23)
+
+- Home > Flashcards opens a native screen: decks with card and due counts, "Study N due cards" (all decks) or "Study this deck". Study shows the question, tap to reveal the answer, then Again / Hard / Good / Easy. Each rating uses the website's spaced-repetition schedule (SM-2 style, "Again" returns in 10 minutes), a revision-checked update on the card, and a review row in `card_reviews`. Cards can be skipped for the session. You can add a deck and add cards to a deck. Quizzes, deleting cards or decks, and linking decks to courses stay on the website ("More").
+- Files: `src/flashcards.ts` (4 tests, covering the schedule maths), `FlashcardsScreen.tsx`. The scheduling maths is repeated from `apps/web/lib/spaced-repetition.ts`; keep them in sync. Mobile tests: 77.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, and the card update, review insert and card/deck inserts under row-level security (same tables and policies as the web). Up to 500 cards load, like the web page.
+- Next: Projects, then the remaining modules.
