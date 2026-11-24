@@ -35,6 +35,7 @@ import { NewsScreen } from "./src/NewsScreen";
 import { PersonalScreen } from "./src/PersonalScreen";
 import { ProjectsScreen } from "./src/ProjectsScreen";
 import { RunningScreen } from "./src/RunningScreen";
+import { SettingsScreen } from "./src/SettingsScreen";
 import { SearchScreen } from "./src/SearchScreen";
 import { routeFor } from "./src/search";
 import { VaultScreen } from "./src/VaultScreen";
@@ -77,6 +78,7 @@ type Screen =
   | "entertainment"
   | "vault"
   | "search"
+  | "settings"
   | null;
 type Tab = "home" | "web" | "notifications" | "tasks" | "account";
 
@@ -413,6 +415,16 @@ function Home({ session }: { session: Session }) {
         )}
         {tab === "home" && screen === "search" && (
           <SearchScreen onBack={() => setScreen(null)} onOpenPath={openPath} />
+        )}
+        {tab === "home" && screen === "settings" && (
+          <SettingsScreen
+            onBack={() => setScreen(null)}
+            onOpenWeb={() => {
+              setWebUrl(`${SITE_URL}/settings`);
+              setScreen(null);
+              setTab("web");
+            }}
+          />
         )}
         {tab === "home" && !screen && <Dashboard onTab={setTab} onOpen={openPath} />}
         {tab === "notifications" && <Notifications />}

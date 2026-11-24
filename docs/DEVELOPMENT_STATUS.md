@@ -799,3 +799,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/search.ts` (6 tests), `SearchScreen.tsx`. The kind list is repeated from `apps/web/lib/search.ts`; keep them in sync. Mobile tests: 108.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, and the search calls under row-level security on a real account (the function is the one the website already uses).
 - Next: Settings, Assistant.
+
+## Session update: native Settings screen (2026-11-24)
+
+- Home > Settings opens a native screen: your name and time zone (saved to your profile and settings, same tables as the website; the time zone is checked with the phone's own list, there is a "Use this phone's time zone" button, and the screen explains it decides what counts as "today" for habits, runs, the calendar and quiet hours), and the module list for your workspace with Enable/Disable (owners and admins only; core modules and modules not set up in the workspace cannot be toggled). The database enforces dependencies, so rule messages (for example "requires X") are shown as they are. Other settings pages (workspace members, push, quiet hours) stay on the website ("More"); push settings are on the web Notifications page; app updates are in the Account tab.
+- Files: `src/settings.ts` (4 tests), `SettingsScreen.tsx`; `routeFor` now sends /settings and its sub-pages to this screen. Mobile tests: 112.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, and the profile and module updates under row-level security (same tables and policies as the web). Disabling a module here does not hide it from the phone's Home grid, which lists every module.
+- Next: Assistant (the AI chat; server-side provider calls only).

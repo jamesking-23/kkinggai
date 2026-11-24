@@ -48,7 +48,9 @@ describe("search", () => {
     expect(routeFor("/ideas")).toEqual({ type: "screen", screen: "ideas" });
     expect(routeFor("/tasks/abc-123")).toEqual({ type: "tab", tab: "tasks" });
     expect(routeFor("/chess/games/7?x=1")).toEqual({ type: "screen", screen: "chess" });
-    expect(routeFor("/settings")).toEqual({ type: "web", path: "/settings" });
+    expect(routeFor("/settings")).toEqual({ type: "screen", screen: "settings" });
+    expect(routeFor("/settings/modules")).toEqual({ type: "screen", screen: "settings" });
+    expect(routeFor("/assistant")).toEqual({ type: "web", path: "/assistant" });
     expect(routeFor("/")).toEqual({ type: "web", path: "/" });
   });
 

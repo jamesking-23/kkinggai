@@ -89,7 +89,8 @@ export type NativeScreen =
   | "news"
   | "entertainment"
   | "vault"
-  | "search";
+  | "search"
+  | "settings";
 
 const NATIVE: ReadonlySet<string> = new Set<NativeScreen>([
   "calendar",
@@ -108,6 +109,7 @@ const NATIVE: ReadonlySet<string> = new Set<NativeScreen>([
   "entertainment",
   "vault",
   "search",
+  "settings",
 ]);
 
 /** Where a site path opens on the phone: a native screen, the Tasks tab, or the Website tab. */
