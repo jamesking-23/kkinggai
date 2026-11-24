@@ -828,3 +828,9 @@ Other open items are in the per-phase notes below.
 - Scope, honestly: this protects the Vault screen on the phone only. The Website tab can still open `/vault` on the site, which relies on the site's own sign-in session (the same one the app uses), so it is not behind this lock. The vault is still not end-to-end encrypted.
 - Files: `src/lock.ts` (2 tests), `VaultLock.tsx`; `package.json`, `pnpm-lock.yaml`, `app.json`. Mobile tests: 119.
 - Verified: typecheck and tests. NOT verified: the build with the new native module, and the prompt on a real phone (fingerprint, face, PIN, cancel, relock after background).
+
+## Session update: Play Store signing path (2026-11-25)
+
+- `.github/workflows/mobile-android.yml` now re-signs the AAB with the owner's upload key when the repository secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` all exist: it removes the debug signature, signs with `jarsigner`, verifies, prints the certificate owner and SHA-256, and deletes the keystore from the runner. With the secrets missing it says so and leaves the AAB debug-signed (Play will reject it). The APK stays debug-signed on purpose, because a different key would stop existing installs from updating in place.
+- Rehearsed here with a throwaway key (strip, sign, `jarsigner -verify`, cert printed); NOT run with a real keystore and nothing has been uploaded to Play. The workflow YAML parses. Claude never sees the keystore or passwords: the owner creates the keystore and adds the secrets (steps in `docs/PLAY_STORE.md`).
+- Still needed from the owner for a store release: Play developer account, keystore and secrets, store listing, privacy policy, data-safety form, closed-test requirement for new personal accounts.

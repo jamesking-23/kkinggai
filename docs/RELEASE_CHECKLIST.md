@@ -38,4 +38,4 @@ Mark each item only when it has actually been done. "Written" is not "tested".
 
 - [x] Android build: variables `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` set, workflow ran green (builds 5 and 6).
 - [ ] Install the APK from the latest GitHub Release (https://github.com/jamesking-23/kkinggai/releases) on a phone, sign in, then publish a newer build and test Account > Check for updates installs over it without uninstalling.
-- [ ] Google Play: create an upload keystore and wire it into the workflow before submitting the AAB.
+- [ ] Google Play: the workflow now signs the AAB with your upload key when the four `ANDROID_KEYSTORE_*`/`ANDROID_KEY_*` secrets exist (not yet run with a real keystore). You still need the keystore, the secrets, a Play developer account and a store listing with a privacy policy. See docs/PLAY_STORE.md.

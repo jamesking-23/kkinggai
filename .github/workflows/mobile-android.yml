@@ -3,7 +3,9 @@ name: Mobile (Android)
 # It runs `expo prebuild` and Gradle directly. Run it from the Actions tab (workflow_dispatch) or push a tag named mobile-v*.
 # The runner already includes the Android SDK. Needs two repository VARIABLES (Settings > Secrets and variables > Actions > Variables), both public by design:
 #   SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY. Never put a service-role key here.
-# The files are signed with the debug key unless you add your own keystore, so the APK is for sideloading and the AAB is NOT yet uploadable to Play.
+# The APK is always signed with the public Expo debug key: that keeps in-place updates working for phones that already have the app, and it is for sideloading only.
+# The AAB (for Google Play) is re-signed with YOUR upload key when these four repository SECRETS exist, and is NOT uploadable to Play without them:
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD. See docs/PLAY_STORE.md. Never commit the keystore.
 on:
   workflow_dispatch:
   push:
@@ -49,6 +51,30 @@ jobs:
       - name: Build APK and AAB
         working-directory: apps/mobile/android
         run: ./gradlew assembleRelease bundleRelease --no-daemon
+      - name: Sign the AAB with the Play upload key (only when the keystore secrets exist)
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "Upload keystore secrets are not all set: the AAB stays debug-signed and Google Play will reject it."
+            exit 0
+          fi
+          AAB=$(ls apps/mobile/android/app/build/outputs/bundle/release/*.aab | head -1)
+          KS="$RUNNER_TEMP/upload.jks"
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$KS"
+          printf '%s' "$KEYSTORE_PASSWORD" > "$RUNNER_TEMP/storepass"
+          printf '%s' "$KEY_PASSWORD" > "$RUNNER_TEMP/keypass"
+          # Remove the debug signature, then sign with the upload key (Play accepts only the upload key's signature).
+          zip -q -d "$AAB" 'META-INF/*' || true
+          jarsigner -keystore "$KS" -storepass:file "$RUNNER_TEMP/storepass" -keypass:file "$RUNNER_TEMP/keypass" \
+            -sigalg SHA256withRSA -digestalg SHA-256 "$AAB" "$KEY_ALIAS"
+          jarsigner -verify "$AAB"
+          echo "AAB upload-key certificate (register this with Play if asked):"
+          keytool -printcert -jarfile "$AAB" | grep -E "Owner|SHA256"
+          rm -f "$KS" "$RUNNER_TEMP/storepass" "$RUNNER_TEMP/keypass"
       - name: Print the signing certificate (must be identical across builds for in-place updates)
         run: |
           APKSIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
