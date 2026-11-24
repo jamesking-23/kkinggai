@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterModules, greeting, MODULES } from "./modules";
+import { filterModules, greeting, MODULES, visibleModules } from "./modules";
 
 describe("modules", () => {
   it("has unique ids and site-relative paths", () => {
@@ -19,5 +19,15 @@ describe("modules", () => {
     expect(filterModules("CHE").map((m) => m.id)).toEqual(["chess"]);
     expect(filterModules("deadlines").map((m) => m.id)).toContain("academics");
     expect(filterModules("zzz")).toEqual([]);
+  });
+});
+
+describe("visibleModules", () => {
+  it("hides only modules that are switched off", () => {
+    const out = visibleModules(MODULES, new Set(["chess", "news"]));
+    expect(out.some((m) => m.id === "chess")).toBe(false);
+    expect(out.some((m) => m.id === "news")).toBe(false);
+    expect(out.length).toBe(MODULES.length - 2);
+    expect(visibleModules(MODULES, new Set()).length).toBe(MODULES.length);
   });
 });

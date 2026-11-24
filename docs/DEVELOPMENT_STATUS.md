@@ -815,3 +815,9 @@ Other open items are in the per-phase notes below.
 - Verified: typecheck and unit tests. NOT verified: a real reply. The route has not been called with a real sign-in token, and the AI provider call has never been confirmed live (it needs `GEMINI_API_KEY` or an OpenRouter key set on Vercel; the Gemini key that was pasted in chat must be rotated before use). NOT verified on a phone: the screen.
 - Order matters: the phone calls the website, so the new route must be deployed on Vercel before the Android build is useful.
 - Next: polish from phone feedback; Running/Sports hub, chess live play, piece images and themes; Play signing on request.
+
+## Session update: Home grid follows module settings (2026-11-25)
+
+- The phone's Home grid now hides modules the workspace has switched off (Settings > Modules, on the phone or the website). It reads the `workspace_modules` rows that are disabled and hides those ids; modules with no setting stay visible, and if the settings cannot be read every module is shown rather than hiding any. Search already followed module settings.
+- Files: `src/modules.ts` (`visibleModules`, 1 new test), `Dashboard.tsx`. Mobile tests: 117.
+- Verified: typecheck and tests. NOT verified on a phone.

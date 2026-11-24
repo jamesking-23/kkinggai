@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { dueLabel } from "./format";
-import { filterModules, greeting, type ModuleLink } from "./modules";
+import { MODULES, filterModules, greeting, visibleModules, type ModuleLink } from "./modules";
 import { supabase } from "./supabase";
 import { C } from "./theme";
 
@@ -29,10 +29,11 @@ export function Dashboard({
   const [failed, setFailed] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [query, setQuery] = useState("");
+  const [disabled, setDisabled] = useState<ReadonlySet<string>>(new Set());
 
   const load = useCallback(async () => {
     setFailed(false);
-    const [t, n, list] = await Promise.all([
+    const [t, n, list, mods] = await Promise.all([
       supabase
         .from("tasks")
         .select("id", { count: "exact", head: true })
@@ -51,18 +52,21 @@ export function Dashboard({
         .order("due_at", { ascending: true })
         .limit(3)
         .overrideTypes<Next[]>(),
+      supabase.from("workspace_modules").select("module_id").eq("enabled", false),
     ]);
     if (t.error || n.error || list.error) return setFailed(true);
     setOpen(t.count ?? 0);
     setUnread(n.count ?? 0);
     setNext(list.data ?? []);
+    // If the module settings cannot be read, show every module rather than hiding any.
+    setDisabled(new Set(mods.error ? [] : (mods.data ?? []).map((m) => m.module_id as string)));
   }, []);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  const modules: ModuleLink[] = filterModules(query);
+  const modules: ModuleLink[] = filterModules(query, visibleModules(MODULES, disabled));
 
   return (
     <ScrollView

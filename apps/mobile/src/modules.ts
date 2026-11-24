@@ -36,3 +36,11 @@ export function filterModules(query: string, list: readonly ModuleLink[] = MODUL
   if (!q) return [...list];
   return list.filter((m) => m.label.toLowerCase().includes(q) || m.hint.toLowerCase().includes(q));
 }
+
+/** Hides modules the workspace has switched off. Modules with no setting (or when the settings could not be read) stay visible. */
+export function visibleModules(
+  list: readonly ModuleLink[],
+  disabled: ReadonlySet<string>,
+): ModuleLink[] {
+  return list.filter((m) => !disabled.has(m.id));
+}
