@@ -777,3 +777,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/news.ts` (4 tests), `NewsScreen.tsx`. Mobile tests: 92.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, opening links, and the read/saved updates under row-level security (same table and policies as the web). Whether stored items stay fresh depends on fetching from the website; there is no scheduled fetch on the phone.
 - Next: Entertainment, Vault, Search, Settings, Assistant.
+
+## Session update: native Entertainment screen (2026-11-24)
+
+- Home > Entertainment opens a native log of books, films, shows, games, music and podcasts (the 500 most recently updated): status chips with counts (Wishlist, In progress, Done, Dropped), kind chips, search by title or creator, and "Add an item" (title, optional creator, kind, status). Tap an item to move it to another status with a revision check; when marking Done you can pick a 1-5 rating first, and a finish date is stamped (today in your account timezone) if none was recorded, as on the website. Start/finish dates, notes, tags and deleting stay on the website ("More").
+- Files: `src/media.ts` (6 tests), `EntertainmentScreen.tsx`. Kinds and statuses are repeated from `packages/schemas`; keep them in sync. Mobile tests: 98.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, and the insert and status update under row-level security (same table and policies as the web).
+- Next: Vault, Search, Settings, Assistant.
