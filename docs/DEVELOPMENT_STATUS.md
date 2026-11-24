@@ -770,3 +770,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/personal.ts` (6 tests), `PersonalScreen.tsx`. Kinds and moods are repeated from the website; keep them in sync. Mobile tests: 88.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, and the journal and date inserts under row-level security (same tables and policies as the web). "Today" uses your account timezone.
 - Next: News, Entertainment, Vault, Search, Settings, Assistant.
+
+## Session update: native News screen (2026-11-24)
+
+- Home > News opens a native reader for the items already stored from your feeds (the 200 most recent): filter Unread, Saved or All, and by feed (with unread counts per feed). Tap an item to open the article in the phone's browser (only http and https links open) and mark it read; Save/Unsave and Mark read/unread buttons on each item. Summaries have HTML stripped and are shortened. Changes show at once and are put back if saving fails. Adding or removing feeds and fetching new items (the website's refresh) stay on the website ("More"); pull-to-refresh only reloads what is stored.
+- Files: `src/news.ts` (4 tests), `NewsScreen.tsx`. Mobile tests: 92.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, opening links, and the read/saved updates under row-level security (same table and policies as the web). Whether stored items stay fresh depends on fetching from the website; there is no scheduled fetch on the phone.
+- Next: Entertainment, Vault, Search, Settings, Assistant.

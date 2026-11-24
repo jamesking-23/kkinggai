@@ -30,6 +30,7 @@ import { GoalsScreen } from "./src/GoalsScreen";
 import { HabitsScreen } from "./src/HabitsScreen";
 import { IdeasScreen } from "./src/IdeasScreen";
 import { FlashcardsScreen } from "./src/FlashcardsScreen";
+import { NewsScreen } from "./src/NewsScreen";
 import { PersonalScreen } from "./src/PersonalScreen";
 import { ProjectsScreen } from "./src/ProjectsScreen";
 import { RunningScreen } from "./src/RunningScreen";
@@ -68,6 +69,7 @@ type Screen =
   | "flashcards"
   | "projects"
   | "personal"
+  | "news"
   | null;
 type Tab = "home" | "web" | "notifications" | "tasks" | "account";
 
@@ -363,6 +365,16 @@ function Home({ session }: { session: Session }) {
             }}
           />
         )}
+        {tab === "home" && screen === "news" && (
+          <NewsScreen
+            onBack={() => setScreen(null)}
+            onOpenWeb={() => {
+              setWebUrl(`${SITE_URL}/news`);
+              setScreen(null);
+              setTab("web");
+            }}
+          />
+        )}
         {tab === "home" && !screen && (
           <Dashboard
             onTab={setTab}
@@ -379,6 +391,7 @@ function Home({ session }: { session: Session }) {
               if (path === "/flashcards") return setScreen("flashcards");
               if (path === "/projects") return setScreen("projects");
               if (path === "/personal") return setScreen("personal");
+              if (path === "/news") return setScreen("news");
               setWebUrl(`${SITE_URL}${path}`);
               setTab("web");
             }}
