@@ -35,6 +35,7 @@ import { NewsScreen } from "./src/NewsScreen";
 import { PersonalScreen } from "./src/PersonalScreen";
 import { ProjectsScreen } from "./src/ProjectsScreen";
 import { RunningScreen } from "./src/RunningScreen";
+import { AssistantScreen } from "./src/AssistantScreen";
 import { SettingsScreen } from "./src/SettingsScreen";
 import { SearchScreen } from "./src/SearchScreen";
 import { routeFor } from "./src/search";
@@ -79,6 +80,7 @@ type Screen =
   | "vault"
   | "search"
   | "settings"
+  | "assistant"
   | null;
 type Tab = "home" | "web" | "notifications" | "tasks" | "account";
 
@@ -415,6 +417,9 @@ function Home({ session }: { session: Session }) {
         )}
         {tab === "home" && screen === "search" && (
           <SearchScreen onBack={() => setScreen(null)} onOpenPath={openPath} />
+        )}
+        {tab === "home" && screen === "assistant" && (
+          <AssistantScreen onBack={() => setScreen(null)} />
         )}
         {tab === "home" && screen === "settings" && (
           <SettingsScreen

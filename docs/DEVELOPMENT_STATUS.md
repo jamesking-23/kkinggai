@@ -806,3 +806,12 @@ Other open items are in the per-phase notes below.
 - Files: `src/settings.ts` (4 tests), `SettingsScreen.tsx`; `routeFor` now sends /settings and its sub-pages to this screen. Mobile tests: 112.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, and the profile and module updates under row-level security (same tables and policies as the web). Disabling a module here does not hide it from the phone's Home grid, which lists every module.
 - Next: Assistant (the AI chat; server-side provider calls only).
+
+## Session update: native Assistant screen and phone-safe assistant API (2026-11-25)
+
+- New server route `POST /api/assistant` for the phone: it takes the app's own sign-in token (`Authorization: Bearer`), checks it with Supabase, and runs the same assistant turn as the website (`lib/assistant.ts`, `runAssistantTurn`, now shared by the website's form action and the route). Every database call uses the caller's own token, so row-level security applies; the AI provider key stays on the server and the phone never talks to the provider. The 50-messages-per-day cap, history trimming, "store the user's message first" and safe error messages are unchanged. The route is excluded from the middleware so a bearer token (no cookie) works; without a valid token it returns 401, without a server key 503.
+- Home > Assistant opens a native chat: your chats list (30 most recent), "+ New chat", send and read replies, delete a chat (soft delete, as on the website). The assistant only sees the conversation, not your tasks, goals or vault; the screen says so. A failed send puts your text back in the box.
+- Files: `apps/web/lib/assistant.ts` (+5 tests with a fake database, 1 for the token parser), `apps/web/app/api/assistant/route.ts`, `apps/mobile/src/assistant.ts` (4 tests), `AssistantScreen.tsx`; `routeFor` now sends /assistant to this screen. Mobile tests: 116.
+- Verified: typecheck and unit tests. NOT verified: a real reply. The route has not been called with a real sign-in token, and the AI provider call has never been confirmed live (it needs `GEMINI_API_KEY` or an OpenRouter key set on Vercel; the Gemini key that was pasted in chat must be rotated before use). NOT verified on a phone: the screen.
+- Order matters: the phone calls the website, so the new route must be deployed on Vercel before the Android build is useful.
+- Next: polish from phone feedback; Running/Sports hub, chess live play, piece images and themes; Play signing on request.

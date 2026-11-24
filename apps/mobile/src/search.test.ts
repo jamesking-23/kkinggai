@@ -50,7 +50,8 @@ describe("search", () => {
     expect(routeFor("/chess/games/7?x=1")).toEqual({ type: "screen", screen: "chess" });
     expect(routeFor("/settings")).toEqual({ type: "screen", screen: "settings" });
     expect(routeFor("/settings/modules")).toEqual({ type: "screen", screen: "settings" });
-    expect(routeFor("/assistant")).toEqual({ type: "web", path: "/assistant" });
+    expect(routeFor("/assistant?c=1")).toEqual({ type: "screen", screen: "assistant" });
+    expect(routeFor("/news-x")).toEqual({ type: "web", path: "/news-x" });
     expect(routeFor("/")).toEqual({ type: "web", path: "/" });
   });
 
