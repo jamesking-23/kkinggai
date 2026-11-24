@@ -821,3 +821,10 @@ Other open items are in the per-phase notes below.
 - The phone's Home grid now hides modules the workspace has switched off (Settings > Modules, on the phone or the website). It reads the `workspace_modules` rows that are disabled and hides those ids; modules with no setting stay visible, and if the settings cannot be read every module is shown rather than hiding any. Search already followed module settings.
 - Files: `src/modules.ts` (`visibleModules`, 1 new test), `Dashboard.tsx`. Mobile tests: 117.
 - Verified: typecheck and tests. NOT verified on a phone.
+
+## Session update: Vault lock on the phone (2026-11-25)
+
+- Opening the native Vault (from Home or from a search result) now asks for the phone's own unlock first: fingerprint, face, PIN or pattern, through `expo-local-authentication` (new native dependency, `~58.0.3`, with its config plugin in `app.json`, so the Android build adds the biometric permission). The vault locks again when the app has been in the background for 30 seconds, and always when you leave the screen. If the phone has no screen lock at all, the vault stays closed and explains why ("Set a screen lock first"); this is a deliberate choice, easy to relax in `VaultLock.tsx`.
+- Scope, honestly: this protects the Vault screen on the phone only. The Website tab can still open `/vault` on the site, which relies on the site's own sign-in session (the same one the app uses), so it is not behind this lock. The vault is still not end-to-end encrypted.
+- Files: `src/lock.ts` (2 tests), `VaultLock.tsx`; `package.json`, `pnpm-lock.yaml`, `app.json`. Mobile tests: 119.
+- Verified: typecheck and tests. NOT verified: the build with the new native module, and the prompt on a real phone (fingerprint, face, PIN, cancel, relock after background).

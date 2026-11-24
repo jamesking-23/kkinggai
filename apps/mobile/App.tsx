@@ -39,6 +39,7 @@ import { AssistantScreen } from "./src/AssistantScreen";
 import { SettingsScreen } from "./src/SettingsScreen";
 import { SearchScreen } from "./src/SearchScreen";
 import { routeFor } from "./src/search";
+import { VaultLock } from "./src/VaultLock";
 import { VaultScreen } from "./src/VaultScreen";
 import { CareerScreen } from "./src/CareerScreen";
 import { ChessScreen } from "./src/ChessScreen";
@@ -406,14 +407,16 @@ function Home({ session }: { session: Session }) {
           />
         )}
         {tab === "home" && screen === "vault" && (
-          <VaultScreen
-            onBack={() => setScreen(null)}
-            onOpenWeb={() => {
-              setWebUrl(`${SITE_URL}/vault`);
-              setScreen(null);
-              setTab("web");
-            }}
-          />
+          <VaultLock onBack={() => setScreen(null)}>
+            <VaultScreen
+              onBack={() => setScreen(null)}
+              onOpenWeb={() => {
+                setWebUrl(`${SITE_URL}/vault`);
+                setScreen(null);
+                setTab("web");
+              }}
+            />
+          </VaultLock>
         )}
         {tab === "home" && screen === "search" && (
           <SearchScreen onBack={() => setScreen(null)} onOpenPath={openPath} />
