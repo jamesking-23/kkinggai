@@ -35,6 +35,8 @@ import { NewsScreen } from "./src/NewsScreen";
 import { PersonalScreen } from "./src/PersonalScreen";
 import { ProjectsScreen } from "./src/ProjectsScreen";
 import { RunningScreen } from "./src/RunningScreen";
+import { SearchScreen } from "./src/SearchScreen";
+import { routeFor } from "./src/search";
 import { VaultScreen } from "./src/VaultScreen";
 import { CareerScreen } from "./src/CareerScreen";
 import { ChessScreen } from "./src/ChessScreen";
@@ -74,6 +76,7 @@ type Screen =
   | "news"
   | "entertainment"
   | "vault"
+  | "search"
   | null;
 type Tab = "home" | "web" | "notifications" | "tasks" | "account";
 
@@ -201,6 +204,15 @@ function Home({ session }: { session: Session }) {
   const [screen, setScreen] = useState<Screen>(null);
   const web = useRef<WebView>(null);
   const canGoBack = useRef(false);
+
+  /** Opens a site path on the phone: a native screen, the Tasks tab, or the Website tab. */
+  function openPath(path: string) {
+    const r = routeFor(path);
+    if (r.type === "screen") return setScreen(r.screen);
+    if (r.type === "tab") return setTab(r.tab);
+    setWebUrl(`${SITE_URL}${r.path}`);
+    setTab("web");
+  }
 
   // Android back button: go back inside the website first.
   useEffect(() => {
@@ -399,30 +411,10 @@ function Home({ session }: { session: Session }) {
             }}
           />
         )}
-        {tab === "home" && !screen && (
-          <Dashboard
-            onTab={setTab}
-            onOpen={(path) => {
-              if (path === "/calendar") return setScreen("calendar");
-              if (path === "/habits") return setScreen("habits");
-              if (path === "/goals") return setScreen("goals");
-              if (path === "/career") return setScreen("career");
-              if (path === "/academics") return setScreen("academics");
-              if (path === "/business") return setScreen("business");
-              if (path === "/chess") return setScreen("chess");
-              if (path === "/ideas") return setScreen("ideas");
-              if (path === "/running") return setScreen("running");
-              if (path === "/flashcards") return setScreen("flashcards");
-              if (path === "/projects") return setScreen("projects");
-              if (path === "/personal") return setScreen("personal");
-              if (path === "/news") return setScreen("news");
-              if (path === "/entertainment") return setScreen("entertainment");
-              if (path === "/vault") return setScreen("vault");
-              setWebUrl(`${SITE_URL}${path}`);
-              setTab("web");
-            }}
-          />
+        {tab === "home" && screen === "search" && (
+          <SearchScreen onBack={() => setScreen(null)} onOpenPath={openPath} />
         )}
+        {tab === "home" && !screen && <Dashboard onTab={setTab} onOpen={openPath} />}
         {tab === "notifications" && <Notifications />}
         {tab === "tasks" && <Tasks />}
         {tab === "account" && <Account session={session} />}

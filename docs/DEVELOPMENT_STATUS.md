@@ -791,3 +791,11 @@ Other open items are in the per-phase notes below.
 - Files: `src/vault.ts` (4 tests), `VaultScreen.tsx`. Mobile tests: 102.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, the inserts, and file signed links under the storage policies (same table and bucket policies as the web). There is no app lock or biometric gate on this screen yet.
 - Next: Search, Settings, Assistant.
+
+## Session update: native Search screen (2026-11-24)
+
+- Home > Search opens a native search over the workspace, your private vault and chats, calling the same server function as the website (`search_workspace`, so row-level security applies). Typing searches after a short pause; several words must all match (each word is searched separately and the results intersected), a "quoted phrase" is kept whole, at most 4 terms; results are grouped by kind with matches highlighted, and only kinds from enabled modules are shown. Tapping a result opens it on the phone: a native screen when the module has one, the Tasks tab for tasks, otherwise the website page in the Website tab (results do not jump to the exact item yet; the native screens open at their top).
+- Routing is now one function (`routeFor` in `src/search.ts`) used by both the Home grid and search results, replacing the long if-chain in `App.tsx`. New native screens only need adding to that list.
+- Files: `src/search.ts` (6 tests), `SearchScreen.tsx`. The kind list is repeated from `apps/web/lib/search.ts`; keep them in sync. Mobile tests: 108.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, and the search calls under row-level security on a real account (the function is the one the website already uses).
+- Next: Settings, Assistant.
