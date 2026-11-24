@@ -784,3 +784,10 @@ Other open items are in the per-phase notes below.
 - Files: `src/media.ts` (6 tests), `EntertainmentScreen.tsx`. Kinds and statuses are repeated from `packages/schemas`; keep them in sync. Mobile tests: 98.
 - Verified: typecheck and tests. NOT verified on a phone: the screen, and the insert and status update under row-level security (same table and policies as the web).
 - Next: Vault, Search, Settings, Assistant.
+
+## Session update: native Vault screen (2026-11-24)
+
+- Home > Vault opens a native screen for your private notes, links and files (500 newest): filter All/Notes/Links/Files, search by title, category or tag, add a note or a link (title, text, optional category, tags; links must start with http:// or https://), tap an item to read it, "Open link" (http and https only), and "Open file" (a signed link that expires after 60 seconds, opened in the phone's browser). The page repeats the website's warning: the vault is private to you and encrypted at rest by the database provider, but NOT end-to-end encrypted; do not store passwords, recovery codes or card numbers. Uploading files, editing and deleting stay on the website ("More").
+- Files: `src/vault.ts` (4 tests), `VaultScreen.tsx`. Mobile tests: 102.
+- Verified: typecheck and tests. NOT verified on a phone: the screen, the inserts, and file signed links under the storage policies (same table and bucket policies as the web). There is no app lock or biometric gate on this screen yet.
+- Next: Search, Settings, Assistant.

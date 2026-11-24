@@ -35,6 +35,7 @@ import { NewsScreen } from "./src/NewsScreen";
 import { PersonalScreen } from "./src/PersonalScreen";
 import { ProjectsScreen } from "./src/ProjectsScreen";
 import { RunningScreen } from "./src/RunningScreen";
+import { VaultScreen } from "./src/VaultScreen";
 import { CareerScreen } from "./src/CareerScreen";
 import { ChessScreen } from "./src/ChessScreen";
 import { Dashboard } from "./src/Dashboard";
@@ -72,6 +73,7 @@ type Screen =
   | "personal"
   | "news"
   | "entertainment"
+  | "vault"
   | null;
 type Tab = "home" | "web" | "notifications" | "tasks" | "account";
 
@@ -387,6 +389,16 @@ function Home({ session }: { session: Session }) {
             }}
           />
         )}
+        {tab === "home" && screen === "vault" && (
+          <VaultScreen
+            onBack={() => setScreen(null)}
+            onOpenWeb={() => {
+              setWebUrl(`${SITE_URL}/vault`);
+              setScreen(null);
+              setTab("web");
+            }}
+          />
+        )}
         {tab === "home" && !screen && (
           <Dashboard
             onTab={setTab}
@@ -405,6 +417,7 @@ function Home({ session }: { session: Session }) {
               if (path === "/personal") return setScreen("personal");
               if (path === "/news") return setScreen("news");
               if (path === "/entertainment") return setScreen("entertainment");
+              if (path === "/vault") return setScreen("vault");
               setWebUrl(`${SITE_URL}${path}`);
               setTab("web");
             }}
