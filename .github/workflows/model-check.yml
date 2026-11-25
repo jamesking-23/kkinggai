@@ -1,0 +1,22 @@
+name: Model check
+# Downloads the real embedding model and measures the assistant's thresholds against it. Run by hand:
+# Actions > Model check > Run workflow. The report appears in the run summary.
+on: workflow_dispatch
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Download the model (fails if it cannot)
+        working-directory: apps/web
+        run: REQUIRE_MODEL=1 node scripts/download-model.js
+      - name: Measure
+        working-directory: apps/web
+        run: pnpm exec vitest run lib/offline-assistant.model.test.ts

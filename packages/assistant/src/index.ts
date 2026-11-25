@@ -28,3 +28,5 @@ export {
   type CacheStore,
 } from "./cache";
 export { FACTS, factRef, topFacts, type Fact } from "./facts";
+export { CACHE_PAIRS, NEGATIVE_PHRASES, ROUTING_CASES } from "./eval-cases";
+export { dot, normalize } from "./vector";

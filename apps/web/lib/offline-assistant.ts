@@ -34,7 +34,7 @@ export function modelPresent(dir: string = modelDir()): boolean {
  * Loads the quantised bge-small model through @huggingface/transformers, strictly from disk
  * (`allowRemoteModels = false`). Returns null when the files are missing or fail to load.
  */
-async function loadModelEmbedder(): Promise<Embedder | null> {
+export async function loadModelEmbedder(): Promise<Embedder | null> {
   if (!modelPresent()) return null;
   try {
     const { pipeline, env } = await import("@huggingface/transformers");
