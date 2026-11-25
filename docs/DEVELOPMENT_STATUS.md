@@ -915,3 +915,12 @@ Owner feedback: the assistant looked poor and the keyboard covered the text box.
 **NOT verified**: none of this has been seen on a real phone, including the keyboard fix (the exact behaviour depends on the device and Android version; the measuring approach was chosen to cope with both resize and no-resize). The suggestion/command phrases are tested only against the backup matcher.
 
 Update: the phone Assistant now has a **Copy** button under each reply (`expo-clipboard ~58.0.4`, a new native module in the next build) and a **stop** button while waiting (it stops waiting for the answer; the server may still finish and store it). Untested on a real phone.
+
+## Real-model verification (GitHub Actions "Model check")
+
+New manual workflow `.github/workflows/model-check.yml` downloads `Xenova/bge-small-en-v1.5` on a GitHub runner and runs `apps/web/lib/offline-assistant.model.test.ts` against it (the report appears in the run summary). First failed run found a bug in the download script (`require.resolve` blocked by the package's exports map; fixed). Second run (id 45707042748) **passed**:
+
+- The model file list is correct (about 33 MB), and the model loads from disk with remote loading off and produces 384-dimension vectors.
+- Tier 1: all 27 labelled phrases route to the right command; lowest correct score 0.761. Eight messages that must not run a command all scored below 0.72, but the highest ("xxxxxxxx", which matched greet_user) scored 0.719, so the margin is only about 0.04. A threshold of about 0.74 would sit in the middle; 0.72 is kept as requested. Override with `OFFLINE_ASSISTANT_THRESHOLD`.
+- Tier 2 (0.90): paraphrases scored at least 0.914 and different-question pairs at most 0.852, so 0.90 separates them on this small sample, with a thin margin on the paraphrase side (it may miss some true paraphrases, which is the safe direction).
+- Still unverified: how this behaves inside the Vercel function (package size, cold-start time, the WASM files) and with real user phrases. The sample is small (27 / 8 / 5).
