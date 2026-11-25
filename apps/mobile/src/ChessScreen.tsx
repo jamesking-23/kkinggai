@@ -187,8 +187,17 @@ function Puzzles() {
 }
 
 /** Native chess: puzzles from your own mistakes, and your game history with a move-by-move viewer. Live play with a friend is in the Play tab. Import, analysis, repertoire drills and board settings stay on the website. */
-export function ChessScreen({ onBack, onOpenWeb }: { onBack: () => void; onOpenWeb: () => void }) {
-  const [tab, setTab] = useState<"puzzles" | "games" | "play">("puzzles");
+export function ChessScreen({
+  onBack,
+  onOpenWeb,
+  joinCode = null,
+}: {
+  onBack: () => void;
+  onOpenWeb: () => void;
+  /** An invite code from a tapped link: opens the Play tab with it filled in. */
+  joinCode?: string | null;
+}) {
+  const [tab, setTab] = useState<"puzzles" | "games" | "play">(joinCode ? "play" : "puzzles");
   const [openGame, setOpenGame] = useState<string | null>(null);
   return (
     <View style={{ flex: 1 }}>
@@ -219,7 +228,7 @@ export function ChessScreen({ onBack, onOpenWeb }: { onBack: () => void; onOpenW
         ) : tab === "games" ? (
           <ChessGames openId={openGame} onOpen={setOpenGame} />
         ) : (
-          <ChessPlay />
+          <ChessPlay initialCode={joinCode} />
         )}
       </ScrollView>
     </View>

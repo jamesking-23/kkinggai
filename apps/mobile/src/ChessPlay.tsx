@@ -388,14 +388,14 @@ function GameView({
 }
 
 /** Live games against a friend: create a game, share the invite link (or paste one you received), and play with clocks. Moves are checked on the phone and again by the database. */
-export function ChessPlay() {
+export function ChessPlay({ initialCode = null }: { initialCode?: string | null }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [games, setGames] = useState<Game[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [color, setColor] = useState<"random" | "white" | "black">("random");
   const [control, setControl] = useState<string>("none");
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode ?? "");
   const [busy, setBusy] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
 

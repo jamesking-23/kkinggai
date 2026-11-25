@@ -207,11 +207,17 @@ function Home({ session }: { session: Session }) {
   const [tab, setTab] = useState<Tab>("home");
   const [webUrl, setWebUrl] = useState(SITE_URL);
   const [screen, setScreen] = useState<Screen>(null);
+  const [chessJoin, setChessJoin] = useState<string | null>(null);
   const web = useRef<WebView>(null);
   const canGoBack = useRef(false);
 
   /** Opens a site path on the phone: a native screen, the Tasks tab, or the Website tab. */
   function openPath(path: string) {
+    const invite = /\/chess\/play\/join\/([0-9a-f]{32})/i.exec(path);
+    if (invite) {
+      setChessJoin(invite[1]!.toLowerCase());
+      return setScreen("chess");
+    }
     const r = routeFor(path);
     if (r.type === "screen") return setScreen(r.screen);
     if (r.type === "tab") return setTab(r.tab);
@@ -328,7 +334,11 @@ function Home({ session }: { session: Session }) {
         )}
         {tab === "home" && screen === "chess" && (
           <ChessScreen
-            onBack={() => setScreen(null)}
+            joinCode={chessJoin}
+            onBack={() => {
+              setChessJoin(null);
+              setScreen(null);
+            }}
             onOpenWeb={() => {
               setWebUrl(`${SITE_URL}/chess`);
               setScreen(null);
