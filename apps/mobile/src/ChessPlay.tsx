@@ -539,7 +539,10 @@ export function ChessPlay({ initialCode = null }: { initialCode?: string | null 
         const invited = g.invited_id === userId && g.status === "waiting";
         const mineWhite = g.white_id === userId;
         const opp = mineWhite ? g.black_name : g.white_name;
-        const sum = summarise(g, replayMoves(g.moves));
+        const rep = replayMoves(g.moves);
+        const sum = summarise(g, rep);
+        const mine = mineWhite ? "w" : g.black_id === userId ? "b" : null;
+        const yourMove = g.status === "active" && !sum.finished && rep.ok && rep.turn === mine;
         return (
           <Pressable key={g.id} style={s.card} onPress={() => setOpenId(g.id)}>
             <Text style={s.body}>
@@ -548,7 +551,11 @@ export function ChessPlay({ initialCode = null }: { initialCode?: string | null 
                 : `vs ${opp ?? "(waiting)"} · you are ${mineWhite ? "white" : "black"}`}
             </Text>
             <Text style={sum.finished ? s.muted : s.active}>
-              {invited ? "Tap to accept or decline" : sum.text}
+              {invited
+                ? "Tap to accept or decline"
+                : yourMove
+                  ? `${sum.text} · your move`
+                  : sum.text}
             </Text>
           </Pressable>
         );
