@@ -872,3 +872,33 @@ Requested: run the assistant 100% offline, no external AI APIs/keys/internet. Th
 **NOT verified**: nothing here has run on a real phone or against two real accounts. Realtime delivery on the phone, clocks, and every `mp_*` call from the app are untested. Clocks use the phone's own clock against the server's start time, so a phone with a wrong clock will show wrong times (the database still decides timeouts).
 
 Update: premoves added on the phone (queue a move on the opponent's turn; it plays when legal, promotes to a queen, any tap cancels). Resolution logic is unit-tested; the on-screen behaviour is untested on a real phone.
+
+## Session: 3-tier hybrid assistant (Gemini restored as Tier 3)
+
+The owner reversed the earlier "zero API" request: Gemini is back, used only as the last tier. (Gemini was never deleted from the code: `packages/ai` is unchanged; the offline commit had only switched it off behind a flag. That flag, `ASSISTANT_CLOUD_FALLBACK`, is gone. The Running coach is restored to its original Gemini/OpenRouter behaviour.)
+
+**Pipeline** (`packages/assistant/src/pipeline.ts`): the message is embedded once and that vector is reused by every tier.
+
+1. **Tier 1, built-in commands, no internet.** The local `Xenova/bge-small-en-v1.5` model (quantised, via `@huggingface/transformers`, `allowRemoteModels = false`, loaded only from `apps/web/app_models`, WASM files copied to `app_models/wasm`) is compared against the `INTENTS` bank (17 commands, 8 phrases each incl. Ugandan slang). Cosine similarity at or above **0.72** runs the matching typed function; parameters come from regex parsers; `greet_user` and `help_menu` included.
+2. **Tier 2, shared cache.** For general questions only (`isCacheable`: no personal words like my/I/our, nothing time-sensitive such as today/latest/price/score, no emails/links/long numbers), the same vector is looked up in `response_cache` (pgvector). Similarity at or above **0.90**, the same key numbers in the question, and all source facts still current: the stored answer is returned and `last_used_at` is updated. No AI call.
+3. **Tier 3, Gemini.** Only if both miss: the question plus the most relevant **public app facts** (`facts.ts`, with versions) go to Gemini. The answer is saved in `response_cache` (`query_text`, `embedding`, `response_text`, `source_fact_ids`, `created_at`, `last_used_at`) before it is returned. If Gemini cannot be reached the user gets a friendly offline message; nothing is cached.
+
+- `cleanupCache` (LRU cap of 10,000, run every 25 writes) and `invalidateCacheByFact(factId)` are in `cache.ts`; bump a fact's `version` when its text changes and older answers stop being served.
+
+**Database**: migration `20261125000041_response_cache.sql` (applied). The table is reachable only with the server's service-role key: RLS on, no policies, all privileges revoked from `anon` and `authenticated`, RPCs executable by `service_role` only. Privilege test `backend/supabase/tests/rls_response_cache.sql` was run (rolled back) and passed; advisors show only the expected INFO "RLS enabled, no policy" for this table.
+
+**Privacy decisions** (worth knowing):
+
+- The cache is shared between users, so Tier 3 never receives a user's own data (tasks, goals, notes, vault, run data) and "RAG" is over the app's public facts only. Personal questions are never cached or served from the cache.
+- Conversation history sent to Gemini excludes every message answered by the built-in router (their replies contain the user's data).
+- Only the server writes to the cache, so a signed-in user cannot plant answers for others.
+
+**Tested**: 33 tests in `packages/assistant` (tiers, thresholds, number matching, cacheability, invalidation, LRU, offline message, failing cache), web `runAssistantTurn` tests. These use the built-in n-gram embedder and in-memory fakes.
+
+**NOT verified**
+
+- The real model has never run (the sandbox can't reach huggingface.co). The Xenova file list and the `dtype: "q8"` load path are from documentation and unconfirmed until a real deploy; check the Vercel build log for "downloaded" lines.
+- Thresholds 0.72 (Tier 1) and 0.90 (Tier 2) are uncalibrated for bge-small; its scores are compressed, so 0.72 may accept unrelated text and 0.90 may serve a near-miss answer. Tune `OFFLINE_ASSISTANT_THRESHOLD` after trying real phrases.
+- The Supabase cache calls (vector passing through PostgREST, hnsw index) have only been checked at SQL level, not through the app.
+- Gemini has still not been called for real (key not set on Vercel; the previous key was exposed in chat and must be rotated).
+- **Owner actions**: set a NEW `GEMINI_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` on Vercel (server-only; without the service key the cache stays off and every open question goes to Gemini).

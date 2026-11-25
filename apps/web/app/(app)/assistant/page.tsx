@@ -59,9 +59,11 @@ export default async function AssistantPage({ searchParams }: { searchParams: Pr
                 What&apos;s on your mind today?
               </h1>
               <p className="mt-3 text-sm text-muted">
-                Runs fully offline on this server: no AI model, no outside calls. Try &quot;add task
-                buy milk tomorrow&quot;, &quot;my tasks&quot;, &quot;calculate 15% of 80000&quot; or
-                &quot;help&quot;. It never reads your vault.
+                Commands run on the server with no outside calls. Try &quot;add task buy milk
+                tomorrow&quot;, &quot;my tasks&quot;, &quot;calculate 15% of 80000&quot; or
+                &quot;help&quot;. Open questions may use a stored answer or an online AI (Gemini),
+                which sees only your question and public app facts, never your tasks, notes or
+                vault.
               </p>
               <div className="mt-8 w-full max-w-2xl text-left">
                 <AssistantComposer

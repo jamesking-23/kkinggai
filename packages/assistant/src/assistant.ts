@@ -56,29 +56,34 @@ export async function createAssistant(options: {
           score: hit.best?.score ?? null,
           unmatched: true,
         };
-      const ctx: ActionContext = {
-        data: env.data,
-        now: env.now ?? new Date(),
-        timeZone: env.timeZone ?? "UTC",
-        intents,
-      };
-      try {
-        return {
-          text: await intents[hit.id]!.run(ctx, trimmed),
-          intent: hit.id,
-          score: hit.score,
-          unmatched: false,
-        };
-      } catch (e) {
-        if (e instanceof MissingInput)
-          return { text: e.message, intent: hit.id, score: hit.score, unmatched: false };
-        return {
-          text: "Something went wrong while doing that. Nothing was changed. Try again in a moment.",
-          intent: hit.id,
-          score: hit.score,
-          unmatched: false,
-        };
-      }
+      return executeIntent(intents, hit.id, hit.score, trimmed, env);
     },
   };
+}
+
+/** Runs one deterministic action. A missing input becomes a question; any other failure a safe, honest message. */
+export async function executeIntent(
+  intents: Readonly<Record<string, Intent>>,
+  id: string,
+  score: number,
+  text: string,
+  env: { data: AssistantData; now?: Date; timeZone?: string },
+): Promise<AssistantReply> {
+  const ctx: ActionContext = {
+    data: env.data,
+    now: env.now ?? new Date(),
+    timeZone: env.timeZone ?? "UTC",
+    intents,
+  };
+  try {
+    return { text: await intents[id]!.run(ctx, text), intent: id, score, unmatched: false };
+  } catch (e) {
+    if (e instanceof MissingInput) return { text: e.message, intent: id, score, unmatched: false };
+    return {
+      text: "Something went wrong while doing that. Nothing was changed. Try again in a moment.",
+      intent: id,
+      score,
+      unmatched: false,
+    };
+  }
 }

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { bearerToken, runAssistantTurn } from "../../../lib/assistant";
 import { supabaseAssistantData } from "../../../lib/assistant-data";
-import { cloudProvider, getOfflineAssistant } from "../../../lib/offline-assistant";
+import { cloudProvider, getPipeline } from "../../../lib/offline-assistant";
 import type { Database } from "../../../lib/supabase/database.types";
 
 export const dynamic = "force-dynamic";
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
   const timeZone = prefs?.timezone || "UTC";
 
   const result = await runAssistantTurn(supabase, ws.data.id, body, {
-    assistant: await getOfflineAssistant(),
+    pipeline: await getPipeline(),
     data: supabaseAssistantData(supabase, ws.data.id, u.user.id, timeZone),
     timeZone,
     provider: cloudProvider(process.env),

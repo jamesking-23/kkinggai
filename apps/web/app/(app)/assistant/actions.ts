@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getAppContext } from "../../../lib/session";
 import { runAssistantTurn } from "../../../lib/assistant";
 import { supabaseAssistantData } from "../../../lib/assistant-data";
-import { cloudProvider, getOfflineAssistant } from "../../../lib/offline-assistant";
+import { cloudProvider, getPipeline } from "../../../lib/offline-assistant";
 import { createClient } from "../../../lib/supabase/server";
 
 function back(conversationId: string | null, kind: "error" | "message", text: string): never {
@@ -21,7 +21,7 @@ export async function sendMessage(formData: FormData) {
     ctx.current.id,
     { message: formData.get("message"), conversationId: formData.get("conversationId") },
     {
-      assistant: await getOfflineAssistant(),
+      pipeline: await getPipeline(),
       data: supabaseAssistantData(supabase, ctx.current.id, ctx.userId, ctx.timezone),
       timeZone: ctx.timezone,
       provider: cloudProvider(process.env),

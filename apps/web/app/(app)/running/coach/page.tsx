@@ -1,4 +1,4 @@
-import { cloudProvider } from "../../../../lib/offline-assistant";
+import { providerFromEnv } from "@kkingg/ai";
 import { ASSISTANT_MAX_MESSAGE_CHARS } from "@kkingg/schemas";
 import { requireModule } from "../../../../lib/modules";
 import { getAppContext } from "../../../../lib/session";
@@ -21,7 +21,7 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
   requireModule(ctx, "running");
   const { c, error, message } = await searchParams;
   const supabase = await createClient();
-  const provider = cloudProvider(process.env);
+  const provider = providerFromEnv(process.env);
 
   const { data: conversations } = await supabase
     .from("ai_conversations")
@@ -50,9 +50,8 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
       <Flash error={error} message={message} />
       {!provider && (
         <p className="mb-4 rounded-md border border-border px-3 py-2 text-sm text-muted">
-          The AI coach is off because this app runs fully offline. Ask the Assistant for a
-          &quot;running report&quot; for your weekly totals and plan instead. To enable cloud chat,
-          set a provider key and ASSISTANT_CLOUD_FALLBACK=1 on the server.
+          The coach is not configured yet: set GEMINI_API_KEY or OPENROUTER_API_KEY on the server.
+          Until then it cannot reply.
         </p>
       )}
       <p className="mb-4 text-xs text-muted">
