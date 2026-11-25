@@ -239,3 +239,8 @@ export function uciFor(fen: string, from: string, to: string, promotion?: string
     return null;
   }
 }
+
+/** UCI for a queued premove once it is our turn (promotes to a queen), or null if it is no longer legal. */
+export function resolvePremove(fen: string, from: string, to: string): string | null {
+  return uciFor(fen, from, to) ?? uciFor(fen, from, to, "q");
+}

@@ -7,6 +7,7 @@ import {
   replayMoves,
   sideOf,
   summarise,
+  resolvePremove,
   uciFor,
 } from "./mp";
 
@@ -70,5 +71,10 @@ describe("mp", () => {
     expect(uciFor(fen, "a7", "a8", "n")).toBe("a7a8n");
     expect(uciFor(START, "e2", "e4")).toBe("e2e4");
     expect(uciFor(START, "e2", "e5")).toBeNull();
+  });
+  it("resolves premoves, promoting to a queen, and drops illegal ones", () => {
+    expect(resolvePremove("8/P7/8/8/8/8/8/k6K w - - 0 1", "a7", "a8")).toBe("a7a8q");
+    expect(resolvePremove(START, "e2", "e4")).toBe("e2e4");
+    expect(resolvePremove(START, "e2", "e5")).toBeNull();
   });
 });

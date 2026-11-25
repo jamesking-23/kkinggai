@@ -19,6 +19,7 @@ import {
   pollIntervalMs,
   promotionPieces,
   replayMoves,
+  resolvePremove,
   sideOf,
   summarise,
   TIME_CONTROLS,
@@ -72,6 +73,7 @@ function GameView({
   const [from, setFrom] = useState<string | null>(null);
   const [promo, setPromo] = useState<{ from: string; to: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [premove, setPremove] = useState<{ from: string; to: string } | null>(null);
   const [channel, setChannel] = useState<"subscribed" | "connecting" | "failed">("connecting");
   const [tick, setTick] = useState(0);
 
@@ -154,6 +156,18 @@ function GameView({
   }
 
   function tap(square: string) {
+    if (!canMove && premoveOk && side) {
+      if (premove) return setPremove(null); // any tap cancels the queued move
+      if (!from) {
+        if (ownsSquare(fen, square, side)) setFrom(square);
+        return;
+      }
+      if (square === from) return setFrom(null);
+      if (ownsSquare(fen, square, side)) return setFrom(square);
+      setPremove({ from, to: square });
+      setFrom(null);
+      return;
+    }
     if (!canMove || !g) return;
     if (promo) setPromo(null);
     if (!from) {
@@ -167,6 +181,18 @@ function GameView({
     if (uci) void send(uci);
     else setFrom(null);
   }
+
+  const premoveOk = active && !myTurn && !!side;
+
+  // Play a queued premove as soon as it is our turn; drop it if it is no longer legal or premoves stop applying.
+  useEffect(() => {
+    if (!premove) return;
+    if (canMove) {
+      const uci = resolvePremove(fen, premove.from, premove.to);
+      setPremove(null);
+      if (uci) void send(uci);
+    } else if (!premoveOk) setPremove(null);
+  }, [fen, canMove, premoveOk]);
 
   const targets = useMemo(() => (from ? legalTargets(fen, from) : new Set<string>()), [from, fen]);
 
@@ -270,12 +296,18 @@ function GameView({
           fen={fen}
           flip={side === "black"}
           label={`Chess board, you play ${side ?? "white"}`}
-          selected={from}
+          selected={from ?? premove?.from ?? null}
           targets={targets}
           last={rep.ok ? rep.last : null}
-          onSquare={canMove ? tap : undefined}
+          onSquare={canMove || premoveOk ? tap : undefined}
         />
       </View>
+      {premove && (
+        <Text style={s.muted}>
+          Premove {premove.from} → {premove.to} is queued and plays if it is legal. Tap the board to
+          cancel.
+        </Text>
+      )}
       {promo && (
         <View style={s.card}>
           <Text style={s.body}>Promote to</Text>

@@ -867,6 +867,8 @@ Requested: run the assistant 100% offline, no external AI APIs/keys/internet. Th
 - Game screen: tap-to-move board (legal-move dots, promotion picker), live updates through Supabase realtime on `mp_games` with a polling backup (30 s when the channel is subscribed, 3 s when not), both clocks, resign (with confirmation), draw offer/accept/decline, rematch, and "claim win on time".
 - All writes use the same `mp_*` database functions as the website, so the database enforces turn order, clocks and results; the phone also checks legality first.
 
-**Not built**: premoves, move sounds/haptics, push notifications for the opponent's move, and opening a link from outside the app (an in-app link such as a notification or search result with a `/chess/play/join/<code>` address does open the Play tab with the code filled in; an untested path).
+**Not built**: move sounds/haptics, push notifications for the opponent's move, and opening a link from outside the app (an in-app link such as a notification or search result with a `/chess/play/join/<code>` address does open the Play tab with the code filled in; an untested path).
 
 **NOT verified**: nothing here has run on a real phone or against two real accounts. Realtime delivery on the phone, clocks, and every `mp_*` call from the app are untested. Clocks use the phone's own clock against the server's start time, so a phone with a wrong clock will show wrong times (the database still decides timeouts).
+
+Update: premoves added on the phone (queue a move on the opponent's turn; it plays when legal, promotes to a queen, any tap cancels). Resolution logic is unit-tested; the on-screen behaviour is untested on a real phone.
