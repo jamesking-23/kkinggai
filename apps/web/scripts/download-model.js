@@ -21,7 +21,8 @@ const WASM = ["ort-wasm-simd-threaded.jsep.mjs", "ort-wasm-simd-threaded.jsep.wa
 const required = process.env.REQUIRE_MODEL === "1";
 
 function copyWasm() {
-  const from = path.dirname(require.resolve("@huggingface/transformers/package.json"));
+  // (require.resolve cannot be used: the package's "exports" map hides package.json.)
+  const from = path.join(process.cwd(), "node_modules", "@huggingface", "transformers");
   const dest = path.join(ROOT, "wasm");
   fs.mkdirSync(dest, { recursive: true });
   for (const f of WASM) {
