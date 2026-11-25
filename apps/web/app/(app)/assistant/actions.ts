@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { providerFromEnv } from "@kkingg/ai";
 import { getAppContext } from "../../../lib/session";
 import { runAssistantTurn } from "../../../lib/assistant";
+import { supabaseAssistantData } from "../../../lib/assistant-data";
+import { cloudProvider, getOfflineAssistant } from "../../../lib/offline-assistant";
 import { createClient } from "../../../lib/supabase/server";
 
 function back(conversationId: string | null, kind: "error" | "message", text: string): never {
@@ -13,21 +14,19 @@ function back(conversationId: string | null, kind: "error" | "message", text: st
 }
 
 export async function sendMessage(formData: FormData) {
-  const rawId = String(formData.get("conversationId") ?? "") || null;
-  const provider = providerFromEnv(process.env);
-  if (!provider)
-    back(
-      rawId,
-      "error",
-      "The assistant is not configured: no AI provider key is set on the server.",
-    );
-
   const ctx = await getAppContext();
   const supabase = await createClient();
-  const result = await runAssistantTurn(supabase, provider, ctx.current.id, {
-    message: formData.get("message"),
-    conversationId: formData.get("conversationId"),
-  });
+  const result = await runAssistantTurn(
+    supabase,
+    ctx.current.id,
+    { message: formData.get("message"), conversationId: formData.get("conversationId") },
+    {
+      assistant: await getOfflineAssistant(),
+      data: supabaseAssistantData(supabase, ctx.current.id, ctx.userId, ctx.timezone),
+      timeZone: ctx.timezone,
+      provider: cloudProvider(process.env),
+    },
+  );
   if (!result.ok) back(result.conversationId, "error", result.error);
 
   revalidatePath("/assistant");

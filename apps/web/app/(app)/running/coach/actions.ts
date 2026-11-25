@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { AiError, providerFromEnv, trimHistory, type ChatMessage } from "@kkingg/ai";
+import { AiError, trimHistory, type ChatMessage } from "@kkingg/ai";
 import { ASSISTANT_DAILY_MESSAGE_LIMIT, assistantMessageSchema } from "@kkingg/schemas";
 import { buildCoachContext, COACH_SYSTEM_PROMPT } from "../../../../lib/coach";
+import { cloudProvider } from "../../../../lib/offline-assistant";
 import { getAppContext } from "../../../../lib/session";
 import { createClient } from "../../../../lib/supabase/server";
 
@@ -23,9 +24,13 @@ export async function askCoach(formData: FormData) {
   if (!parsed.success) back(rawId, "error", parsed.error.issues[0]?.message ?? "Invalid message");
   const { message } = parsed.data;
 
-  const provider = providerFromEnv(process.env);
+  const provider = cloudProvider(process.env);
   if (!provider)
-    back(rawId, "error", "The coach is not configured: no AI provider key is set on the server.");
+    back(
+      rawId,
+      "error",
+      'The AI coach is off: this app runs fully offline. Ask the Assistant for a "running report" instead, or set a provider key and ASSISTANT_CLOUD_FALLBACK=1 to enable cloud chat.',
+    );
 
   const ctx = await getAppContext();
   const supabase = await createClient();

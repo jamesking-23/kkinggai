@@ -1,4 +1,3 @@
-import { providerFromEnv } from "@kkingg/ai";
 import { requireModule } from "../../../lib/modules";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
@@ -15,7 +14,6 @@ export default async function AssistantPage({ searchParams }: { searchParams: Pr
   requireModule(ctx, "assistant");
   const { c, error, message } = await searchParams;
   const supabase = await createClient();
-  const provider = providerFromEnv(process.env);
 
   const { data: conversations } = await supabase
     .from("ai_conversations")
@@ -37,13 +35,6 @@ export default async function AssistantPage({ searchParams }: { searchParams: Pr
   return (
     <div className="mx-auto max-w-5xl">
       <Flash error={error} message={message} />
-      {!provider && (
-        <p className="mb-4 rounded-md border border-border px-3 py-2 text-sm text-muted">
-          The assistant is not configured yet: set GEMINI_API_KEY or OPENROUTER_API_KEY on the
-          server. Until then it cannot reply.
-        </p>
-      )}
-
       <div className="grid gap-6 md:grid-cols-[13rem_1fr]">
         <nav aria-label="Conversations" className="space-y-1 md:pt-2">
           <a href="/assistant" className={`${subtleButton} block text-center`}>
@@ -68,15 +59,15 @@ export default async function AssistantPage({ searchParams }: { searchParams: Pr
                 What&apos;s on your mind today?
               </h1>
               <p className="mt-3 text-sm text-muted">
-                Ask, draft, plan or think something through. Private to you; it only sees this chat,
-                never your tasks or vault.
+                Runs fully offline on this server: no AI model, no outside calls. Try &quot;add task
+                buy milk tomorrow&quot;, &quot;my tasks&quot;, &quot;calculate 15% of 80000&quot; or
+                &quot;help&quot;. It never reads your vault.
               </p>
               <div className="mt-8 w-full max-w-2xl text-left">
                 <AssistantComposer
                   action={sendMessage}
                   conversationId={null}
                   maxLength={ASSISTANT_MAX_MESSAGE_CHARS}
-                  disabled={!provider}
                   showSuggestions
                 />
               </div>
@@ -109,7 +100,6 @@ export default async function AssistantPage({ searchParams }: { searchParams: Pr
                   action={sendMessage}
                   conversationId={activeId}
                   maxLength={ASSISTANT_MAX_MESSAGE_CHARS}
-                  disabled={!provider}
                   showSuggestions={false}
                 />
               </div>

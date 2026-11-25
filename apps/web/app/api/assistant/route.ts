@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { providerFromEnv } from "@kkingg/ai";
 import { bearerToken, runAssistantTurn } from "../../../lib/assistant";
+import { supabaseAssistantData } from "../../../lib/assistant-data";
+import { cloudProvider, getOfflineAssistant } from "../../../lib/offline-assistant";
 import type { Database } from "../../../lib/supabase/database.types";
 
 export const dynamic = "force-dynamic";
@@ -27,13 +28,6 @@ export async function POST(request: Request) {
   const { data: u, error: authError } = await supabase.auth.getUser(token);
   if (authError || !u.user) return NextResponse.json({ error: "Sign in again." }, { status: 401 });
 
-  const provider = providerFromEnv(process.env);
-  if (!provider)
-    return NextResponse.json(
-      { error: "The assistant is not configured: no AI provider key is set on the server." },
-      { status: 503 },
-    );
-
   let body: { message?: unknown; conversationId?: unknown };
   try {
     body = (await request.json()) as typeof body;
@@ -50,7 +44,19 @@ export async function POST(request: Request) {
   if (!ws.data)
     return NextResponse.json({ error: "Could not find your workspace." }, { status: 400 });
 
-  const result = await runAssistantTurn(supabase, provider, ws.data.id, body);
+  const { data: prefs } = await supabase
+    .from("user_settings")
+    .select("timezone")
+    .eq("user_id", u.user.id)
+    .maybeSingle();
+  const timeZone = prefs?.timezone || "UTC";
+
+  const result = await runAssistantTurn(supabase, ws.data.id, body, {
+    assistant: await getOfflineAssistant(),
+    data: supabaseAssistantData(supabase, ws.data.id, u.user.id, timeZone),
+    timeZone,
+    provider: cloudProvider(process.env),
+  });
   if (!result.ok)
     return NextResponse.json(
       { error: result.error, conversationId: result.conversationId },

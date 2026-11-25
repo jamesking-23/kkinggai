@@ -3,12 +3,7 @@
 import { useRef } from "react";
 import { useFormStatus } from "react-dom";
 
-const SUGGESTIONS = [
-  "Help me plan my week",
-  "Explain a concept simply",
-  "Draft a polite follow-up email",
-  "Brainstorm ideas with me",
-];
+const SUGGESTIONS = ["What can you do?", "My tasks", "Calculate 15% of 80000", "Running report"];
 
 function Thinking() {
   const { pending } = useFormStatus();
@@ -51,7 +46,7 @@ export function AssistantComposer(props: {
   action: (formData: FormData) => void | Promise<void>;
   conversationId: string | null;
   maxLength: number;
-  disabled: boolean;
+  disabled?: boolean;
   showSuggestions: boolean;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -80,7 +75,7 @@ export function AssistantComposer(props: {
         />
         <div className="mt-2 flex items-center justify-between px-1">
           <span className="text-xs text-muted">Enter to send · Shift+Enter for a new line</span>
-          <Send disabled={props.disabled} />
+          <Send disabled={props.disabled ?? false} />
         </div>
       </form>
       {props.showSuggestions && (

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { AiError, trimHistory, type ChatMessage, type ChatProvider } from "@kkingg/ai";
+import type { Assistant, AssistantData } from "@kkingg/assistant";
 import { ASSISTANT_DAILY_MESSAGE_LIMIT, assistantMessageSchema } from "@kkingg/schemas";
 import type { Database } from "./supabase/database.types";
 
@@ -15,18 +16,34 @@ export type AssistantResult =
   | { ok: true; conversationId: string; reply: string }
   | { ok: false; error: string; conversationId: string | null };
 
+export type AssistantDeps = {
+  /** The offline intent router. Always runs first. */
+  assistant: Pick<Assistant, "reply">;
+  data: AssistantData;
+  timeZone: string;
+  /** Optional cloud chat for messages the router does not understand. Null (the default) means fully offline. */
+  provider?: ChatProvider | null;
+  now?: Date;
+};
+
+export const OFFLINE_PROVIDER = "offline-router";
+
 /**
  * One assistant turn, shared by the website and the phone app. Always runs on the server with the caller's own
- * Supabase client, so row-level security applies, and the AI provider key never leaves the server.
- * The user's message is stored first so it is never lost if the provider fails.
+ * Supabase client, so row-level security applies.
+ * The message goes to the offline intent router first: it picks a deterministic action and runs it, with no AI
+ * model involved. Only when the router does not recognise the message AND a cloud provider was passed in (which
+ * the callers do only when a key is set and ASSISTANT_CLOUD_FALLBACK=1) is the message sent to that provider.
+ * The user's message is stored first so it is never lost if anything fails.
  */
 export async function runAssistantTurn(
   supabase: SupabaseClient<Database>,
-  provider: ChatProvider,
   workspaceId: string,
   input: { message?: unknown; conversationId?: unknown },
-  now: Date = new Date(),
+  deps: AssistantDeps,
 ): Promise<AssistantResult> {
+  const now = deps.now ?? new Date();
+  const provider = deps.provider ?? null;
   const parsed = assistantMessageSchema.safeParse({
     message: input.message,
     conversationId: input.conversationId,
@@ -41,20 +58,6 @@ export async function runAssistantTurn(
     };
   const { message } = parsed.data;
   let conversationId = parsed.data.conversationId ?? null;
-
-  // Cost control: signups are open, so cap how much one account can spend per day.
-  const since = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-  const { count } = await supabase
-    .from("ai_messages")
-    .select("id", { count: "exact", head: true })
-    .eq("role", "user")
-    .gte("created_at", since);
-  if ((count ?? 0) >= ASSISTANT_DAILY_MESSAGE_LIMIT)
-    return {
-      ok: false,
-      error: `Daily limit of ${ASSISTANT_DAILY_MESSAGE_LIMIT} messages reached. Try again tomorrow.`,
-      conversationId,
-    };
 
   let history: ChatMessage[] = [];
   if (conversationId) {
@@ -92,6 +95,38 @@ export async function runAssistantTurn(
     .from("ai_messages")
     .insert({ conversation_id: id, role: "user", content: message });
   if (userErr) return { ok: false, error: "Could not save your message.", conversationId: id };
+
+  const offline = await deps.assistant.reply(message, {
+    data: deps.data,
+    now,
+    timeZone: deps.timeZone,
+  });
+  if (!offline.unmatched || !provider) {
+    const { error: saveErr } = await supabase.from("ai_messages").insert({
+      conversation_id: id,
+      role: "assistant",
+      content: offline.text.slice(0, 60000),
+      provider: OFFLINE_PROVIDER,
+      model: offline.intent ?? "fallback",
+    });
+    if (saveErr) return { ok: false, error: "The reply could not be saved.", conversationId: id };
+    await supabase.from("ai_conversations").update({ title: undefined }).eq("id", id);
+    return { ok: true, conversationId: id, reply: offline.text };
+  }
+
+  // Cloud path only. Cost control: signups are open, so cap how much one account can spend per day.
+  const since = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+  const { count } = await supabase
+    .from("ai_messages")
+    .select("id", { count: "exact", head: true })
+    .eq("role", "user")
+    .gte("created_at", since);
+  if ((count ?? 0) >= ASSISTANT_DAILY_MESSAGE_LIMIT)
+    return {
+      ok: false,
+      error: `Daily limit of ${ASSISTANT_DAILY_MESSAGE_LIMIT} messages reached. Try again tomorrow.`,
+      conversationId,
+    };
 
   const messages: ChatMessage[] = [
     { role: "system", content: SYSTEM_PROMPT },

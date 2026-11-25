@@ -834,3 +834,27 @@ Other open items are in the per-phase notes below.
 - `.github/workflows/mobile-android.yml` now re-signs the AAB with the owner's upload key when the repository secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` all exist: it removes the debug signature, signs with `jarsigner`, verifies, prints the certificate owner and SHA-256, and deletes the keystore from the runner. With the secrets missing it says so and leaves the AAB debug-signed (Play will reject it). The APK stays debug-signed on purpose, because a different key would stop existing installs from updating in place.
 - Rehearsed here with a throwaway key (strip, sign, `jarsigner -verify`, cert printed); NOT run with a real keystore and nothing has been uploaded to Play. The workflow YAML parses. Claude never sees the keystore or passwords: the owner creates the keystore and adds the secrets (steps in `docs/PLAY_STORE.md`).
 - Still needed from the owner for a store release: Play developer account, keystore and secrets, store listing, privacy policy, data-safety form, closed-test requirement for new personal accounts.
+
+## Session: offline assistant (no AI API required)
+
+Requested: run the assistant 100% offline, no external AI APIs/keys/internet. The repo has no Python, so by the owner's choice it was built in TypeScript on the same stack (not `requirements.txt` / `download_model.py`).
+
+**Code written**
+
+- `packages/assistant` (`@kkingg/assistant`): an intent router plus deterministic actions. Every action is a plain function; no model generates maths, data or actions. 17 intents in a central `INTENTS` bank (8 example phrases each: formal, casual, broken grammar, Ugandan slang), embedded and normalised once at startup. Parameters come from regex parsers (dates, distances, durations, quoted text) and a safe maths parser (no `eval`). Missing inputs produce a question instead of an action. `greet_user` picks randomly from warm greetings; `help_menu` is generated from the intent bank; below the threshold the user gets a polite fallback.
+- `apps/web/lib/offline-assistant.ts`: loads `BAAI/bge-small-en-v1.5` (quantised ONNX via `fastembed`) from `./app_models` only (never downloads at run time). If the files are missing it uses the built-in n-gram embedder and keeps working.
+- `apps/web/lib/assistant-data.ts`: Supabase implementation of the actions' data access, using the caller's own session (RLS applies).
+- `apps/web/lib/assistant.ts`: `runAssistantTurn` is router-first. Offline replies are stored with provider `offline-router`; the daily cap only applies to the cloud path.
+- `apps/web/scripts/download-model.mjs`: fetches the model into `apps/web/app_models` (gitignored), run by `pnpm build`. Non-fatal if offline unless `REQUIRE_MODEL=1`.
+- `next.config.mjs`: `serverExternalPackages` for fastembed/onnxruntime, tracing includes for `app_models`, tracing excludes for other platforms' binaries. `.npmrc` skips the CUDA download.
+
+**Cloud chat is opt-in, default OFF** (the owner chose to keep it as a fallback). It is used only when a provider key is set AND `ASSISTANT_CLOUD_FALLBACK=1`, and only for messages the router does not understand. The Running coach is cloud-only, so it is off until that flag is set; the Assistant's "running report" gives the weekly totals and plan offline. To be fully "zero API key", leave both unset and remove the keys from Vercel.
+
+**Tested**: 20 unit tests in `packages/assistant` (routing of 27 labelled phrases with the n-gram embedder, gibberish fallback, greeting, help, maths, param extraction, threshold, under 15 ms per match) and the web `runAssistantTurn` tests. Lint, typecheck, tests, build pass.
+
+**NOT verified**
+
+- The real bge-small model was never run: the sandbox cannot reach huggingface.co, so the download script failed here (as designed) and every test used the n-gram embedder. The file list for the Qdrant ONNX repo is from memory and unconfirmed.
+- The default threshold 0.65 is uncalibrated for bge-small, whose cosine scores are compressed (roughly 0.6-1.0); it may accept gibberish. Tune with `OFFLINE_ASSISTANT_THRESHOLD` after trying real phrases. The 15 ms target is measured only for the n-gram embedder, not for the model.
+- Vercel function size with onnxruntime and the model is unmeasured.
+- The data actions (add task/idea, log run, reads) have not run against the real database under RLS.
