@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { BoardView } from "./BoardView";
 import { ChessGames } from "./ChessGames";
+import { ChessPlay } from "./ChessPlay";
 import {
   legalTargets,
   nextSchedule,
@@ -185,9 +186,9 @@ function Puzzles() {
   );
 }
 
-/** Native chess: puzzles from your own mistakes, and your game history with a move-by-move viewer. Import, analysis, repertoire drills, board settings and live play stay on the website. */
+/** Native chess: puzzles from your own mistakes, and your game history with a move-by-move viewer. Live play with a friend is in the Play tab. Import, analysis, repertoire drills and board settings stay on the website. */
 export function ChessScreen({ onBack, onOpenWeb }: { onBack: () => void; onOpenWeb: () => void }) {
-  const [tab, setTab] = useState<"puzzles" | "games">("puzzles");
+  const [tab, setTab] = useState<"puzzles" | "games" | "play">("puzzles");
   const [openGame, setOpenGame] = useState<string | null>(null);
   return (
     <View style={{ flex: 1 }}>
@@ -198,7 +199,7 @@ export function ChessScreen({ onBack, onOpenWeb }: { onBack: () => void; onOpenW
       />
       <ScrollView contentContainerStyle={s.page} keyboardShouldPersistTaps="handled">
         <View style={s.tabs}>
-          {(["puzzles", "games"] as const).map((t) => (
+          {(["puzzles", "games", "play"] as const).map((t) => (
             <Pressable
               key={t}
               onPress={() => {
@@ -208,12 +209,18 @@ export function ChessScreen({ onBack, onOpenWeb }: { onBack: () => void; onOpenW
               style={[s.tab, tab === t && s.tabOn]}
             >
               <Text style={[s.tabText, tab === t && s.tabTextOn]}>
-                {t === "puzzles" ? "Puzzles" : "Games"}
+                {t === "puzzles" ? "Puzzles" : t === "games" ? "Games" : "Play"}
               </Text>
             </Pressable>
           ))}
         </View>
-        {tab === "puzzles" ? <Puzzles /> : <ChessGames openId={openGame} onOpen={setOpenGame} />}
+        {tab === "puzzles" ? (
+          <Puzzles />
+        ) : tab === "games" ? (
+          <ChessGames openId={openGame} onOpen={setOpenGame} />
+        ) : (
+          <ChessPlay />
+        )}
       </ScrollView>
     </View>
   );

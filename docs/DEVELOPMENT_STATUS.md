@@ -858,3 +858,15 @@ Requested: run the assistant 100% offline, no external AI APIs/keys/internet. Th
 - The default threshold 0.65 is uncalibrated for bge-small, whose cosine scores are compressed (roughly 0.6-1.0); it may accept gibberish. Tune with `OFFLINE_ASSISTANT_THRESHOLD` after trying real phrases. The 15 ms target is measured only for the n-gram embedder, not for the model.
 - Vercel function size with onnxruntime and the model is unmeasured.
 - The data actions (add task/idea, log run, reads) have not run against the real database under RLS.
+
+## Session: chess live play on the phone
+
+**Code written** (`apps/mobile/src`): `mp.ts` (the website's `lib/mp.ts` rules/clock helpers, copied, plus invite-code and promotion helpers; 7 tests), `ChessPlay.tsx` and a new **Play** tab in the Chess screen.
+
+- Create a game (colour, time control), share the invite link with the system share sheet, or paste a link/code to join. Accept or decline rematch invitations.
+- Game screen: tap-to-move board (legal-move dots, promotion picker), live updates through Supabase realtime on `mp_games` with a polling backup (30 s when the channel is subscribed, 3 s when not), both clocks, resign (with confirmation), draw offer/accept/decline, rematch, and "claim win on time".
+- All writes use the same `mp_*` database functions as the website, so the database enforces turn order, clocks and results; the phone also checks legality first.
+
+**Not built**: premoves, move sounds/haptics, push notifications for the opponent's move, and tapping an invite link opening the Play tab (a link opens the Chess screen only; paste it in Play).
+
+**NOT verified**: nothing here has run on a real phone or against two real accounts. Realtime delivery on the phone, clocks, and every `mp_*` call from the app are untested. Clocks use the phone's own clock against the server's start time, so a phone with a wrong clock will show wrong times (the database still decides timeouts).
