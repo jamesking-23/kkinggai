@@ -913,3 +913,5 @@ Owner feedback: the assistant looked poor and the keyboard covered the text box.
 - Not built: voice input (needs a native speech module), copy button, image/file attachments.
 
 **NOT verified**: none of this has been seen on a real phone, including the keyboard fix (the exact behaviour depends on the device and Android version; the measuring approach was chosen to cope with both resize and no-resize). The suggestion/command phrases are tested only against the backup matcher.
+
+Update: the phone Assistant now has a **Copy** button under each reply (`expo-clipboard ~58.0.4`, a new native module in the next build) and a **stop** button while waiting (it stops waiting for the answer; the server may still finish and store it). Untested on a real phone.

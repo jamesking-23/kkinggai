@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import * as Clipboard from "expo-clipboard";
 import {
   ActivityIndicator,
   Alert,
@@ -63,6 +64,9 @@ export function AssistantScreen({ onBack }: { onBack: () => void }) {
   const scroller = useRef<{ scrollToEnd: (o?: { animated?: boolean }) => void } | null>(null);
   const input = useRef<{ focus: () => void } | null>(null);
   const root = useRef<Measurable | null>(null);
+  const abort = useRef<AbortController | null>(null);
+  const stopped = useRef(false);
+  const [copied, setCopied] = useState<string | null>(null);
   const { overlap, onLayout } = useKeyboardOverlap(root);
 
   const loadList = useCallback(async () => {
@@ -135,6 +139,8 @@ export function AssistantScreen({ onBack }: { onBack: () => void }) {
     setMessages((m) => [...m, pending]);
     setText("");
     const ctl = new AbortController();
+    abort.current = ctl;
+    stopped.current = false;
     const timer = setTimeout(() => ctl.abort(), 70_000);
     try {
       const res = await fetch(`${SITE_URL}/api/assistant`, {
@@ -166,11 +172,23 @@ export function AssistantScreen({ onBack }: { onBack: () => void }) {
     } catch {
       setMessages((m) => m.filter((x) => x.id !== pending.id));
       setText(v.message);
-      setProblem("Could not reach the assistant. Check your connection and try again.");
+      // The server may already have stored the message and be answering; stopping only stops waiting for it.
+      setProblem(
+        stopped.current
+          ? "Stopped. The assistant may still have received your message; reopen the chat to see."
+          : "Could not reach the assistant. Check your connection and try again.",
+      );
     } finally {
+      abort.current = null;
       clearTimeout(timer);
       setSending(false);
     }
+  }
+
+  async function copy(id: string, content: string) {
+    await Clipboard.setStringAsync(content);
+    setCopied(id);
+    setTimeout(() => setCopied((c) => (c === id ? null : c)), 1500);
   }
 
   function pick(s: Starter) {
@@ -289,6 +307,14 @@ export function AssistantScreen({ onBack }: { onBack: () => void }) {
                 <Mark size={22} />
                 <View style={{ flex: 1 }}>
                   <Markdown source={m.content} />
+                  <Pressable
+                    style={s.copyBtn}
+                    onPress={() => void copy(m.id, m.content)}
+                    hitSlop={8}
+                    accessibilityLabel="Copy reply"
+                  >
+                    <Text style={s.copyText}>{copied === m.id ? "Copied" : "Copy"}</Text>
+                  </Pressable>
                 </View>
               </View>
             ),
@@ -326,18 +352,27 @@ export function AssistantScreen({ onBack }: { onBack: () => void }) {
             selectionColor={D.accent}
             cursorColor={D.accent}
           />
-          <Pressable
-            style={[s.send, !canSend && s.sendOff]}
-            disabled={!canSend}
-            onPress={() => void send(text)}
-            accessibilityLabel="Send"
-          >
-            {sending ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
+          {sending ? (
+            <Pressable
+              style={s.send}
+              onPress={() => {
+                stopped.current = true;
+                abort.current?.abort();
+              }}
+              accessibilityLabel="Stop waiting"
+            >
+              <View style={s.stopSquare} />
+            </Pressable>
+          ) : (
+            <Pressable
+              style={[s.send, !canSend && s.sendOff]}
+              disabled={!canSend}
+              onPress={() => void send(text)}
+              accessibilityLabel="Send"
+            >
               <Text style={s.sendText}>↑</Text>
-            )}
-          </Pressable>
+            </Pressable>
+          )}
         </View>
       </View>
 
@@ -603,6 +638,9 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  stopSquare: { width: 14, height: 14, borderRadius: 3, backgroundColor: "#fff" },
+  copyBtn: { alignSelf: "flex-start", paddingVertical: 6 },
+  copyText: { color: D.muted, fontSize: 13 },
   sendOff: { backgroundColor: D.surface2, opacity: 0.7 },
   sendText: { color: "#fff", fontSize: 22, fontWeight: "700" },
   modalRoot: { flex: 1, flexDirection: "row" },
