@@ -902,3 +902,14 @@ The owner reversed the earlier "zero API" request: Gemini is back, used only as 
 - The Supabase cache calls (vector passing through PostgREST, hnsw index) have only been checked at SQL level, not through the app.
 - Gemini has still not been called for real (key not set on Vercel; the previous key was exposed in chat and must be rotated).
 - **Owner actions**: set a NEW `GEMINI_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` on Vercel (server-only; without the service key the cache stays off and every open question goes to Gemini).
+
+## Session: phone Assistant redesign
+
+Owner feedback: the assistant looked poor and the keyboard covered the text box. Rebuilt `apps/mobile/src/AssistantScreen.tsx` as a dark full-screen experience modelled on the layout of the screenshot the owner sent (original mark and colours, not a copy of another product's branding):
+
+- Greeting with your first name, four tappable starters, rounded composer with a `+` commands sheet (14 commands; ones needing input fill the box) and a round send button; animated "thinking" dots; chat-history drawer (☰, long-press a chat to delete), new chat (✎), pull to refresh in a chat.
+- Replies render light markdown (bold, italic, code, headings, lists, code blocks): `assistantFormat.ts`, 7 tests. A test also checks that the one-tap commands route to the right intent (with the built-in matcher, not the real model).
+- **Keyboard fix**: `useKeyboardOverlap` measures how far the keyboard covers the screen and pads the bottom by that amount. It re-measures when the layout changes, so it should not double up if Android also resizes the window. The bottom tab bar and light status bar are hidden/switched while the Assistant is open (hardware back or ‹ returns).
+- Not built: voice input (needs a native speech module), copy button, image/file attachments.
+
+**NOT verified**: none of this has been seen on a real phone, including the keyboard fix (the exact behaviour depends on the device and Android version; the measuring approach was chosen to cope with both resize and no-resize). The suggestion/command phrases are tested only against the backup matcher.

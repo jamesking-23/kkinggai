@@ -88,6 +88,7 @@ type Tab = "home" | "web" | "notifications" | "tasks" | "account";
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
+  const [immersive, setImmersive] = useState(false);
 
   useEffect(() => {
     if (!configured) {
@@ -112,8 +113,8 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.root}>
-        <StatusBar style="dark" />
+      <SafeAreaView style={[styles.root, immersive && { backgroundColor: "#0a0a10" }]}>
+        <StatusBar style={immersive ? "light" : "dark"} />
         {!configured ? (
           <Centered>
             <Text style={styles.title}>Not configured</Text>
@@ -127,7 +128,7 @@ export default function App() {
             <ActivityIndicator />
           </Centered>
         ) : session ? (
-          <Home session={session} />
+          <Home session={session} onImmersive={setImmersive} />
         ) : (
           <SignIn />
         )}
@@ -203,11 +204,16 @@ const TAB_LABEL: Record<Tab, string> = {
   account: "Account",
 };
 
-function Home({ session }: { session: Session }) {
+function Home({ session, onImmersive }: { session: Session; onImmersive: (on: boolean) => void }) {
   const [tab, setTab] = useState<Tab>("home");
   const [webUrl, setWebUrl] = useState(SITE_URL);
   const [screen, setScreen] = useState<Screen>(null);
   const [chessJoin, setChessJoin] = useState<string | null>(null);
+  const immersive = tab === "home" && screen === "assistant";
+  useEffect(() => {
+    onImmersive(immersive);
+    return () => onImmersive(false);
+  }, [immersive, onImmersive]);
   const web = useRef<WebView>(null);
   const canGoBack = useRef(false);
 
@@ -449,13 +455,15 @@ function Home({ session }: { session: Session }) {
         {tab === "tasks" && <Tasks />}
         {tab === "account" && <Account session={session} />}
       </View>
-      <View style={styles.tabs}>
-        {(["home", "tasks", "notifications", "web", "account"] as const).map((t) => (
-          <Pressable key={t} style={styles.tab} onPress={() => setTab(t)}>
-            <Text style={[styles.tabText, tab === t && styles.tabActive]}>{TAB_LABEL[t]}</Text>
-          </Pressable>
-        ))}
-      </View>
+      {!immersive && (
+        <View style={styles.tabs}>
+          {(["home", "tasks", "notifications", "web", "account"] as const).map((t) => (
+            <Pressable key={t} style={styles.tab} onPress={() => setTab(t)}>
+              <Text style={[styles.tabText, tab === t && styles.tabActive]}>{TAB_LABEL[t]}</Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
     </View>
   );
 }

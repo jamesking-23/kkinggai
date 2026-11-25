@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  Alert,
+  Animated,
+  Modal,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -21,26 +22,50 @@ import {
   type ConversationRow,
   type MessageRow,
 } from "./assistant";
-import { ScreenHeader } from "./ScreenHeader";
+import {
+  blocks,
+  COMMANDS,
+  firstName,
+  STARTERS,
+  type Block,
+  type Span,
+  type Starter,
+} from "./assistantFormat";
 import { supabase } from "./supabase";
-import { C } from "./theme";
+import { useKeyboardOverlap, type Measurable } from "./useKeyboardOverlap";
 import { SITE_URL } from "./web";
 
-/** Native assistant chat. Replies come from the site's /api/assistant (the AI provider key stays on the server). The assistant only sees the conversation, not your other data. Daily limit applies, as on the website. */
+// The assistant is a dark, full-screen experience of its own, so it has its own palette.
+const D = {
+  bg: "#0a0a10",
+  surface: "#1b1b22",
+  surface2: "#26262f",
+  border: "#2e2e3a",
+  text: "#f3f3f7",
+  muted: "#9b9bab",
+  accent: "#3d55d6",
+  glow: "#1a2a78",
+  danger: "#ff7b7b",
+};
+
+/** Native assistant. Commands run on the server's local model; open questions may use a stored answer or the online AI. The assistant never sees your vault or other data beyond what a command reads. */
 export function AssistantScreen({ onBack }: { onBack: () => void }) {
   const [convs, setConvs] = useState<ConversationRow[] | null>(null);
   const [current, setCurrent] = useState<string | null>(null);
-  const [chatting, setChatting] = useState(false);
   const [messages, setMessages] = useState<MessageRow[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
-  const [failed, setFailed] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
+  const [name, setName] = useState("there");
+  const [drawer, setDrawer] = useState(false);
+  const [menu, setMenu] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const scroller = useRef<{ scrollToEnd: (o?: { animated?: boolean }) => void } | null>(null);
+  const input = useRef<{ focus: () => void } | null>(null);
+  const root = useRef<Measurable | null>(null);
+  const { overlap, onLayout } = useKeyboardOverlap(root);
 
   const loadList = useCallback(async () => {
-    setFailed(false);
     const r = await supabase
       .from("ai_conversations")
       .select("id, title, updated_at")
@@ -48,8 +73,7 @@ export function AssistantScreen({ onBack }: { onBack: () => void }) {
       .order("updated_at", { ascending: false })
       .limit(30)
       .overrideTypes<ConversationRow[], { merge: false }>();
-    if (r.error) return setFailed(true);
-    setConvs(r.data ?? []);
+    if (!r.error) setConvs(r.data ?? []);
   }, []);
 
   const loadMessages = useCallback(async (id: string) => {
@@ -65,28 +89,38 @@ export function AssistantScreen({ onBack }: { onBack: () => void }) {
   }, []);
 
   useEffect(() => {
-    loadList();
+    void loadList();
+    void (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) return;
+      const p = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", data.user.id)
+        .maybeSingle();
+      setName(firstName(p.data?.display_name));
+    })();
   }, [loadList]);
 
-  async function open(id: string | null) {
-    setProblem(null);
-    setCurrent(id);
-    setMessages([]);
-    setChatting(true);
-    if (id) await loadMessages(id);
-  }
-
-  function leave() {
-    setChatting(false);
+  function newChat() {
     setCurrent(null);
     setMessages([]);
     setProblem(null);
-    loadList();
+    setDrawer(false);
+    setText("");
   }
 
-  async function send() {
+  async function openChat(id: string) {
+    setDrawer(false);
+    setProblem(null);
+    setCurrent(id);
+    setMessages([]);
+    await loadMessages(id);
+  }
+
+  async function send(raw: string) {
     if (sending) return;
-    const v = checkMessage(text);
+    const v = checkMessage(raw);
     if (typeof v === "string") return setProblem(v);
     setSending(true);
     setProblem(null);
@@ -96,7 +130,7 @@ export function AssistantScreen({ onBack }: { onBack: () => void }) {
       setSending(false);
       return setProblem("Your session expired. Sign in again.");
     }
-    // Show the user's message at once; it is replaced by the stored copy after the reply.
+    // Show the message at once; it is replaced by the stored copy after the reply.
     const pending: MessageRow = { id: `pending-${Date.now()}`, role: "user", content: v.message };
     setMessages((m) => [...m, pending]);
     setText("");
@@ -128,6 +162,7 @@ export function AssistantScreen({ onBack }: { onBack: () => void }) {
           setText(v.message);
         }
       }
+      void loadList();
     } catch {
       setMessages((m) => m.filter((x) => x.id !== pending.id));
       setText(v.message);
@@ -138,162 +173,469 @@ export function AssistantScreen({ onBack }: { onBack: () => void }) {
     }
   }
 
-  async function remove(id: string) {
-    const { error } = await supabase
-      .from("ai_conversations")
-      .update({ deleted_at: new Date().toISOString() })
-      .eq("id", id);
-    if (error) return setProblem("Could not delete the conversation.");
-    leave();
+  function pick(s: Starter) {
+    setMenu(false);
+    if (s.send) void send(s.send);
+    else {
+      setText(s.fill ?? "");
+      setTimeout(() => input.current?.focus(), 80);
+    }
   }
 
-  if (chatting) {
-    return (
-      <KeyboardAvoidingView
+  function confirmDelete(c: ConversationRow) {
+    Alert.alert("Delete this chat?", conversationTitle(c), [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const { error } = await supabase
+            .from("ai_conversations")
+            .update({ deleted_at: new Date().toISOString() })
+            .eq("id", c.id);
+          if (error) return setProblem("Could not delete the chat.");
+          if (c.id === current) newChat();
+          void loadList();
+        },
+      },
+    ]);
+  }
+
+  const empty = messages.length === 0 && !sending;
+  const canSend = !sending && text.trim().length > 0;
+
+  return (
+    <View
+      ref={root as never}
+      collapsable={false}
+      onLayout={onLayout}
+      style={[s.root, { paddingBottom: overlap }]}
+    >
+      <Glow />
+      <View style={s.header}>
+        <View style={s.row}>
+          <Pressable
+            style={s.iconBtn}
+            onPress={onBack}
+            hitSlop={8}
+            accessibilityLabel="Back to Home"
+          >
+            <Text style={s.iconText}>‹</Text>
+          </Pressable>
+          <Pressable
+            style={s.iconBtn}
+            onPress={() => {
+              void loadList();
+              setDrawer(true);
+            }}
+            hitSlop={8}
+            accessibilityLabel="Chat history"
+          >
+            <Text style={s.iconText}>☰</Text>
+          </Pressable>
+        </View>
+        <Text style={s.headTitle}>Assistant</Text>
+        <Pressable style={s.iconBtn} onPress={newChat} hitSlop={8} accessibilityLabel="New chat">
+          <Text style={s.iconText}>✎</Text>
+        </Pressable>
+      </View>
+
+      <ScrollView
+        ref={scroller as never}
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        contentContainerStyle={[s.page, empty && { flexGrow: 1 }]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        onContentSizeChange={() => !empty && scroller.current?.scrollToEnd({ animated: true })}
+        refreshControl={
+          current ? (
+            <RefreshControl
+              tintColor="#fff"
+              refreshing={refreshing}
+              onRefresh={async () => {
+                setRefreshing(true);
+                await loadMessages(current);
+                setRefreshing(false);
+              }}
+            />
+          ) : undefined
+        }
       >
-        <ScreenHeader
-          title="Assistant"
-          onBack={leave}
-          action={current ? { label: "Delete", onPress: () => remove(current) } : undefined}
-        />
-        <ScrollView
-          ref={scroller as never}
-          contentContainerStyle={s.page}
-          keyboardShouldPersistTaps="handled"
-          onContentSizeChange={() => scroller.current?.scrollToEnd({ animated: true })}
-        >
-          {messages.length === 0 && !sending && (
-            <Text style={s.muted}>
-              Ask anything. The assistant only sees this conversation, not your tasks, goals or
-              vault.
-            </Text>
-          )}
-          {messages.map((m) => (
-            <View key={m.id} style={[s.bubble, m.role === "user" ? s.mine : s.theirs]}>
-              <Text style={m.role === "user" ? s.mineText : s.theirsText} selectable>
-                {m.content}
-              </Text>
+        {empty ? (
+          <View style={s.hero}>
+            <Mark size={56} />
+            <Text style={s.greeting}>Hi {name}, what&apos;s on your mind?</Text>
+            <View style={s.starters}>
+              {STARTERS.map((st) => (
+                <Pressable key={st.label} style={s.starter} onPress={() => pick(st)}>
+                  <View style={s.starterIcon}>
+                    <Text style={s.starterGlyph}>{st.icon}</Text>
+                  </View>
+                  <Text style={s.starterText}>{st.label}</Text>
+                </Pressable>
+              ))}
             </View>
-          ))}
-          {sending && <ActivityIndicator color={C.primary} style={{ marginTop: 8 }} />}
-          {problem && <Text style={s.error}>{problem}</Text>}
-        </ScrollView>
+          </View>
+        ) : (
+          messages.map((m) =>
+            m.role === "user" ? (
+              <View key={m.id} style={s.mine}>
+                <Text style={s.mineText} selectable>
+                  {m.content}
+                </Text>
+              </View>
+            ) : (
+              <View key={m.id} style={s.theirs}>
+                <Mark size={22} />
+                <View style={{ flex: 1 }}>
+                  <Markdown source={m.content} />
+                </View>
+              </View>
+            ),
+          )
+        )}
+        {sending && (
+          <View style={s.theirs}>
+            <Mark size={22} />
+            <Dots />
+          </View>
+        )}
+        {problem && <Text style={s.error}>{problem}</Text>}
+      </ScrollView>
+
+      <View style={s.composerWrap}>
         <View style={s.composer}>
+          <Pressable
+            style={s.plus}
+            onPress={() => setMenu(true)}
+            hitSlop={6}
+            accessibilityLabel="Commands"
+          >
+            <Text style={s.plusText}>+</Text>
+          </Pressable>
           <TextInput
+            ref={input as never}
             style={s.input}
-            placeholder="Message"
-            placeholderTextColor={C.muted}
+            placeholder="Ask or type a command"
+            placeholderTextColor={D.muted}
             value={text}
             onChangeText={setText}
             multiline
             maxLength={MAX_MESSAGE_CHARS}
             editable={!sending}
+            selectionColor={D.accent}
+            cursorColor={D.accent}
           />
           <Pressable
-            style={[s.send, (sending || !text.trim()) && { opacity: 0.5 }]}
-            disabled={sending || !text.trim()}
-            onPress={send}
+            style={[s.send, !canSend && s.sendOff]}
+            disabled={!canSend}
+            onPress={() => void send(text)}
+            accessibilityLabel="Send"
           >
-            <Text style={s.sendText}>Send</Text>
+            {sending ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={s.sendText}>↑</Text>
+            )}
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
-    );
-  }
+      </View>
 
-  return (
-    <View style={{ flex: 1 }}>
-      <ScreenHeader title="Assistant" onBack={onBack} />
-      <ScrollView
-        contentContainerStyle={s.page}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={async () => {
-              setRefreshing(true);
-              await loadList();
-              setRefreshing(false);
-            }}
-          />
-        }
+      <Modal
+        visible={drawer}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setDrawer(false)}
       >
-        <Pressable style={s.addBtn} onPress={() => open(null)}>
-          <Text style={s.sendText}>+ New chat</Text>
-        </Pressable>
-        {failed && <Text style={s.error}>Could not load chats. Pull down to retry.</Text>}
-        {convs === null && !failed && <ActivityIndicator color={C.primary} />}
-        {convs && convs.length === 0 && <Text style={s.muted}>No chats yet.</Text>}
-        {convs?.map((c) => (
-          <Pressable key={c.id} style={s.card} onPress={() => open(c.id)}>
-            <Text style={s.title} numberOfLines={2}>
-              {conversationTitle(c)}
-            </Text>
-            <Text style={s.meta}>{c.updated_at.slice(0, 10)}</Text>
+        <View style={s.modalRoot}>
+          <View style={s.drawer}>
+            <Text style={s.drawerTitle}>Chats</Text>
+            <Pressable style={s.newChat} onPress={newChat}>
+              <Text style={s.newChatText}>✎ New chat</Text>
+            </Pressable>
+            <ScrollView>
+              {convs === null && <ActivityIndicator color="#fff" style={{ marginTop: 16 }} />}
+              {convs?.length === 0 && <Text style={s.muted}>No chats yet.</Text>}
+              {convs?.map((c) => (
+                <Pressable
+                  key={c.id}
+                  style={[s.convRow, c.id === current && { backgroundColor: D.surface2 }]}
+                  onPress={() => void openChat(c.id)}
+                  onLongPress={() => confirmDelete(c)}
+                >
+                  <Text style={s.convTitle} numberOfLines={1}>
+                    {conversationTitle(c)}
+                  </Text>
+                </Pressable>
+              ))}
+              {!!convs?.length && <Text style={s.hint}>Press and hold a chat to delete it.</Text>}
+            </ScrollView>
+          </View>
+          <Pressable style={s.backdrop} onPress={() => setDrawer(false)} />
+        </View>
+      </Modal>
+
+      <Modal visible={menu} transparent animationType="slide" onRequestClose={() => setMenu(false)}>
+        <Pressable style={s.sheetBackdrop} onPress={() => setMenu(false)}>
+          <Pressable style={s.sheet} onPress={() => undefined}>
+            <Text style={s.drawerTitle}>Commands</Text>
+            <ScrollView>
+              {COMMANDS.map((c) => (
+                <Pressable key={c.label} style={s.cmd} onPress={() => pick(c)}>
+                  <View style={s.starterIcon}>
+                    <Text style={s.starterGlyph}>{c.icon}</Text>
+                  </View>
+                  <Text style={s.starterText}>{c.label}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
           </Pressable>
-        ))}
-      </ScrollView>
+        </Pressable>
+      </Modal>
+    </View>
+  );
+}
+
+/** The assistant's mark: an original glyph in a soft ring. */
+function Mark({ size }: { size: number }) {
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: D.glow,
+        borderWidth: Math.max(1, size / 22),
+        borderColor: D.accent,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Text style={{ color: D.text, fontWeight: "800", fontSize: size * 0.46 }}>K</Text>
+    </View>
+  );
+}
+
+/** A deep-blue glow rising from the bottom, built from stacked bands so it needs no extra native module. */
+function Glow() {
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      {Array.from({ length: 14 }, (_, i) => (
+        <View
+          key={i}
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: `${(i + 1) * 3.2}%`,
+            backgroundColor: D.glow,
+            opacity: 0.045,
+          }}
+        />
+      ))}
+    </View>
+  );
+}
+
+function Dots() {
+  const vals = useRef([0, 1, 2].map(() => new Animated.Value(0.3))).current;
+  useEffect(() => {
+    const loops = vals.map((v, i) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(i * 160),
+          Animated.timing(v, { toValue: 1, duration: 320, useNativeDriver: true }),
+          Animated.timing(v, { toValue: 0.3, duration: 320, useNativeDriver: true }),
+          Animated.delay(320 - i * 160),
+        ]),
+      ),
+    );
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [vals]);
+  return (
+    <View
+      style={{ flexDirection: "row", gap: 6, paddingVertical: 8 }}
+      accessibilityLabel="Thinking"
+    >
+      {vals.map((v, i) => (
+        <Animated.View key={i} style={[s.dot, { opacity: v }]} />
+      ))}
+    </View>
+  );
+}
+
+function Spans({ spans }: { spans: Span[] }) {
+  return (
+    <>
+      {spans.map((sp, i) => (
+        <Text
+          key={i}
+          style={[
+            sp.bold && { fontWeight: "700" },
+            sp.italic && { fontStyle: "italic" },
+            sp.code && s.inlineCode,
+          ]}
+        >
+          {sp.text}
+        </Text>
+      ))}
+    </>
+  );
+}
+
+function Markdown({ source }: { source: string }) {
+  const list: Block[] = blocks(source);
+  return (
+    <View style={{ gap: 8 }}>
+      {list.map((b, i) => {
+        if (b.type === "code")
+          return (
+            <View key={i} style={s.codeBlock}>
+              <Text style={s.codeText} selectable>
+                {b.text}
+              </Text>
+            </View>
+          );
+        if (b.type === "li")
+          return (
+            <View key={i} style={{ flexDirection: "row", gap: 8 }}>
+              <Text style={s.replyText}>{b.marker}</Text>
+              <Text style={[s.replyText, { flex: 1 }]} selectable>
+                <Spans spans={b.spans} />
+              </Text>
+            </View>
+          );
+        return (
+          <Text key={i} style={b.type === "h" ? s.replyHead : s.replyText} selectable>
+            <Spans spans={b.spans} />
+          </Text>
+        );
+      })}
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  page: { padding: 16, paddingBottom: 24 },
-  addBtn: {
-    backgroundColor: C.primary,
-    borderRadius: 10,
-    padding: 12,
+  root: { flex: 1, backgroundColor: D.bg },
+  header: {
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
-  card: {
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
+  row: { flexDirection: "row", gap: 4 },
+  iconBtn: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+  iconText: { color: D.text, fontSize: 24 },
+  headTitle: { color: D.text, fontSize: 17, fontWeight: "600" },
+  page: { paddingHorizontal: 18, paddingTop: 6, paddingBottom: 18, gap: 18 },
+  hero: { flex: 1, justifyContent: "space-between", paddingTop: 70 },
+  greeting: {
+    color: D.text,
+    fontSize: 32,
+    lineHeight: 40,
+    fontWeight: "400",
+    marginTop: 22,
+    marginBottom: "auto",
   },
-  title: { color: C.text, fontWeight: "700", fontSize: 15 },
-  meta: { color: C.muted, fontSize: 12, marginTop: 4 },
-  muted: { color: C.muted, marginVertical: 8 },
-  error: { color: C.danger, marginTop: 10 },
-  bubble: { maxWidth: "88%", borderRadius: 14, padding: 12, marginBottom: 8 },
-  mine: { alignSelf: "flex-end", backgroundColor: C.primary },
-  theirs: {
-    alignSelf: "flex-start",
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.border,
+  starters: { gap: 6, paddingTop: 30 },
+  starter: { flexDirection: "row", alignItems: "center", gap: 16, paddingVertical: 14 },
+  cmd: { flexDirection: "row", alignItems: "center", gap: 16, paddingVertical: 12 },
+  starterIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: D.surface,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  mineText: { color: "#fff", lineHeight: 20 },
-  theirsText: { color: C.text, lineHeight: 20 },
+  starterGlyph: { color: D.text, fontSize: 17 },
+  starterText: { color: D.text, fontSize: 17, flexShrink: 1 },
+  mine: {
+    alignSelf: "flex-end",
+    maxWidth: "84%",
+    backgroundColor: D.surface2,
+    borderRadius: 22,
+    borderBottomRightRadius: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+  },
+  mineText: { color: D.text, fontSize: 16, lineHeight: 23 },
+  theirs: { flexDirection: "row", gap: 12, alignItems: "flex-start", paddingRight: 8 },
+  replyText: { color: D.text, fontSize: 16, lineHeight: 24 },
+  replyHead: { color: D.text, fontSize: 18, lineHeight: 26, fontWeight: "700", marginTop: 4 },
+  inlineCode: { fontFamily: "monospace", backgroundColor: D.surface2, color: "#cfd6ff" },
+  codeBlock: { backgroundColor: D.surface, borderRadius: 12, padding: 12 },
+  codeText: { color: "#cfd6ff", fontFamily: "monospace", fontSize: 13, lineHeight: 19 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: D.muted },
+  error: { color: D.danger, fontSize: 14 },
+  composerWrap: { paddingHorizontal: 12, paddingTop: 6, paddingBottom: 12 },
   composer: {
     flexDirection: "row",
-    gap: 8,
     alignItems: "flex-end",
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: C.border,
-    backgroundColor: C.bg,
+    gap: 8,
+    backgroundColor: D.surface,
+    borderRadius: 30,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: D.border,
   },
+  plus: { width: 40, height: 44, alignItems: "center", justifyContent: "center" },
+  plusText: { color: D.text, fontSize: 30, lineHeight: 32 },
   input: {
     flex: 1,
-    maxHeight: 120,
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    color: C.text,
+    maxHeight: 150,
+    minHeight: 44,
+    color: D.text,
+    fontSize: 17,
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingHorizontal: 4,
   },
   send: {
-    backgroundColor: C.primary,
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: D.accent,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  sendText: { color: "#fff", fontWeight: "700" },
+  sendOff: { backgroundColor: D.surface2, opacity: 0.7 },
+  sendText: { color: "#fff", fontSize: 22, fontWeight: "700" },
+  modalRoot: { flex: 1, flexDirection: "row" },
+  drawer: {
+    width: "82%",
+    backgroundColor: D.bg,
+    paddingTop: 48,
+    paddingHorizontal: 14,
+    borderRightWidth: 1,
+    borderRightColor: D.border,
+  },
+  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.55)" },
+  drawerTitle: { color: D.text, fontSize: 20, fontWeight: "700", marginBottom: 12 },
+  newChat: {
+    backgroundColor: D.surface,
+    borderRadius: 22,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 10,
+  },
+  newChatText: { color: D.text, fontSize: 15, fontWeight: "600" },
+  convRow: { paddingVertical: 12, paddingHorizontal: 12, borderRadius: 12 },
+  convTitle: { color: D.text, fontSize: 15 },
+  muted: { color: D.muted, marginTop: 12 },
+  hint: { color: D.muted, fontSize: 12, marginTop: 14, textAlign: "center" },
+  sheetBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "flex-end" },
+  sheet: {
+    backgroundColor: D.bg,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 18,
+    maxHeight: "75%",
+    borderWidth: 1,
+    borderColor: D.border,
+  },
 });
