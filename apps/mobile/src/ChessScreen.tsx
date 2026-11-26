@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { BoardSettings } from "./BoardSettings";
 import { BoardView } from "./BoardView";
 import { ChessGames } from "./ChessGames";
 import { ChessPlay } from "./ChessPlay";
@@ -210,6 +211,7 @@ export function ChessScreen({
         action={{ label: "Full chess", onPress: onOpenWeb }}
       />
       <ScrollView contentContainerStyle={s.page} keyboardShouldPersistTaps="handled">
+        <BoardSettings />
         <View style={s.tabs}>
           {(["puzzles", "games", "drills", "play"] as const).map((t) => (
             <Pressable
