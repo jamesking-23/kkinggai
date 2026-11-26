@@ -926,3 +926,9 @@ New manual workflow `.github/workflows/model-check.yml` downloads `Xenova/bge-sm
 - Still unverified: how this behaves inside the Vercel function (package size, cold-start time, the WASM files) and with real user phrases. The sample is small (27 / 8 / 5).
 
 Fix: two Vercel deploys (the mobile-only "copy reply" commit and the docs commit) ended in ERROR with `ENOENT ... app_models/wasm/...`. Cause: Turborepo restored the web build from its cache (nothing in apps/web had changed), which skips the model download script, but `app_models` was not part of the cached outputs, so the file tracer could not find the model files. Fixed by adding `app_models/**` to the build outputs in `turbo.json`. The site kept serving the last good deployment meanwhile (the Model-check commit's build was READY, and the model download and WASM copy worked on Vercel).
+
+## Session: phone repertoire drills
+
+New **Drills** tab in the phone Chess screen (`ChessRepertoire.tsx`, `chessRepertoire.ts`): a port of the website's repertoire drill. It builds your opening repertoire from your own games (up to 1000 recent games with a known side, first 16 plies, positions reached at least twice with a main move played in at least 60 % of those games), shows a position, asks for your usual move by tapping a piece and a square, then shows what you played, with counts and scores. The logic has 4 unit tests. Reads `chess_games` under RLS.
+
+**NOT verified**: not seen on a real phone; board taps and layout are untested on a device. It will ship in the next Android build.

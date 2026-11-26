@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { BoardView } from "./BoardView";
 import { ChessGames } from "./ChessGames";
 import { ChessPlay } from "./ChessPlay";
+import { ChessRepertoire } from "./ChessRepertoire";
 import {
   legalTargets,
   nextSchedule,
@@ -186,7 +187,7 @@ function Puzzles() {
   );
 }
 
-/** Native chess: puzzles from your own mistakes, and your game history with a move-by-move viewer. Live play with a friend is in the Play tab. Import, analysis, repertoire drills and board settings stay on the website. */
+/** Native chess: puzzles from your own mistakes, and your game history with a move-by-move viewer. Live play with a friend is in the Play tab. Repertoire drills are in the Drills tab. Import, analysis and board settings stay on the website. */
 export function ChessScreen({
   onBack,
   onOpenWeb,
@@ -197,7 +198,9 @@ export function ChessScreen({
   /** An invite code from a tapped link: opens the Play tab with it filled in. */
   joinCode?: string | null;
 }) {
-  const [tab, setTab] = useState<"puzzles" | "games" | "play">(joinCode ? "play" : "puzzles");
+  const [tab, setTab] = useState<"puzzles" | "games" | "drills" | "play">(
+    joinCode ? "play" : "puzzles",
+  );
   const [openGame, setOpenGame] = useState<string | null>(null);
   return (
     <View style={{ flex: 1 }}>
@@ -208,7 +211,7 @@ export function ChessScreen({
       />
       <ScrollView contentContainerStyle={s.page} keyboardShouldPersistTaps="handled">
         <View style={s.tabs}>
-          {(["puzzles", "games", "play"] as const).map((t) => (
+          {(["puzzles", "games", "drills", "play"] as const).map((t) => (
             <Pressable
               key={t}
               onPress={() => {
@@ -218,7 +221,13 @@ export function ChessScreen({
               style={[s.tab, tab === t && s.tabOn]}
             >
               <Text style={[s.tabText, tab === t && s.tabTextOn]}>
-                {t === "puzzles" ? "Puzzles" : t === "games" ? "Games" : "Play"}
+                {t === "puzzles"
+                  ? "Puzzles"
+                  : t === "games"
+                    ? "Games"
+                    : t === "drills"
+                      ? "Drills"
+                      : "Play"}
               </Text>
             </Pressable>
           ))}
@@ -227,6 +236,8 @@ export function ChessScreen({
           <Puzzles />
         ) : tab === "games" ? (
           <ChessGames openId={openGame} onOpen={setOpenGame} />
+        ) : tab === "drills" ? (
+          <ChessRepertoire />
         ) : (
           <ChessPlay initialCode={joinCode} />
         )}
