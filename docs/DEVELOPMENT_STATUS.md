@@ -936,3 +936,9 @@ New **Drills** tab in the phone Chess screen (`ChessRepertoire.tsx`, `chessReper
 ## Attempt: attachments on recurring tasks (abandoned)
 
 I tried copying a task's attachments to the next copy when a recurring task is completed. My first version of the database function had a name clash, and the second hit the `task_attachment_path` check (a row's `storage_path` must contain its own task id), so copies cannot reuse the original file. Both attempts were applied to production before being tested, so for a few minutes completing a recurring task that had attachments would have failed. I restored the previous function; the existing reopen/carry-over test passed against the restored one and a recurring task with an attachment completes normally. Migration `20261126000042` documents this and leaves `complete_task` as it was. The feature would need a storage-side copy (a server action) or a deliberate loosening of the constraint; not built. Lesson: test a function change in a rolled-back transaction before applying it, not after.
+
+## Attachments on recurring tasks (second attempt, server-side)
+
+Completing a recurring task now copies its live attachments to the next copy (`apps/web/lib/copy-attachments.ts`, called from `toggleTask`). Each file is copied inside the `task-files` bucket into the new task's folder (so the `task_attachment_path` rule still holds) and gets its own metadata row; no database function or constraint was changed. It is best effort: a file that fails to copy is skipped and completing the task still succeeds. 4 unit tests with a fake client.
+
+**NOT verified**: the storage copy has never run against the real bucket (it relies on the existing select and insert policies on `task-files`; I did not test them for a copy call), and the website flow was not tried by hand. Also fixed: ESLint now ignores the downloaded `apps/web/app_models/**` (lint failed on the model's WASM loader once a build had created it).

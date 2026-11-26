@@ -5,6 +5,7 @@ import { taskSchema } from "@kkingg/schemas";
 import { firstIssue, flash } from "../../../lib/form";
 import { getAppContext } from "../../../lib/session";
 import { createClient } from "../../../lib/supabase/server";
+import { copyAttachments } from "../../../lib/copy-attachments";
 import { nextDueDate, ruleFor } from "../../../lib/recurrence";
 import { localDate, zonedTimeToUtc } from "../../../lib/time";
 
@@ -72,6 +73,7 @@ export async function toggleTask(formData: FormData) {
           : "Could not update the task",
       );
     }
+    if (created) await copyAttachments(supabase, ctx.current.id, id, String(created));
     revalidatePath(PATH);
     flash(
       PATH,

@@ -6,6 +6,7 @@ vi.mock("next/navigation", () => ({
   },
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("../../../lib/copy-attachments", () => ({ copyAttachments: vi.fn(async () => 0) }));
 vi.mock("../../../lib/session", () => ({
   getAppContext: async () => ({ current: { id: "ws" }, timezone: "Africa/Kampala", userId: "u" }),
 }));

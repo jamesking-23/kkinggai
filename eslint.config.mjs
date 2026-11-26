@@ -10,6 +10,7 @@ export default tseslint.config(
       "**/.turbo/**",
       "**/next-env.d.ts",
       "apps/web/public/engine/**",
+      "apps/web/app_models/**",
       "apps/desktop/src-tauri/**",
     ],
   },
